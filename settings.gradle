@@ -1,0 +1,4 @@
+include ':app', ':mewwalletbl', ':mewwalletkit', ':secp256k1'
+
+project (":mewwalletkit").projectDir = new File("../MEWwalletKit/mewwalletkit")
+project (":secp256k1").projectDir = new File("../MEWwalletKit/secp256k1")

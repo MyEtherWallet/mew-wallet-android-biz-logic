@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MEWwalletBL</string>
+
+    <string name="service_notification_channel_name" comment="Service notification - channel name (system settings)">MEWconnect connection service</string>
+    <string name="service_notification_channel_description" comment="Service notification - channel description (system settings)">Shown while application is connected</string>
+    <string name="service_notification_title" comment="Service notification - title">MEWconnect</string>
+    <string name="service_notification_text" comment="Service notification - text">Connected</string>
+    <string name="service_notification_disconnect" comment="Service notification - button">Disconnect</string>
+</resources>

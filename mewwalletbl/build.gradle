@@ -1,0 +1,86 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.kotlin.android.extensions'
+
+androidExtensions {
+    experimental = true
+}
+
+def secretsPropertiesFile = rootProject.file("../mewwalletbl/secrets.properties")
+def secretsProperties = new Properties()
+secretsProperties.load(new FileInputStream(secretsPropertiesFile))
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+
+        buildConfigField "String", "NODE_API_END_POINT", "\"" + secretsProperties['nodeApiEndPoint'] + "\""
+        buildConfigField "String", "MEW_MAINNET_API_END_POINT", "\"" + secretsProperties['mewMainnetApiEndPoint'] + "\""
+        buildConfigField "String", "MEW_ROPSTEN_API_END_POINT", "\"" + secretsProperties['mewRopstenApiEndPoint'] + "\""
+        buildConfigField "String", "WEB_RTC_STUN_END_POINT", "\"" + secretsProperties['webRtcStunEndPoint'] + "\""
+        buildConfigField "String", "SOCKET_END_POINT", "\"" + secretsProperties['socketEndPoint'] + "\""
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':mewwalletkit')
+    implementation project(path: ':secp256k1')
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+
+    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+    implementation 'org.webrtc:google-webrtc:1.0.27225'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+    api 'androidx.room:room-runtime:2.2.2'
+    kapt 'androidx.room:room-compiler:2.2.2'
+
+    implementation 'ru.bartwell:ultradebugger.wrapper:1.4.1'
+    debugImplementation 'ru.bartwell:ultradebugger:1.4.1'
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+
+    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'androidx.preference:preference-ktx:1.1.0'
+}
+
+repositories {
+    mavenCentral()
+    flatDir { dirs "libs" }
+}

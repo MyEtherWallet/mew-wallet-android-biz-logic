@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.myetherwallet.mewwalletbl">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <application>
+
+        <provider
+                android:name=".MewWalletBlProvider"
+                android:authorities="${applicationId}.contentprovider"
+                android:enabled="true"
+                android:exported="false"/>
+
+        <service
+                android:name=".connection.MewConnectService"
+                android:enabled="true"
+                android:exported="false"/>
+
+        <receiver
+                android:name=".connection.NotificationActionReceiver"
+                android:enabled="true"
+                android:exported="false"/>
+
+        <receiver
+                android:name=".connection.ServiceAlarmReceiver"
+                android:enabled="true"
+                android:exported="false"/>
+    </application>
+</manifest>
