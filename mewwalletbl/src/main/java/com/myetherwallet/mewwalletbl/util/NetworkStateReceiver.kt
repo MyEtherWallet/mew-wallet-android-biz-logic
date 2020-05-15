@@ -19,8 +19,12 @@ class NetworkStateReceiver(private val listener: () -> Unit) : BroadcastReceiver
         context.registerReceiver(this, filter)
     }
 
-    fun unregister(context: Context) {
-        context.unregisterReceiver(this)
+    fun unregister(context: Context?) {
+        try {
+            context?.unregisterReceiver(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {

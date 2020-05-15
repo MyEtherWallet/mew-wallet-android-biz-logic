@@ -1,10 +1,11 @@
 package com.myetherwallet.mewwalletbl.key
 
 import android.content.Context
+import com.myetherwallet.mewwalletbl.key.storage.EncryptStorage
+import com.myetherwallet.mewwalletbl.key.storage.PersistentEncryptStorage
 import com.myetherwallet.mewwalletbl.key.util.AES
 import com.myetherwallet.mewwalletbl.key.util.HKDF
 import com.myetherwallet.mewwalletbl.key.util.Utils
-import com.myetherwallet.mewwalletbl.preference.Preferences
 import com.myetherwallet.mewwalletkit.core.extension.md5
 import com.myetherwallet.mewwalletkit.core.extension.sha512
 
@@ -12,19 +13,19 @@ import com.myetherwallet.mewwalletkit.core.extension.sha512
  * Created by BArtWell on 05.08.2019.
  */
 
-class PinEncryptHelper(context: Context, pinString: String) : BaseEncryptHelper(context, KeyType.PIN) {
+class PinEncryptHelper(context: Context, pinString: String, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.PIN, encryptStorage) {
 
     private val pin = pinString.toByteArray()
     private var wasAccessKeyGenerated = false
 
     init {
-        if (!Preferences.main.isAccessKeyExists(KeyType.PIN)) {
+        if (!encryptStorage.isAccessKeyExists(KeyType.PIN)) {
             createAccessAndMasterKeys()
         }
     }
 
     fun checkPin(): Boolean {
-        val signature = Preferences.main.getSignature(KeyType.PIN)
+        val signature = encryptStorage.getSignature(KeyType.PIN)
         return signature != null && signPin().contentEquals(signature)
     }
 
@@ -42,9 +43,9 @@ class PinEncryptHelper(context: Context, pinString: String) : BaseEncryptHelper(
         val masterKey = generateMasterKey()
         val encryptedAccessKey = keystoreHelper.encrypt(accessKey)
         val encryptedMasterKey = AES.encrypt(masterKey, accessKey)
-        Preferences.main.setAccessKey(encryptedAccessKey, KeyType.PIN)
-        Preferences.main.setMasterKey(encryptedMasterKey, KeyType.PIN)
-        Preferences.main.setSignature(signPin(), KeyType.PIN)
+        encryptStorage.setAccessKey(encryptedAccessKey, KeyType.PIN)
+        encryptStorage.setMasterKey(encryptedMasterKey, KeyType.PIN)
+        encryptStorage.setSignature(signPin(), KeyType.PIN)
     }
 
     private fun generateMasterKey(): ByteArray {

@@ -6,6 +6,7 @@ import com.myetherwallet.mewwalletbl.data.api.TransactionStatus
 import com.myetherwallet.mewwalletbl.data.database.EntityTransaction
 import com.myetherwallet.mewwalletbl.data.database.Recent
 import com.myetherwallet.mewwalletbl.data.database.TransactionInfo
+import java.util.*
 
 @Dao
 abstract class TransactionsDao : BaseDao<EntityTransaction> {
@@ -14,8 +15,8 @@ abstract class TransactionsDao : BaseDao<EntityTransaction> {
         "SELECT " +
                 "$TABLE_NAME.txHash AS hash," +
                 "${AccountsDao.TABLE_NAME}.address," +
-                "(SELECT ${RecipientDao.TABLE_NAME}.address FROM ${RecipientDao.TABLE_NAME} WHERE ${RecipientDao.TABLE_NAME}.id=$TABLE_NAME.fromRecipientId)  AS fromRecipient," +
-                "(SELECT ${RecipientDao.TABLE_NAME}.address FROM ${RecipientDao.TABLE_NAME} WHERE ${RecipientDao.TABLE_NAME}.id=$TABLE_NAME.toRecipientId)  AS toRecipient," +
+                "(SELECT ${RecipientDao.TABLE_NAME}.address FROM ${RecipientDao.TABLE_NAME} WHERE ${RecipientDao.TABLE_NAME}.id=$TABLE_NAME.fromRecipientId) AS fromRecipient," +
+                "(SELECT ${RecipientDao.TABLE_NAME}.address FROM ${RecipientDao.TABLE_NAME} WHERE ${RecipientDao.TABLE_NAME}.id=$TABLE_NAME.toRecipientId) AS toRecipient," +
                 "amount," +
                 "status," +
                 "$TABLE_NAME.timestamp," +
@@ -74,22 +75,11 @@ abstract class TransactionsDao : BaseDao<EntityTransaction> {
     )
     abstract fun getTransaction(hash: String): TransactionInfo?
 
-    @Query("UPDATE $TABLE_NAME SET status=:status WHERE txHash=:txHash")
-    abstract fun updateStatus(txHash: String, status: TransactionStatus)
+    @Query("UPDATE $TABLE_NAME SET status=:status, timestamp=:timestamp WHERE txHash=:txHash")
+    abstract fun updateStatus(txHash: String, status: TransactionStatus, timestamp: Date)
 
     @Query("SELECT * FROM $TABLE_NAME")
     abstract fun getAll(): List<EntityTransaction>
-
-    @Query(
-        "SELECT " +
-                "${RecipientDao.TABLE_NAME}.address " +
-                "FROM (SELECT * FROM $TABLE_NAME ORDER BY timestamp DESC) as t INNER JOIN ${AccountsDao.TABLE_NAME} INNER JOIN ${RecipientDao.TABLE_NAME} " +
-                "ON t.accountId=${AccountsDao.TABLE_NAME}.id " +
-                "AND t.fromRecipientId=${RecipientDao.TABLE_NAME}.id " +
-                "WHERE ${AccountsDao.TABLE_NAME}.address<>${RecipientDao.TABLE_NAME}.address " +
-                "GROUP BY ${RecipientDao.TABLE_NAME}.address"
-    )
-    abstract fun getRecent(): List<Recent>
 
     companion object {
         const val TABLE_NAME: String = "transactions"

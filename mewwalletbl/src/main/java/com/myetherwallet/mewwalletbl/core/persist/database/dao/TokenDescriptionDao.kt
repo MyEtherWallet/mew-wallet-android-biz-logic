@@ -18,6 +18,9 @@ abstract class TokenDescriptionDao : BaseDao<EntityTokenDescription> {
     @Query("SELECT * FROM $TABLE_NAME WHERE address=:address")
     abstract fun get(address: Address): EntityTokenDescription?
 
+    @Query("SELECT * FROM $TABLE_NAME WHERE symbol=:symbol")
+    abstract fun get(symbol: String): EntityTokenDescription?
+
     fun getExistsIdOrInsert(entity: EntityTokenDescription): Long {
         val id = Database.instance.getTokenDescriptionDao().insertOrIgnore(entity)
         return if (id == -1L) {

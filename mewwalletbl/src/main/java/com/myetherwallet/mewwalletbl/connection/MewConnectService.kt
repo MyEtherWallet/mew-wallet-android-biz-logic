@@ -9,6 +9,7 @@ import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.connection.webrtc.WebRtc
+import com.myetherwallet.mewwalletbl.core.LogsCollector
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.json.JsonParser
 import com.myetherwallet.mewwalletbl.data.*
@@ -22,7 +23,9 @@ import java.util.concurrent.TimeUnit
  * Created by BArtWell on 23.07.2019.
  */
 
-private const val TAG = "SocketService"
+private const val TAG = "MewConnectService"
+
+private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(10)
 
 private const val ACTION_START = "${BuildConfig.LIBRARY_PACKAGE_NAME}.$TAG.ACTION_START"
 private const val ACTION_STOP = "${BuildConfig.LIBRARY_PACKAGE_NAME}.$TAG.ACTION_STOP"
@@ -37,29 +40,9 @@ private const val OUTCOME_RTC_CONNECTED = "rtcconnected"
 
 class MewConnectService : Service() {
 
-    companion object {
-
-        private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(10)
-
-        fun getIntent(context: Context) = Intent(context, MewConnectService::class.java)
-
-        fun start(context: Context) {
-            MewLog.d(TAG, "Start")
-            val intent = getIntent(context)
-            intent.action = ACTION_START
-            ContextCompat.startForegroundService(context, intent)
-        }
-
-        fun stop(context: Context) {
-            MewLog.d(TAG, "Stop")
-            val intent = getIntent(context)
-            intent.action = ACTION_STOP
-            ContextCompat.startForegroundService(context, intent)
-        }
-    }
-
     var isConnected = false
     private val binder = ServiceBinder(this)
+    private val logsCollector = LogsCollector()
     private val handler = Handler()
     private var socket: WebSocketWrapper? = null
     private lateinit var messageCrypt: MessageCrypt
@@ -73,7 +56,7 @@ class MewConnectService : Service() {
     private var turnServers: List<TurnServer>? = null
     private var isDisconnectSignalReceived = false
 
-    var errorListener: (() -> Unit)? = null
+    var errorListener: ((LogsCollector) -> Unit)? = null
     var connectedListener: (() -> Unit)? = null
     var connectingListener: (() -> Unit)? = null
     var transactionConfirmListener: ((address: String, transaction: Transaction) -> Unit)? = null
@@ -90,12 +73,12 @@ class MewConnectService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            MewLog.d(TAG, "Stop received")
+            logsCollector.add(TAG, "Stop received")
             disconnect()
             disconnectListener?.invoke()
             Timer().schedule(object : TimerTask() {
                 override fun run() {
-                    MewLog.d(TAG, "Service stop delay fired")
+                    logsCollector.add(TAG, "Service stop delay fired")
                     stopService()
                 }
             }, 500L)
@@ -104,8 +87,12 @@ class MewConnectService : Service() {
     }
 
     fun connect(privateKey: String, connectionId: String, walletAddress: String) {
-        MewLog.d(TAG, "Connect")
+        logsCollector.add(TAG, "Connect")
         MewLog.d(TAG, "PrivateKey $privateKey")
+        if (isConnected) {
+            logsCollector.add(TAG, "Already connected, ignore")
+            return
+        }
         disconnect()
         wasTurnUsed = false
         isDisconnectSignalReceived = false
@@ -114,8 +101,8 @@ class MewConnectService : Service() {
         this.privateKey = privateKey
         val ethereumAddress = Address.createEthereum(walletAddress)
         if (ethereumAddress == null) {
-            MewLog.e(TAG, "Wrong address")
-            errorListener?.invoke()
+            logsCollector.add(TAG, "Wrong address")
+            onError("Wrong address")
         } else {
             this.walletAddress = ethereumAddress
             this.connectionId = connectionId
@@ -134,21 +121,22 @@ class MewConnectService : Service() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onConnected() {
-        MewLog.d(TAG, "onConnected")
+        logsCollector.add(TAG, "onConnected")
     }
 
     private fun onMessage(text: String) {
         MewLog.showDebugToast(this, "onMessage $text")
+        logsCollector.add(TAG, "onMessage")
         MewLog.d(TAG, "onMessage: $text")
         val message = JsonParser.fromJson(text, SignalMessage::class.java)
         when (message.signal) {
             INCOME_CONFIRMATION -> {
-                MewLog.d(TAG, "Receive confirmation, creating WebRTC")
+                logsCollector.add(TAG, "Receive confirmation, creating WebRTC")
                 connectWebRtc(null)
                 startTimeoutTimer()
             }
             INCOME_OFFER -> {
-                MewLog.d(TAG, "Receive offer, preparing answer")
+                logsCollector.add(TAG, "Receive offer, preparing answer")
                 val data = JsonParser.fromJson(message.data, SignalData::class.java)
                 val decrypted = messageCrypt.decrypt(data.data)?.let { String(it) }
                 if (decrypted == null) {
@@ -161,14 +149,14 @@ class MewConnectService : Service() {
                 startTimeoutTimer()
             }
             INCOME_ATTEMPTING_TURN -> {
-                MewLog.d(TAG, "Receive turn")
+                logsCollector.add(TAG, "Receive turn")
                 disconnect(false)
                 val data = JsonParser.fromJson(message.data, TurnServerData::class.java)
                 turnServers = data.data
                 connectWebRtc(turnServers)
             }
             INCOME_DISCONNECT -> {
-                MewLog.d(TAG, "Receive disconnect signal")
+                logsCollector.add(TAG, "Receive disconnect signal")
                 isDisconnectSignalReceived = true
                 disconnectSocket()
             }
@@ -176,7 +164,7 @@ class MewConnectService : Service() {
     }
 
     private fun connectWebRtc(turnServers: List<TurnServer>?) {
-        webRtc = WebRtc().apply {
+        webRtc = WebRtc(logsCollector).apply {
             disconnect()
             answerListener = ::onAnswerCreated
             connectSuccessListener = ::onWebRtcConnected
@@ -189,53 +177,53 @@ class MewConnectService : Service() {
 
     private fun onAnswerCreated(offer: Offer) {
         MewLog.showDebugToast(this, "Send answer")
-        MewLog.d(TAG, "Send answer")
+        logsCollector.add(TAG, "Send answer")
         socket?.send(JsonParser.toJson(SignalAction(OUTCOME_ANSWER_SIGNAL, SignalData(connectionId, messageCrypt.encrypt(offer.toByteArray())))))
         startTimeoutTimer()
     }
 
     private fun onWebRtcConnected() {
-        MewLog.d(TAG, "WebRTC connected")
+        logsCollector.add(TAG, "WebRTC connected")
         MewLog.showDebugToast(this, "Connected")
         socket?.send(JsonParser.toJson(SignalAction(OUTCOME_RTC_CONNECTED, null)))
         startTimeoutTimer()
     }
 
     private fun onWebRtcConnectError() {
-        MewLog.d(TAG, "onWebRtcConnectError")
-        waitForTurnOrQuit()
+        logsCollector.add(TAG, "onWebRtcConnectError")
+        waitForTurnOrQuit("WebRTC connect error")
     }
 
     private fun onRtcDisconnected() {
-        MewLog.d(TAG, "onRtcDisconnected")
+        logsCollector.add(TAG, "onRtcDisconnected")
         disconnect()
         disconnectListener?.invoke()
         stopService()
     }
 
     private fun onRtcDataOpened() {
-        MewLog.d(TAG, "onRtcDataOpened")
+        logsCollector.add(TAG, "onRtcDataOpened")
         connectedListener?.invoke()
         isConnected = true
         stopTimeoutTimer()
     }
 
-    private fun waitForTurnOrQuit() {
+    private fun waitForTurnOrQuit(error: String) {
         if (wasTurnUsed) {
-            disconnect()
-            errorListener?.invoke()
+            onError(error)
         } else {
             wasTurnUsed = true
             if (turnServers == null) {
                 startTimeoutTimer()
-                MewLog.d(TAG, "Waiting for turn servers")
+                logsCollector.add(TAG, "Waiting for turn servers")
             } else {
-                MewLog.d(TAG, "Turn servers already received")
+                logsCollector.add(TAG, "Turn servers already received")
             }
         }
     }
 
     private fun handleWebRtcMessages(json: String) {
+        logsCollector.add(TAG, "handleWebRtcMessages")
         MewLog.d(TAG, "handleWebRtcMessages $json")
         if (!isConnected) {
             onRtcDataOpened()
@@ -246,7 +234,7 @@ class MewConnectService : Service() {
                 messageCrypt.decrypt(encryptedMessage)!!,
                 object : TypeToken<WebRtcMessage<JsonElement>>() {}.type
             )
-            MewLog.d(TAG, webRtcMessage.type.name)
+            logsCollector.add(TAG, "Message type: " + webRtcMessage.type.name)
             MewLog.d(TAG, webRtcMessage.data.toString())
             when (webRtcMessage.type) {
                 WebRtcMessage.Type.ADDRESS -> {
@@ -268,9 +256,12 @@ class MewConnectService : Service() {
         }
     }
 
-    fun sendSignTx(signedMessage: ByteArray) {
+    fun sendSignTx(data: ByteArray) {
         try {
-            val message = WebRtcMessage(WebRtcMessage.Type.SIGN_TX, signedMessage.toHexString().toLowerCase(Locale.US))
+            val signedMessage = data.toHexString().toLowerCase(Locale.US)
+            logsCollector.add(TAG, "sendMessage")
+            MewLog.d(TAG, "sendMessage $signedMessage")
+            val message = WebRtcMessage(WebRtcMessage.Type.SIGN_TX, signedMessage)
             webRtc?.send(messageCrypt.encrypt(message))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -279,6 +270,8 @@ class MewConnectService : Service() {
 
     fun sendMessage(signature: String) {
         try {
+            logsCollector.add(TAG, "sendMessage")
+            MewLog.d(TAG, "sendMessage $signature")
             val message = WebRtcMessage(WebRtcMessage.Type.SIGN_MESSAGE, MessageSignData(walletAddress.address, signature))
             webRtc?.send(messageCrypt.encrypt(message))
         } catch (e: Exception) {
@@ -287,15 +280,15 @@ class MewConnectService : Service() {
     }
 
     private fun onError(error: String?) {
-        MewLog.e(TAG, "onError: $error")
+        logsCollector.add(TAG, "onError: $error")
         MewLog.showDebugToast(this, "Error: $error")
         disconnect()
-        errorListener?.invoke()
+        errorListener?.invoke(logsCollector)
         stopService()
     }
 
     private fun onDisconnected() {
-        MewLog.d(TAG, "onDisconnected")
+        logsCollector.add(TAG, "onDisconnected")
         if (!isDisconnectSignalReceived) {
             disconnectListener?.invoke()
             stopService()
@@ -303,7 +296,7 @@ class MewConnectService : Service() {
     }
 
     private fun disconnect(closeSocket: Boolean = true) {
-        MewLog.d(TAG, "disconnect")
+        logsCollector.add(TAG, "disconnect")
         isConnected = false
         ServiceAlarmReceiver.cancel(this)
         try {
@@ -318,7 +311,7 @@ class MewConnectService : Service() {
     }
 
     private fun disconnectSocket() {
-        MewLog.d(TAG, "Close socket")
+        logsCollector.add(TAG, "Close socket")
         socket?.disconnect()
     }
 
@@ -328,26 +321,45 @@ class MewConnectService : Service() {
     }
 
     override fun onDestroy() {
-        MewLog.d(TAG, "onDestroy")
+        logsCollector.add(TAG, "onDestroy")
         disconnect()
         super.onDestroy()
     }
 
     private fun startTimeoutTimer() {
         stopTimeoutTimer()
-        MewLog.d(TAG, "Start timer")
+        logsCollector.add(TAG, "Start timer")
         timeoutRunnable = Runnable {
-            MewLog.d(TAG, "Timeout")
-            waitForTurnOrQuit()
+            logsCollector.add(TAG, "Timeout")
+            waitForTurnOrQuit("Timeout")
         }
         handler.postDelayed(timeoutRunnable!!, CONNECT_TIMEOUT)
     }
 
     private fun stopTimeoutTimer() {
-        MewLog.d(TAG, "Stop timer")
+        logsCollector.add(TAG, "Stop timer")
         timeoutRunnable?.let {
             handler.removeCallbacks(it)
             timeoutRunnable = null
+        }
+    }
+
+    companion object {
+
+        fun getIntent(context: Context) = Intent(context, MewConnectService::class.java)
+
+        fun start(context: Context) {
+            MewLog.d(TAG, "Start")
+            val intent = getIntent(context)
+            intent.action = ACTION_START
+            ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun stop(context: Context) {
+            MewLog.d(TAG, "Stop")
+            val intent = getIntent(context)
+            intent.action = ACTION_STOP
+            ContextCompat.startForegroundService(context, intent)
         }
     }
 }

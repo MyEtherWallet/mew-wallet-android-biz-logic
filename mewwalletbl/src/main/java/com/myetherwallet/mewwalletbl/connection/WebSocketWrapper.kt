@@ -63,7 +63,7 @@ class WebSocketWrapper {
             }
         })
 
-        client.dispatcher().executorService().shutdown()
+        client.dispatcher.executorService.shutdown()
     }
 
     fun send(command: String) {

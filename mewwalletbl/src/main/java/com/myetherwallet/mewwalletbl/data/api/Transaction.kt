@@ -27,7 +27,12 @@ data class Transaction(
     @SerializedName("block_number")
     val blockNumber: Int,
     @SerializedName("status")
-    val status: TransactionStatus,
+    val status: TransactionStatus?,
     @SerializedName("timestamp")
-    val timestamp: Date
-)
+    val timestamp: Date?
+) {
+
+    fun getTransactionStatusOrPending() = status ?: TransactionStatus.PENDING
+
+    fun getTimestampOrCurrent() = timestamp ?: Date()
+}

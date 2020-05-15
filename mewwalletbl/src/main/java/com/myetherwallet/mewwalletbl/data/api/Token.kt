@@ -11,7 +11,7 @@ data class Token(
     val address: String,
     @SerializedName("decimals")
     val decimals: Int,
-    @SerializedName("icon")
+    @SerializedName("icon_png")
     val icon: String,
     @SerializedName("website")
     val website: String,

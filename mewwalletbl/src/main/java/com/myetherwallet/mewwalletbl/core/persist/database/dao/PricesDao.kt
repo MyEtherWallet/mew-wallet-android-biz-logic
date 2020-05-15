@@ -39,6 +39,24 @@ abstract class PricesDao : BaseDao<EntityPrice> {
     )
     abstract fun getLast(address: Address, contractAddress: Address): Double
 
+    @Query(
+        "SELECT $TABLE_NAME.price " +
+                "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+                "ON $TABLE_NAME.tokenId=${TokenDescriptionDao.TABLE_NAME}.id " +
+                "WHERE ${TokenDescriptionDao.TABLE_NAME}.address=:contractAddress " +
+                "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 1"
+    )
+    abstract fun getLastPrice(contractAddress: Address): Double
+
+    @Query(
+        "SELECT $TABLE_NAME.price " +
+                "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+                "ON $TABLE_NAME.tokenId=${TokenDescriptionDao.TABLE_NAME}.id " +
+                "WHERE ${TokenDescriptionDao.TABLE_NAME}.address=:contractAddress " +
+                "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 1"
+    )
+    abstract fun getLast(contractAddress: Address): Double
+
     companion object {
         const val TABLE_NAME: String = "prices"
     }

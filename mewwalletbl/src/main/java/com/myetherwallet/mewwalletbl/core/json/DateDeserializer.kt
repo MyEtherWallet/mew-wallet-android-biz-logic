@@ -19,8 +19,6 @@ class DateDeserializer : JsonDeserializer<Date> {
         dateFormat.timeZone = TimeZone.getTimeZone("UTC")
     }
 
-
-
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Date? {
         json?.asString?.let {
             try {

@@ -3,6 +3,7 @@ package com.myetherwallet.mewwalletbl.data.database
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.myetherwallet.mewwalletbl.data.api.Token
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 
 /**
@@ -19,4 +20,6 @@ open class EntityTokenDescription(
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
+
+    constructor(token: Token) : this(Address.createRaw(token.address), token.decimals, token.name, token.symbol, token.icon)
 }

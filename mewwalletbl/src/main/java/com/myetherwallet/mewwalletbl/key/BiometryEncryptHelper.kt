@@ -3,8 +3,9 @@ package com.myetherwallet.mewwalletbl.key
 import android.content.Context
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import com.myetherwallet.mewwalletbl.core.MewLog
+import com.myetherwallet.mewwalletbl.key.storage.EncryptStorage
+import com.myetherwallet.mewwalletbl.key.storage.PersistentEncryptStorage
 import com.myetherwallet.mewwalletbl.key.util.AES
-import com.myetherwallet.mewwalletbl.preference.Preferences
 import javax.crypto.Cipher
 
 /**
@@ -13,9 +14,10 @@ import javax.crypto.Cipher
 
 private const val TAG = "BiometryEncryptHelper"
 
-class BiometryEncryptHelper(context: Context) : BaseEncryptHelper(context, KeyType.BIOMETRY) {
+class BiometryEncryptHelper(context: Context, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.BIOMETRY, encryptStorage) {
 
-    fun prepareForInit(biometryCallback: (Cipher, (Cipher) -> Unit) -> Unit, callback: () -> Unit) = prepare(true, { cipher, function -> biometryCallback(cipher!!, function) }, callback)
+    fun prepareForInit(biometryCallback: (Cipher, (Cipher) -> Unit) -> Unit, callback: () -> Unit) =
+        prepare(true, { cipher, function -> biometryCallback(cipher!!, function) }, callback)
 
     fun prepareForUse(biometryCallback: (Cipher?, (Cipher) -> Unit) -> Unit, callback: () -> Unit) = prepare(false, biometryCallback, callback)
 
@@ -46,16 +48,17 @@ class BiometryEncryptHelper(context: Context) : BaseEncryptHelper(context, KeyTy
 
     private fun isPrepared() = keystoreHelper.signedCipher != null
 
-    fun init(pin: String) {
+    fun init(pin: String) = init(PinEncryptHelper(context, pin, encryptStorage))
+
+    fun init(encryptHelper: BaseEncryptHelper) {
         assertPrepared()
-        val pinEncryptHelper = PinEncryptHelper(context, pin)
-        val masterKey = pinEncryptHelper.retrieveMasterKey(pinEncryptHelper.accessKey)
-        pinEncryptHelper.destroy()
-        val biometryAccessKey = generateAccessKey(Preferences.main.getBiometrySalt())
+        val masterKey = encryptHelper.retrieveMasterKey(encryptHelper.accessKey)
+        encryptHelper.destroy()
+        val biometryAccessKey = generateAccessKey(encryptStorage.getBiometrySalt())
         val encryptedAccessKey = keystoreHelper.encrypt(biometryAccessKey)
         val encryptedMasterKey = AES.encrypt(masterKey, biometryAccessKey)
-        Preferences.main.setAccessKey(encryptedAccessKey, KeyType.BIOMETRY)
-        Preferences.main.setMasterKey(encryptedMasterKey, KeyType.BIOMETRY)
+        encryptStorage.setAccessKey(encryptedAccessKey, KeyType.BIOMETRY)
+        encryptStorage.setMasterKey(encryptedMasterKey, KeyType.BIOMETRY)
     }
 
     override fun retrieveAccessKey(): ByteArray {
@@ -71,8 +74,8 @@ class BiometryEncryptHelper(context: Context) : BaseEncryptHelper(context, KeyTy
 
     private fun onKeyPermanentlyInvalidated() {
         keystoreHelper.remove()
-        Preferences.main.removeBiometrySalt()
-        Preferences.main.removeAccessKey(KeyType.BIOMETRY)
-        Preferences.main.removeMasterKey(KeyType.BIOMETRY)
+        encryptStorage.removeBiometrySalt()
+        encryptStorage.removeAccessKey(KeyType.BIOMETRY)
+        encryptStorage.removeMasterKey(KeyType.BIOMETRY)
     }
 }

@@ -1,19 +1,19 @@
 package com.myetherwallet.mewwalletbl.key
 
 import android.content.Context
+import com.myetherwallet.mewwalletbl.key.storage.EncryptStorage
 import com.myetherwallet.mewwalletbl.key.util.AES
 import com.myetherwallet.mewwalletbl.key.util.HKDF
 import com.myetherwallet.mewwalletbl.key.util.KeystoreHelper
 import com.myetherwallet.mewwalletbl.key.util.Utils
-import com.myetherwallet.mewwalletbl.preference.Preferences
 
 /**
  * Created by BArtWell on 05.08.2019.
  */
 
-abstract class BaseEncryptHelper(protected val context: Context, private val keyType: KeyType) {
+abstract class BaseEncryptHelper(protected val context: Context, private val keyType: KeyType, val encryptStorage: EncryptStorage) {
 
-    protected val keystoreHelper = KeystoreHelper(context, keyType)
+    protected val keystoreHelper = KeystoreHelper(context, keyType, encryptStorage)
     internal var accessKey: ByteArray = ByteArray(0)
         get() {
             if (field.isEmpty()) {
@@ -23,16 +23,19 @@ abstract class BaseEncryptHelper(protected val context: Context, private val key
         }
 
     protected open fun retrieveAccessKey(): ByteArray {
-        val encryptedAccessKey = Preferences.main.getAccessKey(keyType)
+        val encryptedAccessKey = encryptStorage.getAccessKey(keyType)
         return keystoreHelper.decrypt(encryptedAccessKey)
     }
 
-    fun encrypt(decryptedData: String) = AES.encrypt(decryptedData.toByteArray(), retrieveMasterKey(accessKey))
+    fun encrypt(decryptedData: String): ByteArray {
+        encryptStorage.save()
+        return AES.encrypt(decryptedData.toByteArray(), retrieveMasterKey(accessKey))
+    }
 
     fun decrypt(encryptedData: ByteArray) = String(AES.decrypt(encryptedData, retrieveMasterKey(accessKey)))
 
     internal fun retrieveMasterKey(accessKey: ByteArray): ByteArray {
-        val encryptedMasterKey = Preferences.main.getMasterKey(keyType)
+        val encryptedMasterKey = encryptStorage.getMasterKey(keyType)
         return AES.decrypt(encryptedMasterKey, accessKey)
     }
 

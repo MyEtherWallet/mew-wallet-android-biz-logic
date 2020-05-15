@@ -54,6 +54,9 @@ abstract class TokensDao : BaseDao<EntityToken> {
     )
     abstract fun getTokensCount(): List<TokensCount>
 
+    @Query("DELETE FROM $TABLE_NAME WHERE id=:id")
+    abstract fun removeToken(id: Long)
+
     companion object {
         const val TABLE_NAME: String = "tokens"
     }

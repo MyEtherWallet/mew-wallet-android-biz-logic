@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import com.myetherwallet.mewwalletbl.BuildConfig
 
 /**
  * Created by BArtWell on 18.07.2019.
@@ -12,7 +13,7 @@ import android.widget.Toast
 
 object MewLog {
 
-    internal fun shouldDisplayLogs() = true
+    internal fun shouldDisplayLogs() = BuildConfig.DEBUG
     private fun canDisplayToasts() = false
 
     fun v(tag: String, msg: String) {

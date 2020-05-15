@@ -9,6 +9,9 @@ class ExtToken(
     val address: Address,
     val decimals: Int,
     val name: String,
-    val symbol: String,
+    val symbol: String?,
     val logo: String?
-)
+) {
+
+    fun getNotEmptySymbol() = if (symbol.isNullOrEmpty()) "MNKY" else symbol
+}

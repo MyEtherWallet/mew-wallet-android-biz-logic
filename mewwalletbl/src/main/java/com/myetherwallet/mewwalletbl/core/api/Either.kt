@@ -19,6 +19,20 @@ sealed class Either<out L, out R> {
             is Left -> fnL(a)
             is Right -> fnR(b)
         }
+
+    fun getRightOrNull(): R? {
+        if (this is Right) {
+            return b
+        }
+        return null
+    }
+
+    fun getLeftOrNull(): L? {
+        if (this is Left) {
+            return a
+        }
+        return null
+    }
 }
 
 fun <A, B, C> ((A) -> B).c(f: (B) -> C): (A) -> C = {

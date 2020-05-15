@@ -11,18 +11,25 @@ import android.net.NetworkCapabilities
 
 object NetworkHandler {
 
-    private lateinit var connectivityManager: ConnectivityManager
+    private var connectivityManager: ConnectivityManager? = null
 
     fun init(context: Context) {
         connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 
+//    fun isNetworkConnected(): Boolean {
+//        // if connectivityManager is not initialized, the test is running
+//        connectivityManager?.let { connectivityManager ->
+//            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)?.let { networkCapabilities ->
+//                return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+//                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+//            }
+//            return false
+//        } ?: return true
+//    }
+
     fun isNetworkConnected(): Boolean {
-        connectivityManager.activeNetwork?.let { network ->
-            connectivityManager.getNetworkCapabilities(network)?.let { networkCapabilities ->
-                return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-            }
-        }
-        return false
+        // if connectivityManager is not initialized, the test is running
+        return connectivityManager?.activeNetworkInfo?.isConnectedOrConnecting ?: return true
     }
 }

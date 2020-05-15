@@ -6,6 +6,7 @@ import com.myetherwallet.mewwalletbl.data.database.BalanceInfo
 import com.myetherwallet.mewwalletbl.data.database.EntityBalance
 import com.myetherwallet.mewwalletbl.data.database.ExtBalanceInfo
 import com.myetherwallet.mewwalletbl.data.database.TotalBalance
+import com.myetherwallet.mewwalletkit.bip.bip44.Address
 
 /**
  * Created by BArtWell on 18.09.2019.
@@ -29,6 +30,7 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
 
     @Query(
         "SELECT " +
+                "${AccountsDao.TABLE_NAME}.id," +
                 "$TABLE_NAME.amount," +
                 "${TokenDescriptionDao.TABLE_NAME}.decimals," +
                 "${TokenDescriptionDao.TABLE_NAME}.name," +
@@ -37,7 +39,8 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
                 "${TokenDescriptionDao.TABLE_NAME}.address AS contract," +
                 "${TABLE_NAME}.timestamp," +
                 "${AccountsDao.TABLE_NAME}.address," +
-                "${PricesDao.TABLE_NAME}.price " +
+                "${PricesDao.TABLE_NAME}.price," +
+                "${AccountsDao.TABLE_NAME}.anonymous_id " +
                 "FROM $TABLE_NAME INNER JOIN ${TokensDao.TABLE_NAME} INNER JOIN ${AccountsDao.TABLE_NAME} INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
                 "ON ${AccountsDao.TABLE_NAME}.id=${TokensDao.TABLE_NAME}.accountId " +
                 "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
@@ -50,6 +53,30 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
 
     @Query(
         "SELECT " +
+                "${AccountsDao.TABLE_NAME}.id," +
+                "$TABLE_NAME.amount," +
+                "${TokenDescriptionDao.TABLE_NAME}.decimals," +
+                "${TokenDescriptionDao.TABLE_NAME}.name," +
+                "${TokenDescriptionDao.TABLE_NAME}.symbol," +
+                "${TokenDescriptionDao.TABLE_NAME}.logo," +
+                "${TokenDescriptionDao.TABLE_NAME}.address AS contract," +
+                "${TABLE_NAME}.timestamp," +
+                "${AccountsDao.TABLE_NAME}.address," +
+                "${PricesDao.TABLE_NAME}.price," +
+                "${AccountsDao.TABLE_NAME}.anonymous_id " +
+                "FROM $TABLE_NAME INNER JOIN ${TokensDao.TABLE_NAME} INNER JOIN ${AccountsDao.TABLE_NAME} INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+                "ON ${AccountsDao.TABLE_NAME}.id=${TokensDao.TABLE_NAME}.accountId " +
+                "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
+                "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
+                "LEFT JOIN ${PricesDao.TABLE_NAME} ON ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
+                "WHERE ${AccountsDao.TABLE_NAME}.address=:address AND contract=:contract " +
+                "GROUP BY contract ORDER BY $TABLE_NAME.timestamp DESC"
+    )
+    abstract fun getLast(address: Address, contract: Address): BalanceInfo
+
+    @Query(
+        "SELECT " +
+                "${AccountsDao.TABLE_NAME}.id," +
                 "$TABLE_NAME.amount," +
                 "${TokenDescriptionDao.TABLE_NAME}.decimals," +
                 "${TokenDescriptionDao.TABLE_NAME}.name," +
@@ -61,7 +88,8 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
                 "${PricesDao.TABLE_NAME}.price," +
                 "${AccountsDao.TABLE_NAME}.name AS accountName," +
                 "${AccountsDao.TABLE_NAME}.hide, " +
-                "${AccountsDao.TABLE_NAME}.position " +
+                "${AccountsDao.TABLE_NAME}.position," +
+                "${AccountsDao.TABLE_NAME}.anonymous_id " +
                 "FROM $TABLE_NAME INNER JOIN ${AccountsDao.TABLE_NAME} INNER JOIN ${TokensDao.TABLE_NAME} INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
                 "ON ${AccountsDao.TABLE_NAME}.id=${TokensDao.TABLE_NAME}.accountId " +
                 "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +

@@ -23,6 +23,7 @@ class BinderWrapper<T : Service>(private val context: Context, private val inten
     private lateinit var serviceConnection: ServiceConnection
 
     fun bind(onConnected: () -> Unit, onDisconnected: (() -> Unit)? = null) {
+        MewLog.d(TAG, "Bind service")
         serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 MewLog.d(TAG, "Service bound")

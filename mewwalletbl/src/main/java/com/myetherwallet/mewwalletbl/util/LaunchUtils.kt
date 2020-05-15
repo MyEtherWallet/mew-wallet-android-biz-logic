@@ -5,7 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.text.TextUtils
+
 
 /**
  * Created by BArtWell on 23.07.2019.
@@ -58,9 +60,9 @@ object LaunchUtils {
         }
     }
 
-    fun openMarket(context: Context?, applicationId: String) {
+    fun openMarket(context: Context?, packageName: String? = context?.packageName) {
         context?.let {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$applicationId"))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
             val apps = context.packageManager.queryIntentActivities(intent, 0)
             for (app in apps) {
                 if (app.activityInfo.applicationInfo.packageName == "com.android.vending") {
@@ -74,7 +76,14 @@ object LaunchUtils {
                     return
                 }
             }
-            openWebSite(context, "https://play.google.com/store/apps/details?id=$applicationId")
+            openWebSite(context, "https://play.google.com/store/apps/details?id=" + context.packageName)
         }
+    }
+
+    fun openSettings(context: Context) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", context.packageName, null)
+        intent.data = uri
+        context.startActivity(intent)
     }
 }

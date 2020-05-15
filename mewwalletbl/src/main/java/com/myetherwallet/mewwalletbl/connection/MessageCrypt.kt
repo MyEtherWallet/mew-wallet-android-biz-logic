@@ -1,6 +1,6 @@
 package com.myetherwallet.mewwalletbl.connection
 
-import com.myetherwallet.mewwalletbl.NetworkConfig
+import com.myetherwallet.mewwalletbl.MewEnvironment
 import com.myetherwallet.mewwalletbl.data.BaseMessage
 import com.myetherwallet.mewwalletbl.data.EncryptedMessage
 import com.myetherwallet.mewwalletkit.bip.bip44.PrivateKey
@@ -81,7 +81,7 @@ class MessageCrypt(private val privateKey: String) {
     }
 
     private fun publicKeyFromPrivateWithControl(privateKeySource: String): ByteArray {
-        val privateKey = PrivateKey.createWithPrivateKey(privateKeySource.hexToByteArray(), NetworkConfig.current.network)
+        val privateKey = PrivateKey.createWithPrivateKey(privateKeySource.hexToByteArray(), MewEnvironment.current.network)
         val publicKey = privateKey.publicKey()
         return publicKey!!.data()
     }

@@ -1,5 +1,6 @@
 package com.myetherwallet.mewwalletbl.data.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.AccountsDao
@@ -17,5 +18,8 @@ data class EntityAccount(
     val walletId: Long,
     val address: Address,
     val name: String,
-    val hide: Boolean
+    val hide: Boolean,
+    @ColumnInfo(name = "anonymous_id")
+    val anonymousId: String,
+    var nonce: String
 )

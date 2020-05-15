@@ -1,6 +1,8 @@
 package com.myetherwallet.mewwalletbl.core.json
 
 import com.google.gson.*
+import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
+import com.myetherwallet.mewwalletkit.core.extension.isHex
 import java.lang.reflect.Type
 
 /**
@@ -27,6 +29,11 @@ class ByteArraySerializer : JsonSerializer<ByteArray>, JsonDeserializer<ByteArra
                 byteArray[i] = (json.get(i).asInt).toByte()
             }
             return byteArray
+        } else if (json is JsonPrimitive && json.isString) {
+            val string = json.asString
+            if (string.isHex()) {
+                return string.hexToByteArray()
+            }
         }
         return ByteArray(0)
     }

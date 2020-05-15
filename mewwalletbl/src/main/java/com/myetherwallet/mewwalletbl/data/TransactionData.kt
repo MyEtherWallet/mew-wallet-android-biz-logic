@@ -20,11 +20,11 @@ data class TransactionData(
         const val FUNCTION_TOKEN_TRANSFER = "0xa9059cbb"
 
         fun create(data: ByteArray): TransactionData? {
-            return if (data.size == 69) {
+            return if (data.size == 68) {
                 TransactionData(
-                    data.copyOfRange(0, 5).toHexString().toLowerCase(Locale.US).addHexPrefix(),
-                    data.copyOfRange(17, 37).toHexString().toLowerCase(Locale.US).addHexPrefix(),
-                    data.copyOfRange(37, 69).toBigInteger()
+                    data.copyOfRange(0, 4).toHexString().toLowerCase(Locale.US).addHexPrefix(),
+                    data.copyOfRange(16, 36).toHexString().toLowerCase(Locale.US).addHexPrefix(),
+                    data.copyOfRange(36, 68).toBigInteger()
                 )
             } else {
                 null
