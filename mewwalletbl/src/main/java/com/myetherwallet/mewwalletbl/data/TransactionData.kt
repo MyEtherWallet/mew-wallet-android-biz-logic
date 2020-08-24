@@ -18,6 +18,7 @@ data class TransactionData(
 
     companion object {
         const val FUNCTION_TOKEN_TRANSFER = "0xa9059cbb"
+        const val FUNCTION_APPROVAL = "0x095ea7b3"
 
         fun create(data: ByteArray): TransactionData? {
             return if (data.size == 68) {

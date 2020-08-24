@@ -21,4 +21,13 @@ data class TokenDescription(
         entity.logo,
         entity.address
     )
+
+    constructor(data: ExtTokenDescription) : this(
+        data.id,
+        data.decimals,
+        data.name,
+        data.symbol,
+        data.logo,
+        data.contract
+    )
 }

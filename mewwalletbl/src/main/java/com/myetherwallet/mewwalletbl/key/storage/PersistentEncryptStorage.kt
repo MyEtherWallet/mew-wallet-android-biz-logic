@@ -50,7 +50,15 @@ class PersistentEncryptStorage : EncryptStorage {
         Preferences.main.setBiometryEnabled(isEnable)
     }
 
-    override fun isBiometryEnabled()= Preferences.main.isBiometryEnabled()
+    override fun isBiometryEnabled() = Preferences.main.isBiometryEnabled()
+
+    override fun addAccessKeyBackup(index: Int, accessKey: ByteArray) = Preferences.main.setAccessKeyBackup(index, accessKey)
+
+    override fun getAccessKeyBackup(index: Int) = Preferences.main.getAccessKeyBackup(index)
+
+    override fun addKeystoreIvBackup(index: Int, iv: ByteArray) = Preferences.main.setKeystoreIvBackup(index, iv)
+
+    override fun getKeystoreIvBackup(index: Int) = Preferences.main.getKeystoreIvBackup(index)
 
     override fun save() {
         MewLog.d("PersistentEncryptStorage", "save")

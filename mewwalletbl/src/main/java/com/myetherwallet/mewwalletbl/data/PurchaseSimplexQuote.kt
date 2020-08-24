@@ -17,5 +17,7 @@ data class PurchaseSimplexQuote(
     @SerializedName("fiat_amount")
     val fiatAmount: BigDecimal,
     @SerializedName("fiat_currency")
-    val fiatCurrency: String
+    val fiatCurrency: String,
+    @SerializedName("fiat_base_amount")
+    val fiatBaseAmount: BigDecimal
 )

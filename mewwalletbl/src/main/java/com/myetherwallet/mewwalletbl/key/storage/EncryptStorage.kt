@@ -8,14 +8,14 @@ interface EncryptStorage {
     fun getKeystoreIv(keyType: KeyType): ByteArray
 
     fun setAccessKey(key: ByteArray, keyType: KeyType)
-    fun getAccessKey(keyType: KeyType) : ByteArray
-    fun isAccessKeyExists(keyType: KeyType) : Boolean
+    fun getAccessKey(keyType: KeyType): ByteArray
+    fun isAccessKeyExists(keyType: KeyType): Boolean
 
     fun setMasterKey(key: ByteArray, keyType: KeyType)
-    fun getMasterKey(keyType: KeyType) : ByteArray
+    fun getMasterKey(keyType: KeyType): ByteArray
 
     fun setSignature(key: ByteArray, keyType: KeyType)
-    fun getSignature(keyType: KeyType) : ByteArray?
+    fun getSignature(keyType: KeyType): ByteArray?
 
     fun getBiometrySalt(): ByteArray
 
@@ -24,7 +24,12 @@ interface EncryptStorage {
     fun removeMasterKey(keyType: KeyType)
 
     fun setBiometryEnabled(isEnable: Boolean)
-    fun isBiometryEnabled() : Boolean
+    fun isBiometryEnabled(): Boolean
+
+    fun addAccessKeyBackup(index: Int, accessKey: ByteArray)
+    fun getAccessKeyBackup(index: Int): ByteArray?
+    fun addKeystoreIvBackup(index: Int, iv: ByteArray)
+    fun getKeystoreIvBackup(index: Int): ByteArray
 
     fun save()
 }

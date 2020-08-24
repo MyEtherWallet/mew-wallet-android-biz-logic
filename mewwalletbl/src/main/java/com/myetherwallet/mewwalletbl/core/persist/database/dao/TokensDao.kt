@@ -14,14 +14,19 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 @Dao
 abstract class TokensDao : BaseDao<EntityToken> {
 
-    @Query(
-        "SELECT * FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
-                "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id"
-    )
-    abstract fun getAll(): List<ExtToken>
+    @Query("SELECT * FROM $TABLE_NAME")
+    abstract fun getAll(): List<EntityToken>
 
     @Query(
-        "SELECT * FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+        "SELECT $TABLE_NAME.accountId," +
+                "$TABLE_NAME.tokenDescriptionId," +
+                "$TABLE_NAME.isPrimary," +
+                "${TokenDescriptionDao.TABLE_NAME}.address, " +
+                "${TokenDescriptionDao.TABLE_NAME}.decimals, " +
+                "${TokenDescriptionDao.TABLE_NAME}.name, " +
+                "${TokenDescriptionDao.TABLE_NAME}.symbol, " +
+                "${TokenDescriptionDao.TABLE_NAME}.logo " +
+                "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
                 "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "WHERE accountId=:account"
     )
@@ -56,6 +61,9 @@ abstract class TokensDao : BaseDao<EntityToken> {
 
     @Query("DELETE FROM $TABLE_NAME WHERE id=:id")
     abstract fun removeToken(id: Long)
+
+    @Query("UPDATE $TABLE_NAME SET isPrimary=:isPrimary WHERE accountId=:accountId AND tokenDescriptionId=:descriptionId")
+    abstract fun updatePrimary(accountId: Long, descriptionId: Long, isPrimary: Boolean)
 
     companion object {
         const val TABLE_NAME: String = "tokens"

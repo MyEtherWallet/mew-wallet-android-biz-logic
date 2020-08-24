@@ -10,7 +10,7 @@ import java.util.*
  * Created by BArtWell on 17.09.2019.
  */
 
-@Entity(tableName = "transactions", indices = [Index(value = ["txHash","tokenDescriptionId","fromRecipientId","toRecipientId"], unique = true)])
+@Entity(tableName = "transactions", indices = [Index(value = ["txHash","accountId","tokenDescriptionId","fromRecipientId","toRecipientId"], unique = true)])
 data class EntityTransaction(
     val accountId: Long,
     val fromRecipientId: Long,

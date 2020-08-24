@@ -24,6 +24,9 @@ class DelayedEncryptStorage : EncryptStorage {
 
     private var isBiometryEnabled: Boolean? = null
 
+    private val accessKeyBackups = mutableMapOf<Int, ByteArray>()
+    private val keystoreIvBackups = mutableMapOf<Int, ByteArray>()
+
     override fun setKeystoreIv(keyType: KeyType, iv: ByteArray) {
         when (keyType) {
             KeyType.BIOMETRY -> keystoreIvBiometry = iv
@@ -109,6 +112,22 @@ class DelayedEncryptStorage : EncryptStorage {
 
     override fun isBiometryEnabled() = isBiometryEnabled ?: false
 
+    override fun addAccessKeyBackup(index: Int, accessKey: ByteArray) {
+        accessKeyBackups[index] = accessKey
+    }
+
+    override fun getAccessKeyBackup(index: Int) = accessKeyBackups.getOrElse(0) {
+        Preferences.main.getAccessKeyBackup(index)
+    }
+
+    override fun addKeystoreIvBackup(index: Int, iv: ByteArray) {
+        keystoreIvBackups[index] = iv
+    }
+
+    override fun getKeystoreIvBackup(index: Int) = keystoreIvBackups.getOrElse(index) {
+        Preferences.main.getKeystoreIvBackup(index)
+    }
+
     override fun save() {
         if (!isSaved) {
             keystoreIvBiometry?.let { Preferences.main.setKeystoreIv(KeyType.BIOMETRY, it) }
@@ -126,8 +145,16 @@ class DelayedEncryptStorage : EncryptStorage {
             biometrySalt?.let { Preferences.main.saveSalt(it) }
 
             isBiometryEnabled?.let { Preferences.main.setBiometryEnabled(it) }
+
+            for ((index, accessKey) in accessKeyBackups) {
+                Preferences.main.setAccessKeyBackup(index, accessKey)
+            }
+
+            for ((index, iv) in keystoreIvBackups) {
+                Preferences.main.setKeystoreIvBackup(index, iv)
+            }
+
             isSaved = true
         }
     }
-
 }

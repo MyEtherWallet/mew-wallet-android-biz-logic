@@ -17,6 +17,13 @@ abstract class DexPricesDao : BaseDao<EntityDexPrice> {
     abstract fun getPrices(from: Long, to: Long, scale: Int, expirationDate: Date): List<EntityDexPrice>
 
     @Query(
+        "SELECT MAX(price) " +
+                "FROM $TABLE_NAME " +
+                "WHERE base=:from AND quote=:to AND timestamp>:expirationDate"
+    )
+    abstract fun getBestPrice(from: Long, to: Long, expirationDate: Date): Double
+
+    @Query(
         "DELETE FROM $TABLE_NAME " +
                 "WHERE base=:from AND quote=:to AND scale=:scale"
     )

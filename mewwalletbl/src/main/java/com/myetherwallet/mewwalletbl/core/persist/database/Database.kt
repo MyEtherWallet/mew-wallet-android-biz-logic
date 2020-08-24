@@ -13,6 +13,7 @@ import com.myetherwallet.mewwalletbl.core.persist.database.dao.*
 
 object Database {
 
+    var isDatabaseRemovingInProgress = false
     lateinit var instance: MewDatabase
 
     private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -61,10 +62,24 @@ object Database {
         }
     }
 
+    private val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            dropAndCreateTransactionsDao(database)
+
+            database.execSQL("DROP TABLE IF EXISTS " + DexPricesDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + DexPricesDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, dex TEXT NOT NULL, price DOUBLE NOT NULL, base INTEGER NOT NULL, quote INTEGER NOT NULL, scale INTEGER NOT NULL, timestamp INTEGER NOT NULL, marketImpact DOUBLE NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_dex_prices_dex_base_quote_scale ON " + DexPricesDao.TABLE_NAME + " (dex, base, quote, scale)")
+
+            database.execSQL("DROP TABLE IF EXISTS " + BalancesDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + BalancesDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, tokenId INTEGER NOT NULL, amount TEXT NOT NULL, timestamp INTEGER NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_tokenId_timestamp ON " + BalancesDao.TABLE_NAME + " (tokenId, timestamp)")
+        }
+    }
+
     private fun dropAndCreateTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + TransactionsDao.TABLE_NAME)
         database.execSQL("CREATE TABLE " + TransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, accountId INTEGER NOT NULL, fromRecipientId INTEGER NOT NULL, toRecipientId INTEGER NOT NULL, tokenDescriptionId INTEGER NOT NULL, amount DOUBLE NOT NULL, status TEXT NOT NULL, timestamp INTEGER NOT NULL, txHash TEXT NOT NULL)")
-        database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_transactions_txHash_tokenDescriptionId_fromRecipientId_toRecipientId ON " + TransactionsDao.TABLE_NAME + " (txHash, tokenDescriptionId, fromRecipientId, toRecipientId)")
+        database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_transactions_txHash_accountId_tokenDescriptionId_fromRecipientId_toRecipientId ON " + TransactionsDao.TABLE_NAME + " (txHash, accountId, tokenDescriptionId, fromRecipientId, toRecipientId)")
     }
 
     internal fun init(context: Context) {
@@ -74,12 +89,15 @@ object Database {
             .addMigrations(MIGRATION_2_3)
             .addMigrations(MIGRATION_3_4)
             .addMigrations(MIGRATION_4_5)
+            .addMigrations(MIGRATION_5_6)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }
 
     fun drop(context: Context) {
+        isDatabaseRemovingInProgress = true
         context.deleteDatabase(MewDatabase.DB_NAME)
         init(context)
+        isDatabaseRemovingInProgress = false
     }
 }

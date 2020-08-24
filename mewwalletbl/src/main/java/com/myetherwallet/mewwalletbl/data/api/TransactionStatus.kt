@@ -8,5 +8,7 @@ enum class TransactionStatus {
     @SerializedName("SUCCESS")
     SUCCESS,
     @SerializedName("PENDING")
-    PENDING
+    PENDING,
+    @SerializedName("DROPPED")
+    DROPPED
 }

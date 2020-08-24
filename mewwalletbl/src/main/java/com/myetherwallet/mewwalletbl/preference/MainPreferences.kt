@@ -8,7 +8,9 @@ import com.myetherwallet.mewwalletbl.data.KeysStorageType
 import com.myetherwallet.mewwalletbl.data.PurchaseProvider
 import com.myetherwallet.mewwalletbl.key.KeyType
 import com.myetherwallet.mewwalletbl.key.util.Utils
+import org.json.JSONObject
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by BArtWell on 05.08.2019.
@@ -21,6 +23,8 @@ private const val BIOMETRY_ENABLE = "biometry_enable"
 private const val WAS_IMPORT_SUGGESTED = "was_import_suggested"
 private const val ACCESS_KEY = "access_key_"
 private const val MASTER_KEY = "master_key_"
+private const val ACCESS_KEY_BACKUP = "access_key_backup_"
+private const val KEYSTORE_IV_BACKUP = "keystore_iv_backup_"
 private const val SIGNATURE = "signature_"
 private const val KEYSTORE_IV = "keystore_iv_"
 private const val BIOMETRY_SALT = "biometry_salt"
@@ -31,12 +35,14 @@ private const val STORAGE_TYPE = "storage_type"
 private const val SAMSUNG_BLOCKCHAIN_HASH = "samsung_blockchain_hash"
 private const val DEBUG_ENVIRONMENT_TYPE = "debug_environment_type"
 private const val DEBUG_PURCHASE_PROVIDER = "debug_purchase_provider"
+private const val FORCE_BACKUP_DIALOG_DATE = "force_backup_dialog_date"
 private const val PURCHASE_PROVIDER = "purchase_provider"
 private const val WAS_APP_CRASHED = "was_app_crashed"
 private const val APP_CRASH_EXCEPTION = "app_crash_exception"
 private const val RATE_STARTS_COUNT = "rate_starts_count"
 private const val RATE_STARTS_THRESHOLD = "rate_starts_threshold"
 private const val IS_TOKENS_ICONS_CACHED = "is_tokens_icons_cached"
+private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
 private const val DEFAULT_RATE_STARTS_THRESHOLD = 10
 
 class MainPreferences internal constructor(context: Context) {
@@ -125,6 +131,22 @@ class MainPreferences internal constructor(context: Context) {
 
     fun setTokensIconsCached() = preferences.edit().putBoolean(IS_TOKENS_ICONS_CACHED, true).apply()
 
+    fun shouldShowForceBackupDialog(): Boolean {
+        val saved = preferences.getLong(FORCE_BACKUP_DIALOG_DATE, 0)
+        if (System.currentTimeMillis() - saved > TimeUnit.DAYS.toMillis(1)) {
+            return true
+        }
+        return false
+    }
+
+    fun setBackupDialogShown() {
+        preferences.edit().putLong(FORCE_BACKUP_DIALOG_DATE, System.currentTimeMillis()).apply()
+    }
+
+    internal fun setAccessKeyBackup(index: Int, accessKey: ByteArray) = saveBytes(ACCESS_KEY_BACKUP + index, accessKey)
+
+    internal fun getAccessKeyBackup(index: Int) = readBytes(ACCESS_KEY_BACKUP + index)
+
     internal fun setAccessKey(key: ByteArray, keyType: KeyType) = saveBytes(ACCESS_KEY + keyType.name.toLowerCase(Locale.US), key)
 
     internal fun getAccessKey(keyType: KeyType): ByteArray = readBytes(ACCESS_KEY + keyType.name.toLowerCase(Locale.US))!!
@@ -146,6 +168,10 @@ class MainPreferences internal constructor(context: Context) {
     internal fun setKeystoreIv(keyType: KeyType, iv: ByteArray) = saveBytes(KEYSTORE_IV + keyType.name.toLowerCase(Locale.US), iv)
 
     internal fun getKeystoreIv(keyType: KeyType): ByteArray = readBytes(KEYSTORE_IV + keyType.name.toLowerCase(Locale.US))!!
+
+    internal fun getKeystoreIvBackup(index: Int): ByteArray = readBytes(KEYSTORE_IV_BACKUP + index)!!
+
+    internal fun setKeystoreIvBackup(index: Int, iv: ByteArray) = saveBytes(KEYSTORE_IV_BACKUP + index, iv)
 
     internal fun saveSalt(salt: ByteArray) = saveBytes(BIOMETRY_SALT, salt)
 
@@ -178,4 +204,18 @@ class MainPreferences internal constructor(context: Context) {
     fun removeAllData() {
         preferences.edit().clear().apply()
     }
+
+    fun savePrivateKeyTestDate(type: String, isAlive: Boolean) {
+        val jsonObject = preferences.getString(PRIVATE_KEY_TEST_DATE, null)?.let {
+            JSONObject(it)
+        } ?: JSONObject()
+        if (isAlive) {
+            jsonObject.put(type, Date().time)
+        } else {
+            jsonObject.put(type, 0L)
+        }
+        preferences.edit().putString(PRIVATE_KEY_TEST_DATE, jsonObject.toString()).apply()
+    }
+
+    fun getPrivateKeyTestDates() = preferences.getString(PRIVATE_KEY_TEST_DATE, null)
 }

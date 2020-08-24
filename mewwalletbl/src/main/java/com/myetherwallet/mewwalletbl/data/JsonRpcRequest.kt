@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.addHexPrefix
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
+import com.myetherwallet.mewwalletkit.core.extension.toHexStringWithoutStartZeros
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -28,9 +29,7 @@ class JsonRpcRequest<T>(
             val jsonObject = JsonObject()
             transaction.from?.let { jsonObject.addProperty("from", it.address) }
             jsonObject.addProperty("to", transaction.to!!.address)
-            jsonObject.addProperty("gas", transaction.gasLimit.toHexString())
-            jsonObject.addProperty("gasPrice", transaction.gasPrice.toHexString())
-            jsonObject.addProperty("value", transaction.value.toHexString())
+            jsonObject.addProperty("value", transaction.value.toHexStringWithoutStartZeros())
             jsonObject.addProperty("data", transaction.data.toHexString().addHexPrefix())
             val params = listOf(jsonObject)
             return JsonRpcRequest(Method.ESTIMATE_GAS.methodName, params)

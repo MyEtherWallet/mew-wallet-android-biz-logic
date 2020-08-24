@@ -17,23 +17,28 @@ private const val TAG = "BiometryEncryptHelper"
 class BiometryEncryptHelper(context: Context, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.BIOMETRY, encryptStorage) {
 
     fun prepareForInit(biometryCallback: (Cipher, (Cipher) -> Unit) -> Unit, callback: () -> Unit) =
-        prepare(true, { cipher, function -> biometryCallback(cipher!!, function) }, callback)
+        prepare(true, { cipher, error, function -> biometryCallback(cipher!!, function) }, callback)
 
-    fun prepareForUse(biometryCallback: (Cipher?, (Cipher) -> Unit) -> Unit, callback: () -> Unit) = prepare(false, biometryCallback, callback)
+    fun prepareForUse(biometryCallback: (Cipher?, EncryptHelperError, (Cipher) -> Unit) -> Unit, callback: () -> Unit) = prepare(false, biometryCallback, callback)
 
-    private fun prepare(forInit: Boolean, biometryCallback: (Cipher?, (Cipher) -> Unit) -> Unit, callback: () -> Unit) {
+    private fun prepare(forInit: Boolean, biometryCallback: (Cipher?, error: EncryptHelperError, (Cipher) -> Unit) -> Unit, callback: () -> Unit) {
         var cipher: Cipher? = null
+        var error = EncryptHelperError.OK
         try {
             cipher = retrieveCipher(forInit)
         } catch (e: KeyPermanentlyInvalidatedException) {
             MewLog.d(TAG, "Biometry data was changed", e)
+            error = EncryptHelperError.KEY_PERMANENTLY_INVALIDATED
             onKeyPermanentlyInvalidated()
+        } catch (e: Exception) {
+            MewLog.d(TAG, "Cannot retrieve key", e)
+            error = EncryptHelperError.CANNOT_RETRIEVE_KEY
         }
         if (cipher == null) {
-            biometryCallback.invoke(null) {}
+            biometryCallback.invoke(null, error) {}
             destroy()
         } else {
-            biometryCallback.invoke(cipher) {
+            biometryCallback.invoke(cipher, error) {
                 keystoreHelper.signedCipher = it
                 callback()
             }
@@ -72,7 +77,7 @@ class BiometryEncryptHelper(context: Context, encryptStorage: EncryptStorage = P
         }
     }
 
-    private fun onKeyPermanentlyInvalidated() {
+    internal fun onKeyPermanentlyInvalidated() {
         keystoreHelper.remove()
         encryptStorage.removeBiometrySalt()
         encryptStorage.removeAccessKey(KeyType.BIOMETRY)

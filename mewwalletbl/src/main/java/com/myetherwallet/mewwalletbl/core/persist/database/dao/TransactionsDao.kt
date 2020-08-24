@@ -78,6 +78,9 @@ abstract class TransactionsDao : BaseDao<EntityTransaction> {
     @Query("UPDATE $TABLE_NAME SET status=:status, timestamp=:timestamp WHERE txHash=:txHash")
     abstract fun updateStatus(txHash: String, status: TransactionStatus, timestamp: Date)
 
+    @Query("DELETE FROM $TABLE_NAME WHERE txHash=:txHash")
+    abstract fun deleteTransaction(txHash: String)
+
     @Query("SELECT * FROM $TABLE_NAME")
     abstract fun getAll(): List<EntityTransaction>
 

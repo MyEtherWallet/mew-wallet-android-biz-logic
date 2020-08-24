@@ -13,7 +13,8 @@ data class EntityDexPrice(
     val base: Long,
     val quote: Long,
     val scale: Int,
-    val timestamp: Date
+    val timestamp: Date,
+    val marketImpact: Double
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

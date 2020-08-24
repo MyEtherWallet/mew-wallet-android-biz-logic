@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.myetherwallet.mewwalletbl.data.EncryptedMessage
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import org.json.JSONObject
 import java.lang.reflect.Type
 import java.math.BigInteger
@@ -20,6 +21,7 @@ object JsonParser {
         .registerTypeAdapter(ByteArray::class.java, ByteArraySerializer())
         .registerTypeAdapter(EncryptedMessage::class.java, EncryptedMessageSerializer())
         .registerTypeAdapter(Address::class.java, AddressSerializer())
+        .registerTypeAdapter(Transaction::class.java, TransactionDeserializer())
         .create()
 
     fun <T> fromJson(json: ByteArray, c: Class<T>): T = fromJson(String(json), c)
