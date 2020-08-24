@@ -16,6 +16,7 @@ import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
+import okhttp3.Response
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -38,6 +39,8 @@ private const val INCOME_DISCONNECT = "disconnect"
 private const val OUTCOME_ANSWER_SIGNAL = "answersignal"
 private const val OUTCOME_RTC_CONNECTED = "rtcconnected"
 
+private const val WEB_SOCKET_QR_EXPIRED_CODE = 404
+
 class MewConnectService : Service() {
 
     var isConnected = false
@@ -57,6 +60,7 @@ class MewConnectService : Service() {
     private var isDisconnectSignalReceived = false
 
     var errorListener: ((LogsCollector) -> Unit)? = null
+    var qrExpiredListener: (() -> Unit)? = null
     var connectedListener: (() -> Unit)? = null
     var connectingListener: (() -> Unit)? = null
     var transactionConfirmListener: ((address: String, transaction: Transaction) -> Unit)? = null
@@ -276,6 +280,29 @@ class MewConnectService : Service() {
             webRtc?.send(messageCrypt.encrypt(message))
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun sendReject() {
+        try {
+            logsCollector.add(TAG, "sendReject")
+            MewLog.d(TAG, "sendReject $connectionId")
+            val message = WebRtcMessage(WebRtcMessage.Type.REJECT, RejectSign(connectionId))
+            webRtc?.send(messageCrypt.encrypt(message))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun onError(throwable: Throwable?, response: Response?) {
+        MewLog.e(TAG, "onError: " + response?.code, throwable)
+        if (response?.code == WEB_SOCKET_QR_EXPIRED_CODE) {
+            logsCollector.add(TAG, "QR expired")
+            disconnect()
+            qrExpiredListener?.invoke()
+            stopService()
+        } else {
+            onError(throwable?.message)
         }
     }
 

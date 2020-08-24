@@ -24,9 +24,13 @@ import javax.crypto.spec.GCMParameterSpec
 private const val PROVIDER_ANDROID_KEYSTORE = "AndroidKeyStore"
 private const val TRANSFORMATION = "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 
-class KeystoreHelper(private val context: Context, private val keyType: KeyType, private val encryptStorage: EncryptStorage) {
+open class KeystoreHelper(
+    private val context: Context,
+    private val keyType: KeyType,
+    private val encryptStorage: EncryptStorage,
+    private val alias: String = "MewWallet" + keyType.name.toLowerCase(Locale.ENGLISH).capitalize() + "Key"
+) {
 
-    private val alias = "MewWallet" + keyType.name.toLowerCase().capitalize() + "Key"
     private var keyStore: KeyStore = KeyStore.getInstance(PROVIDER_ANDROID_KEYSTORE)
     var signedCipher: Cipher? = null
 
@@ -69,7 +73,7 @@ class KeystoreHelper(private val context: Context, private val keyType: KeyType,
         val key = keyStore.getKey(alias, null)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, key)
-        encryptStorage.setKeystoreIv(keyType, cipher.iv)
+        saveIv(cipher.iv)
         return cipher
     }
 
@@ -86,46 +90,61 @@ class KeystoreHelper(private val context: Context, private val keyType: KeyType,
     fun getDecryptCipher(): Cipher {
         val key = keyStore.getKey(alias, null)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val iv = encryptStorage.getKeystoreIv(keyType)
+        val iv = getIv()
         val ivParameterSpec = GCMParameterSpec(128, iv)
         cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec)
         return cipher
     }
 
-    fun decrypt(input: ByteArray): ByteArray {
-        var result = ByteArray(0)
-        val cipher = signedCipher ?: getDecryptCipher()
-        var byteArrayInputStream: ByteArrayInputStream? = null
+    fun decrypt(input: ByteArray, reTryIfError: Boolean = true): ByteArray {
         try {
-            byteArrayInputStream = ByteArrayInputStream(input)
-            var cipherInputStream: CipherInputStream? = null
+            val result: ByteArray
+            val cipher = signedCipher ?: getDecryptCipher()
+            var byteArrayInputStream: ByteArrayInputStream? = null
             try {
-                cipherInputStream = CipherInputStream(byteArrayInputStream, cipher)
-                var byteArrayOutputStream: ByteArrayOutputStream? = null
+                byteArrayInputStream = ByteArrayInputStream(input)
+                var cipherInputStream: CipherInputStream? = null
                 try {
-                    byteArrayOutputStream = ByteArrayOutputStream()
-                    val buffer = ByteArray(1024)
-                    var numberOfBytesRead: Int
-                    while (cipherInputStream.read(buffer).also { numberOfBytesRead = it } >= 0) {
-                        byteArrayOutputStream.write(buffer, 0, numberOfBytesRead)
+                    cipherInputStream = CipherInputStream(byteArrayInputStream, cipher)
+                    var byteArrayOutputStream: ByteArrayOutputStream? = null
+                    try {
+                        byteArrayOutputStream = ByteArrayOutputStream()
+                        val buffer = ByteArray(1024)
+                        var numberOfBytesRead: Int
+                        while (cipherInputStream.read(buffer).also { numberOfBytesRead = it } >= 0) {
+                            byteArrayOutputStream.write(buffer, 0, numberOfBytesRead)
+                        }
+                        result = byteArrayOutputStream.toByteArray()
+                    } finally {
+                        byteArrayOutputStream?.closeQuietly()
                     }
-                    result = byteArrayOutputStream.toByteArray()
                 } finally {
-                    byteArrayOutputStream?.closeQuietly()
+                    cipherInputStream?.closeQuietly()
                 }
             } finally {
-                cipherInputStream?.closeQuietly()
+                byteArrayInputStream?.closeQuietly()
             }
-        } finally {
-            byteArrayInputStream?.closeQuietly()
+            signedCipher = null
+            return result
+        } catch (e: Exception) {
+            if (reTryIfError) {
+                // Possibly related with a bug: https://stackoverflow.com/a/36846085/1393280
+                // Trying to decrypt one more time
+                //remove()
+                return decrypt(input, false)
+            } else {
+                throw e
+            }
         }
-        signedCipher = null
-        return result
     }
 
     fun remove() {
         keyStore.deleteEntry(alias)
     }
+
+    open fun saveIv(iv: ByteArray) = encryptStorage.setKeystoreIv(keyType, iv)
+
+    open fun getIv() = encryptStorage.getKeystoreIv(keyType)
 
     // Known issue: https://issuetracker.google.com/issues/37095309 (crash with Persian language)
     // Force english locale

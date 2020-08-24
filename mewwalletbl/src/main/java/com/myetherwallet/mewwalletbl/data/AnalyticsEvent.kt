@@ -14,6 +14,10 @@ data class AnalyticsEvent internal constructor(
         MAIN_RECEIVE_BIG_CLICKED("Android-Main-Receive-big-clicked"),
         MAIN_BUY_BIG_CLICKED("Android-Main-Buy-big-clicked"),
         MAIN_GUIDE_CLICKED("Android-Main-WhatIsEthereum-clicked"),
+        MAIN_KEY_CORRUPTED("Android-KeyCorrupted-Authorization"),
+        GENERATING_KEY_CORRUPTED_POPUP_SHOWN("Android-KeyCorrupted-CreateWallet-Popup-shown"),
+        MAIN_KEY_RESTORED("Android-KeyRestored"),
+        MAIN_KEY_CORRUPTED_POPUP_SHOWN("Android-KeyCorrupted-Authorization-Popup-shown"),
         ACCOUNT_DETAILS_RECEIVE_CLICKED("Android-AccountDetails-Receive-clicked"),
         ACCOUNT_DETAILS_BUY_CLICKED("Android-AccountDetails-Buy-clicked"),
         ADD_ACCOUNT_ADD_CLICKED("Android-AddAccount-Add-clicked"),
@@ -53,7 +57,17 @@ data class AnalyticsEvent internal constructor(
         SWAP_INITIATED_SHOWN("Android-Swap-SwapInitiatedPopup-shown"),
         SWAP_SUCCESS_EXECUTED("Android-Swap-successfully-executed"),
         PUSH_NOTIFICATION_RECEIVED("Android-broadcast-push-notification-received"),
+        COMIC_MAIN_CLICKED("Android-Main-Comic-banner-clicked"),
+        COMIC_EDUCATION_CLICKED("Android-Education-center-Comic-banner-clicked"),
+        COMIC_SHARE("Android-Comic-Share-clicked"),
 
         ERROR_SWAP_SAVE_PURCHASE_HISTORY("Android-Error-Swap-SavePurchaseHistory-failed")
+    }
+
+    companion object {
+        fun createDappEvent(dapp: String? = null) = when (dapp) {
+            null -> AnalyticsEvent(Id.CAMERA_VALID_QR_CONNECTION_SUCCESS)
+            else -> AnalyticsEvent("Android-MEWconnect-$dapp-connected", Date())
+        }
     }
 }

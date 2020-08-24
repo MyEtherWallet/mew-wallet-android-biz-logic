@@ -19,7 +19,7 @@ internal class MewWalletBlProvider : ContentProvider() {
         Database.init(context!!)
         Preferences.init(context!!)
         NetworkHandler.init(context!!)
-        UltraDebuggerWrapper.setEnabled(BuildConfig.DEBUG)
+        UltraDebuggerWrapper.setEnabled(false/*BuildConfig.DEBUG*/)
         UltraDebuggerWrapper.start(context!!, 8090)
         return true
     }

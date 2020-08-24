@@ -17,6 +17,8 @@ data class WebRtcMessage<T>(
         @SerializedName("signTx")
         SIGN_TX,
         @SerializedName("signMessage")
-        SIGN_MESSAGE
+        SIGN_MESSAGE,
+        @SerializedName("reject")
+        REJECT
     }
 }

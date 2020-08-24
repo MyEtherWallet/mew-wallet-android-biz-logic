@@ -15,5 +15,7 @@ data class DexMetadata(
     @SerializedName("source")
     val source: DexMetadataSource?,
     @SerializedName("query")
-    val query: DexMetadataQuery
+    val query: DexMetadataQuery,
+    @SerializedName("marketImpact")
+    val marketImpact: String?
 ) : Parcelable

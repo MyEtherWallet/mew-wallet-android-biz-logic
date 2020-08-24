@@ -72,6 +72,6 @@ abstract class MewDatabase : RoomDatabase() {
 
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 5
+        const val DB_VERSION = 6
     }
 }

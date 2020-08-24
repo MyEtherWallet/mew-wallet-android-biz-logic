@@ -5,6 +5,7 @@ import com.myetherwallet.mewwalletbl.key.storage.EncryptStorage
 import com.myetherwallet.mewwalletbl.key.storage.PersistentEncryptStorage
 import com.myetherwallet.mewwalletbl.key.util.AES
 import com.myetherwallet.mewwalletbl.key.util.HKDF
+import com.myetherwallet.mewwalletbl.key.util.KeyIntegrityUtils
 import com.myetherwallet.mewwalletbl.key.util.Utils
 import com.myetherwallet.mewwalletkit.core.extension.md5
 import com.myetherwallet.mewwalletkit.core.extension.sha512
@@ -13,10 +14,12 @@ import com.myetherwallet.mewwalletkit.core.extension.sha512
  * Created by BArtWell on 05.08.2019.
  */
 
-class PinEncryptHelper(context: Context, pinString: String, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.PIN, encryptStorage) {
+class PinEncryptHelper(context: Context, private val pinString: String, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.PIN, encryptStorage) {
 
     private val pin = pinString.toByteArray()
     private var wasAccessKeyGenerated = false
+
+    constructor(encryptHelper: PinEncryptHelper, encryptStorage: EncryptStorage = encryptHelper.encryptStorage) : this(encryptHelper.context, encryptHelper.pinString, encryptStorage)
 
     init {
         if (!encryptStorage.isAccessKeyExists(KeyType.PIN)) {
@@ -46,6 +49,8 @@ class PinEncryptHelper(context: Context, pinString: String, encryptStorage: Encr
         encryptStorage.setAccessKey(encryptedAccessKey, KeyType.PIN)
         encryptStorage.setMasterKey(encryptedMasterKey, KeyType.PIN)
         encryptStorage.setSignature(signPin(), KeyType.PIN)
+
+        KeyIntegrityUtils.saveBackupKeys(context, encryptStorage, accessKey, true)
     }
 
     private fun generateMasterKey(): ByteArray {

@@ -15,7 +15,7 @@ private const val TAG = "WebSocketWrapper"
 class WebSocketWrapper {
 
     var onConnectedListener: (() -> Unit)? = null
-    var onErrorListener: ((String?) -> Unit)? = null
+    var onErrorListener: ((Throwable?, Response?) -> Unit)? = null
     var onDisconnectedListener: (() -> Unit)? = null
     var onMessageListener: ((message: String) -> Unit)? = null
 
@@ -59,7 +59,7 @@ class WebSocketWrapper {
 
             override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
                 MewLog.d(TAG, "Error", throwable)
-                onErrorListener?.invoke(throwable.message)
+                onErrorListener?.invoke(throwable, response)
             }
         })
 

@@ -14,7 +14,11 @@ data class DexPrice(
     @SerializedName("pair")
     val pair: DexPair,
     @SerializedName("pair_description")
-    val descriptionPair: DescriptionPair? = null
+    val descriptionPair: DescriptionPair? = null,
+    @SerializedName("marketImpact")
+    val marketImpact: String? = null,
+    @SerializedName("scale")
+    val scale: Int? = null
 ) : Parcelable {
     @Parcelize
     class DexPair(
@@ -23,6 +27,7 @@ data class DexPrice(
         @SerializedName("quote")
         val quote: String
     ) : Parcelable
+
     @Parcelize
     class DescriptionPair(
         @SerializedName("base")
@@ -33,7 +38,9 @@ data class DexPrice(
 
     var availability = Status.AVAILABLE
 
-    fun getPair(): Pair<String, String> { return Pair(this.pair.base, this.pair.quote)}
+    fun getPair(): Pair<String, String> {
+        return Pair(this.pair.base, this.pair.quote)
+    }
 
     enum class Status {
         AVAILABLE, PENDING, UNAVAILABLE
