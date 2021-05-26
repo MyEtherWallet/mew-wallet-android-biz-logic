@@ -5,7 +5,6 @@ import android.util.Base64
 import androidx.preference.PreferenceManager
 import com.myetherwallet.mewwalletbl.MewEnvironment
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
-import com.myetherwallet.mewwalletbl.data.PurchaseProvider
 import com.myetherwallet.mewwalletbl.key.KeyType
 import com.myetherwallet.mewwalletbl.key.util.Utils
 import org.json.JSONObject
@@ -34,16 +33,27 @@ private const val FCM_TOKEN = "fcm_token"
 private const val STORAGE_TYPE = "storage_type"
 private const val SAMSUNG_BLOCKCHAIN_HASH = "samsung_blockchain_hash"
 private const val DEBUG_ENVIRONMENT_TYPE = "debug_environment_type"
-private const val DEBUG_PURCHASE_PROVIDER = "debug_purchase_provider"
 private const val FORCE_BACKUP_DIALOG_DATE = "force_backup_dialog_date"
-private const val PURCHASE_PROVIDER = "purchase_provider"
 private const val WAS_APP_CRASHED = "was_app_crashed"
 private const val APP_CRASH_EXCEPTION = "app_crash_exception"
 private const val RATE_STARTS_COUNT = "rate_starts_count"
 private const val RATE_STARTS_THRESHOLD = "rate_starts_threshold"
 private const val IS_TOKENS_ICONS_CACHED = "is_tokens_icons_cached"
 private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
-private const val DEFAULT_RATE_STARTS_THRESHOLD = 10
+private const val DEFAULT_RATE_STARTS_THRESHOLD = 20
+private const val IS_DEBUG_RATER_SHOWN = "is_debug_rater_shown"
+private const val NO_CRASH_SESSION_COUNT = "no_crash_session_count"
+private const val DEBUG_WALLET_BALANCE = "debug_wallet_balance"
+private const val DEBUG_DISABLE_STAKED_TRANSACTION = "debug_disable_staked_transaction"
+private const val DAPP_RADAR_UPDATE_TIME = "dapp_radar_update_time"
+private const val FIRST_ACCOUNT_NACL_PUBLIC_KEY = "first_account_nacl_public_key"
+private const val INTERCOM_HASH = "intercom_hash"
+private const val WAS_MARKET_BADGE_SHOWN = "was_market_badge_shown"
+private const val WAS_EXCHANGE_DISCLAIMER_SHOWN = "was_exchange_disclaimer_shown"
+private const val WAS_DAPP_DISCLAIMER_SHOWN = "was_dapp_disclaimer_shown"
+private const val WAS_DAPP_CATALOG_DISCLAIMER_SHOWN = "was_dapp_catalog_disclaimer_shown"
+private const val GUIDE_BANNER_VERSION = "guide_banner_version"
+private const val WAS_STAKING_EXITED_SHOWN = "was_staking_exited_shown"
 
 class MainPreferences internal constructor(context: Context) {
 
@@ -97,20 +107,6 @@ class MainPreferences internal constructor(context: Context) {
 
     fun getDebugEnvironmentType() = MewEnvironment.Type.valueOf(preferences.getString(DEBUG_ENVIRONMENT_TYPE, MewEnvironment.Type.PRODUCTION.name)!!)
 
-    fun setDebugPurchaseProvider(provider: PurchaseProvider?) = preferences.edit().putString(DEBUG_PURCHASE_PROVIDER, provider?.name).apply()
-
-    fun getDebugPurchaseProvider() = preferences.getString(DEBUG_PURCHASE_PROVIDER, null)?.let { PurchaseProvider.valueOf(it) }
-
-    fun setPurchaseProvider(provider: PurchaseProvider) = preferences.edit().putString(PURCHASE_PROVIDER, provider.name).apply()
-
-    fun getPurchaseProvider(): PurchaseProvider {
-        var provider = preferences.getString(DEBUG_PURCHASE_PROVIDER, null)
-        if (provider == null) {
-            provider = preferences.getString(PURCHASE_PROVIDER, PurchaseProvider.SIMPLEX.name)!!
-        }
-        return PurchaseProvider.valueOf(provider)
-    }
-
     fun setAppCrashed(wasCrashed: Boolean) = preferences.edit().putBoolean(WAS_APP_CRASHED, wasCrashed).apply()
 
     fun wasAppCrashed() = preferences.getBoolean(WAS_APP_CRASHED, false)
@@ -142,6 +138,10 @@ class MainPreferences internal constructor(context: Context) {
     fun setBackupDialogShown() {
         preferences.edit().putLong(FORCE_BACKUP_DIALOG_DATE, System.currentTimeMillis()).apply()
     }
+
+    fun getDappRadarUpdateTime() = preferences.getLong(DAPP_RADAR_UPDATE_TIME, 0)
+
+    fun setDappRadarUpdateTime(date: Date) = preferences.edit().putLong(DAPP_RADAR_UPDATE_TIME, date.time).apply()
 
     internal fun setAccessKeyBackup(index: Int, accessKey: ByteArray) = saveBytes(ACCESS_KEY_BACKUP + index, accessKey)
 
@@ -183,6 +183,10 @@ class MainPreferences internal constructor(context: Context) {
 
     internal fun removeBiometrySalt() = remove(BIOMETRY_SALT)
 
+    fun getFirstAccountNaclPublicKey(): ByteArray? = readBytes(FIRST_ACCOUNT_NACL_PUBLIC_KEY)
+
+    fun setFirstAccountNaclPublicKey(key: ByteArray) = saveBytes(FIRST_ACCOUNT_NACL_PUBLIC_KEY, key)
+
     private fun saveBytes(key: String, data: ByteArray) {
         preferences
             .edit()
@@ -206,9 +210,7 @@ class MainPreferences internal constructor(context: Context) {
     }
 
     fun savePrivateKeyTestDate(type: String, isAlive: Boolean) {
-        val jsonObject = preferences.getString(PRIVATE_KEY_TEST_DATE, null)?.let {
-            JSONObject(it)
-        } ?: JSONObject()
+        val jsonObject = getPrivateKeyTestDates()
         if (isAlive) {
             jsonObject.put(type, Date().time)
         } else {
@@ -217,5 +219,57 @@ class MainPreferences internal constructor(context: Context) {
         preferences.edit().putString(PRIVATE_KEY_TEST_DATE, jsonObject.toString()).apply()
     }
 
-    fun getPrivateKeyTestDates() = preferences.getString(PRIVATE_KEY_TEST_DATE, null)
+    fun getPrivateKeyTestDates() = preferences.getString(PRIVATE_KEY_TEST_DATE, null)?.let { JSONObject(it) } ?: JSONObject()
+
+    fun setDebugRaterShown(isShown: Boolean) = preferences.edit().putBoolean(IS_DEBUG_RATER_SHOWN, isShown).apply()
+
+    fun isDebugRaterShown() = preferences.getBoolean(IS_DEBUG_RATER_SHOWN, false)
+
+    fun setNoCrashSessionCount(count: Int) = preferences.edit().putInt(NO_CRASH_SESSION_COUNT, count).apply()
+
+    fun getNoCrashSessionCount() = preferences.getInt(NO_CRASH_SESSION_COUNT, 0)
+
+    fun getDebugWalletBalance() = preferences.getFloat(DEBUG_WALLET_BALANCE, 0f)
+
+    fun setDebugWalletBalance(debugBalance: Float) = preferences.edit().putFloat(DEBUG_WALLET_BALANCE, debugBalance).apply()
+
+    fun isStakedTransactionDisabled() = preferences.getBoolean(DEBUG_DISABLE_STAKED_TRANSACTION, false)
+
+    fun setStakedTransactionDisabled(isDisabled: Boolean) = preferences.edit().putBoolean(DEBUG_DISABLE_STAKED_TRANSACTION, isDisabled).apply()
+
+    fun setIntercomHash(hash: String) = preferences.edit().putString(INTERCOM_HASH, hash).apply()
+
+    fun getIntercomHash() = preferences.getString(INTERCOM_HASH, null)
+
+    fun wasMarketBadgeShown() = preferences.getBoolean(WAS_MARKET_BADGE_SHOWN, false)
+
+    fun setMarketBadgeShown() = preferences.edit().putBoolean(WAS_MARKET_BADGE_SHOWN, true).apply()
+
+    fun wasExchangeDisclaimerShown() = preferences.getBoolean(WAS_EXCHANGE_DISCLAIMER_SHOWN, false)
+
+    fun setExchangeDisclaimerShown() = preferences.edit().putBoolean(WAS_EXCHANGE_DISCLAIMER_SHOWN, true).apply()
+
+    fun setDappDisclaimerShown(host: String) {
+        val hosts = preferences.getString(WAS_DAPP_DISCLAIMER_SHOWN, null)?.split(",")?.toMutableList() ?: mutableListOf()
+        if (!hosts.contains(host)) {
+            hosts.add(host)
+            preferences.edit().putString(WAS_DAPP_DISCLAIMER_SHOWN, hosts.joinToString(",")).apply()
+        }
+    }
+
+    fun wasDappDisclaimerShown(host: String) = preferences.getString(WAS_DAPP_DISCLAIMER_SHOWN, null)?.split(",")?.contains(host) ?: false
+
+    fun wasDappCatalogDisclaimerShown() = preferences.getBoolean(WAS_DAPP_CATALOG_DISCLAIMER_SHOWN, false)
+
+    fun setDappCatalogDisclaimerShown() = preferences.edit().putBoolean(WAS_DAPP_CATALOG_DISCLAIMER_SHOWN, true).apply()
+
+    fun shouldShowGuideBanner(versionCode: Int): Boolean {
+        val current = preferences.getInt(GUIDE_BANNER_VERSION, 0)
+        preferences.edit().putInt(GUIDE_BANNER_VERSION, versionCode).apply()
+        return current < 299
+    }
+
+    fun wasStakingExitedShown() = preferences.getBoolean(WAS_STAKING_EXITED_SHOWN, false)
+
+    fun setStakingExitedShown() = preferences.edit().putBoolean(WAS_STAKING_EXITED_SHOWN, true).apply()
 }

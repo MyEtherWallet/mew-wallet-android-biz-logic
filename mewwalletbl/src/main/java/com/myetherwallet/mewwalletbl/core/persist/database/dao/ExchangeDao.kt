@@ -31,10 +31,10 @@ abstract class ExchangeDao : BaseDao<EntitySwap> {
                 "ON ${PricesDao.TABLE_NAME}.tokenId=$TABLE_NAME.toDescriptionId " +
                 "AND ${AccountsDao.TABLE_NAME}.id=$TABLE_NAME.accountId " +
                 "LEFT JOIN ${TransactionsDao.TABLE_NAME} " +
-                "ON $TABLE_NAME.txHash=${TransactionsDao.TABLE_NAME}.txHash AND $TABLE_NAME.fromDescriptionId=${TransactionsDao.TABLE_NAME}.tokenDescriptionId " +
+                "ON $TABLE_NAME.txHash=${TransactionsDao.TABLE_NAME}.tx_hash AND $TABLE_NAME.fromDescriptionId=${TransactionsDao.TABLE_NAME}.token_description_id " +
                 "ORDER BY updateTime DESC"
     )
-    abstract fun getAll(): List<Swap>
+    abstract suspend fun getAll(): List<Swap>
 
     @Query(
         "SELECT " +
@@ -57,20 +57,20 @@ abstract class ExchangeDao : BaseDao<EntitySwap> {
                 "ON ${PricesDao.TABLE_NAME}.tokenId=$TABLE_NAME.toDescriptionId " +
                 "AND ${AccountsDao.TABLE_NAME}.id=$TABLE_NAME.accountId " +
                 "LEFT JOIN ${TransactionsDao.TABLE_NAME} " +
-                "ON $TABLE_NAME.txHash=${TransactionsDao.TABLE_NAME}.txHash " +
+                "ON $TABLE_NAME.txHash=${TransactionsDao.TABLE_NAME}.tx_hash " +
                 "WHERE $TABLE_NAME.txHash=:hash " +
                 "LIMIT 1"
     )
-    abstract fun getSwap(hash: String): Swap?
+    abstract suspend fun getSwap(hash: String): Swap?
 
     @Query("UPDATE $TABLE_NAME SET txHash=:hash WHERE id=:id")
-    abstract fun updateHash(id: Long, hash: String)
+    abstract suspend fun updateHash(id: Long, hash: String)
 
     @Query("UPDATE $TABLE_NAME SET status=:status, updateTime=:timestamp WHERE id=:swapId")
-    abstract fun updateStatusById(swapId: Long, status: TransactionStatus, timestamp: Date)
+    abstract suspend fun updateStatusById(swapId: Long, status: TransactionStatus, timestamp: Date)
 
     @Query("UPDATE $TABLE_NAME SET status=:status, updateTime=:timestamp WHERE txHash=:txHash")
-    abstract fun updateStatusByHash(txHash: String, status: TransactionStatus, timestamp: Date)
+    abstract suspend fun updateStatusByHash(txHash: String, status: TransactionStatus, timestamp: Date)
 
     companion object {
         const val TABLE_NAME: String = "exchange"

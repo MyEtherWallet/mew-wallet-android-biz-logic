@@ -13,7 +13,8 @@ import com.myetherwallet.mewwalletbl.core.persist.database.dao.TokensDao
 class EntityToken(
     val accountId: Long,
     val tokenDescriptionId: Long,
-    val isPrimary: Boolean
+    val isPrimary: Boolean,
+    val isHidden: Boolean
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

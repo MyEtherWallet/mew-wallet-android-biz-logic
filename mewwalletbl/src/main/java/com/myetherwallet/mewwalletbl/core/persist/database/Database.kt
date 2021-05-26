@@ -38,9 +38,6 @@ object Database {
             database.execSQL("CREATE TABLE " + DexPricesDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, dex TEXT NOT NULL, price DOUBLE NOT NULL, base INTEGER NOT NULL, quote INTEGER NOT NULL)")
             database.execSQL("CREATE UNIQUE INDEX index_dex_prices_dex_base_quote ON " + DexPricesDao.TABLE_NAME + " (dex, base, quote)")
 
-            database.execSQL("CREATE TABLE " + MarketDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contract TEXT NOT NULL, decimals INTEGER NOT NULL, name TEXT NOT NULL, symbol TEXT NOT NULL, price TEXT NOT NULL, logo TEXT NOT NULL, website TEXT NOT NULL, timestamp INTEGER NOT NULL)")
-            database.execSQL("CREATE UNIQUE INDEX index_market_contract ON " + MarketDao.TABLE_NAME + " (contract)")
-
             database.execSQL("CREATE TABLE " + ExchangeDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, txHash TEXT, createTime INTEGER NOT NULL, updateTime INTEGER NOT NULL, fromDescriptionId INTEGER NOT NULL, toDescriptionId INTEGER NOT NULL, fromAmount DOUBLE NOT NULL, toAmount DOUBLE NOT NULL, accountId INTEGER NOT NULL, toAddress TEXT NOT NULL, dex TEXT NOT NULL, status TEXT NOT NULL)")
 
             database.execSQL("CREATE TABLE " + PurchaseDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, transactionId TEXT NOT NULL, fiatAmount DOUBLE NOT NULL, fiatCurrency TEXT NOT NULL, cryptoAmount DOUBLE NOT NULL, cryptoDescriptionId INTEGER NOT NULL, timestamp INTEGER NOT NULL, status TEXT NOT NULL, provider TEXT NOT NULL)")
@@ -76,6 +73,121 @@ object Database {
         }
     }
 
+    private val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE IF EXISTS market")
+            database.execSQL("CREATE TABLE " + PriceHistoryDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contract TEXT NOT NULL, interval TEXT NOT NULL, price DOUBLE NOT NULL, volume DOUBLE NOT NULL, timestamp INTEGER NOT NULL)")
+            database.execSQL("ALTER TABLE " + PricesDao.TABLE_NAME + " ADD COLUMN sparkline TEXT NOT NULL DEFAULT ''")
+
+            database.execSQL("DROP TABLE IF EXISTS " + DexPricesDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + DexPricesDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, exchange TEXT NOT NULL, dex TEXT NOT NULL, price DOUBLE NOT NULL, base INTEGER NOT NULL, quote INTEGER NOT NULL, scale INTEGER NOT NULL, timestamp INTEGER NOT NULL, marketImpact DOUBLE NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_dex_prices_exchange_dex_base_quote_scale ON " + DexPricesDao.TABLE_NAME + " (exchange, dex, base, quote, scale)")
+        }
+    }
+
+    private val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + TokensDao.TABLE_NAME + " ADD COLUMN isHidden INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
+    private val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + AccountsDao.TABLE_NAME + " ADD COLUMN eth2_address TEXT NOT NULL DEFAULT ''")
+            database.execSQL("CREATE TABLE " + StakedHistoryDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, address TEXT NOT NULL, request_uuid TEXT NOT NULL, price DOUBLE NOT NULL, status TEXT NOT NULL, amount DOUBLE NOT NULL, balance DOUBLE NOT NULL, earned DOUBLE, eth2_address TEXT, tx_hash TEXT NOT NULL, apr DOUBLE, current_apr DOUBLE, average_apr DOUBLE, timestamp INTEGER NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_" + StakedHistoryDao.TABLE_NAME + "_tx_hash ON " + StakedHistoryDao.TABLE_NAME + " (tx_hash)")
+        }
+    }
+
+    private val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN estimated_timestamp INTEGER")
+            database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN queue_position INTEGER")
+            database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN queue_total INTEGER")
+        }
+    }
+
+    private val MIGRATION_10_11 = object : Migration(10, 11) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + DexTokensDao.TABLE_NAME + " ADD COLUMN volume_24h DOUBLE NOT NULL DEFAULT 0")
+
+            database.execSQL("CREATE TABLE " + DappDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL DEFAULT '', name TEXT NOT NULL DEFAULT '', desc TEXT NOT NULL DEFAULT '', img TEXT NOT NULL DEFAULT '', category TEXT NOT NULL DEFAULT '')")
+            database.execSQL("CREATE UNIQUE INDEX index_" + DappDao.TABLE_NAME + "_url ON " + DappDao.TABLE_NAME + " (url)")
+
+            database.execSQL("CREATE TABLE " + BrowserFavoriteDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL DEFAULT '', title TEXT, timestamp INTEGER NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_" + BrowserFavoriteDao.TABLE_NAME + "_url ON " + BrowserFavoriteDao.TABLE_NAME + " (url)")
+
+            database.execSQL("CREATE TABLE " + BrowserRecentDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, host TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', title TEXT, timestamp INTEGER NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_" + BrowserRecentDao.TABLE_NAME + "_host ON " + BrowserRecentDao.TABLE_NAME + " (host)")
+        }
+    }
+
+    private val MIGRATION_11_12 = object : Migration(11, 12) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("CREATE TABLE " + DappRadarDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, radar_id TEXT NOT NULL DEFAULT '', name TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', icon TEXT, category TEXT NOT NULL DEFAULT '')")
+            database.execSQL("CREATE UNIQUE INDEX index_" + DappRadarDao.TABLE_NAME + "_radar_id ON " + DappRadarDao.TABLE_NAME + " (radar_id)")
+
+            database.execSQL("DROP TABLE IF EXISTS " + TransactionsDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + TransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, account_id INTEGER NOT NULL, from_recipient_id INTEGER NOT NULL, to_recipient_id INTEGER NOT NULL, token_description_id INTEGER NOT NULL, amount DOUBLE NOT NULL, status TEXT NOT NULL, timestamp INTEGER NOT NULL, tx_hash TEXT NOT NULL, nonce TEXT NOT NULL DEFAULT '')")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + TransactionsDao.TABLE_NAME + "_account_id_from_recipient_id_nonce ON " + TransactionsDao.TABLE_NAME + " (account_id, from_recipient_id, nonce)")
+        }
+    }
+
+    private val MIGRATION_12_13 = object : Migration(12, 13) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN eth_two_exited DOUBLE NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN eth_two_addresses_exited TEXT")
+        }
+    }
+
+    private val MIGRATION_13_14 = object : Migration(13, 14) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("CREATE TABLE " + CurrencyDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, fiat TEXT NOT NULL DEFAULT '', exchange_rate DOUBLE NOT NULL DEFAULT 0)")
+            database.execSQL("CREATE UNIQUE INDEX index_" + CurrencyDao.TABLE_NAME + "_fiat ON " + CurrencyDao.TABLE_NAME + " (fiat)")
+        }
+    }
+
+    private val MIGRATION_14_15 = object : Migration(14, 15) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE IF EXISTS " + BinanceHistoryDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + BinanceHistoryDao.TABLE_NAME + " (" +
+                    "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                    "address TEXT NOT NULL DEFAULT '', " +
+                    "id_key TEXT NOT NULL DEFAULT '', " +
+                    "status TEXT NOT NULL DEFAULT '', " +
+                    "symbol TEXT NOT NULL DEFAULT '', " +
+                    "icon TEXT, " +
+                    "amount DOUBLE NOT NULL, " +
+                    "from_network TEXT NOT NULL DEFAULT '', " +
+                    "to_network TEXT NOT NULL DEFAULT '', " +
+                    "from_address TEXT NOT NULL DEFAULT '', " +
+                    "to_address TEXT NOT NULL DEFAULT '', " +
+                    "deposit_address TEXT NOT NULL DEFAULT '', " +
+                    "eth_contract_address TEXT NOT NULL DEFAULT '', " +
+                    "bsc_contract_address TEXT NOT NULL DEFAULT '', " +
+                    "eth_contract_decimal INTEGER NOT NULL, " +
+                    "bsc_contract_decimal INTEGER NOT NULL, " +
+                    "swap_fee DOUBLE NOT NULL, " +
+                    "swap_fee_rate DOUBLE NOT NULL, " +
+                    "network_fee DOUBLE NOT NULL, " +
+                    "deposit_timeout INTEGER NOT NULL, " +
+                    "deposit_required_confirms TEXT NOT NULL DEFAULT '', " +
+                    "create_time INTEGER NOT NULL, " +
+                    "deposit_amount DOUBLE NOT NULL, " +
+                    "swap_amount DOUBLE NOT NULL, " +
+                    "deposit_received_confirms TEXT NOT NULL DEFAULT '', " +
+                    "deposit_hash TEXT NOT NULL DEFAULT '', " +
+                    "swap_hash TEXT NOT NULL DEFAULT '', " +
+                    "exchange_gas_amount TEXT NOT NULL DEFAULT '')")
+            database.execSQL("CREATE UNIQUE INDEX index_" + BinanceHistoryDao.TABLE_NAME + "_id_key ON " + BinanceHistoryDao.TABLE_NAME + " (id_key)")
+
+            database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
+            database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + LocalTransactionsDao.TABLE_NAME + "_hash ON " + LocalTransactionsDao.TABLE_NAME + " (hash)")
+
+        }
+    }
+
     private fun dropAndCreateTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + TransactionsDao.TABLE_NAME)
         database.execSQL("CREATE TABLE " + TransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, accountId INTEGER NOT NULL, fromRecipientId INTEGER NOT NULL, toRecipientId INTEGER NOT NULL, tokenDescriptionId INTEGER NOT NULL, amount DOUBLE NOT NULL, status TEXT NOT NULL, timestamp INTEGER NOT NULL, txHash TEXT NOT NULL)")
@@ -90,6 +202,15 @@ object Database {
             .addMigrations(MIGRATION_3_4)
             .addMigrations(MIGRATION_4_5)
             .addMigrations(MIGRATION_5_6)
+            .addMigrations(MIGRATION_6_7)
+            .addMigrations(MIGRATION_7_8)
+            .addMigrations(MIGRATION_8_9)
+            .addMigrations(MIGRATION_9_10)
+            .addMigrations(MIGRATION_10_11)
+            .addMigrations(MIGRATION_11_12)
+            .addMigrations(MIGRATION_12_13)
+            .addMigrations(MIGRATION_13_14)
+            .addMigrations(MIGRATION_14_15)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

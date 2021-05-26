@@ -10,18 +10,18 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 abstract class TokenDescriptionDao : BaseDao<EntityTokenDescription> {
 
     @Query("SELECT * FROM $TABLE_NAME")
-    abstract fun getAll(): List<EntityTokenDescription>
+    abstract suspend fun getAll(): List<EntityTokenDescription>
 
     @Query("SELECT * FROM $TABLE_NAME WHERE id=:id")
-    abstract fun get(id: Long): EntityTokenDescription?
+    abstract suspend fun get(id: Long): EntityTokenDescription?
 
     @Query("SELECT * FROM $TABLE_NAME WHERE address=:address")
-    abstract fun get(address: Address): EntityTokenDescription?
+    abstract suspend fun get(address: Address): EntityTokenDescription?
 
     @Query("SELECT * FROM $TABLE_NAME WHERE symbol=:symbol")
-    abstract fun get(symbol: String): EntityTokenDescription?
+    abstract suspend fun get(symbol: String): EntityTokenDescription?
 
-    fun getExistsIdOrInsert(entity: EntityTokenDescription): Long {
+    suspend fun getExistsIdOrInsert(entity: EntityTokenDescription): Long {
         val id = Database.instance.getTokenDescriptionDao().insertOrIgnore(entity)
         return if (id == -1L) {
             Database.instance.getTokenDescriptionDao().get(entity.address)!!.id

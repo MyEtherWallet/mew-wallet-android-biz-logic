@@ -18,4 +18,6 @@ object MewEnvironment {
         QA("eth", BuildConfig.MEW_QA_API_END_POINT, Network.ETHEREUM),
         ROPSTEN("rop", BuildConfig.MEW_DEVELOPMENT_API_END_POINT, Network.ROPSTEN)
     }
+
+    fun isCurrentProductionOrQa() = current == Type.QA || current == Type.PRODUCTION
 }

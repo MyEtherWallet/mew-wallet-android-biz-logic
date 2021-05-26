@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
@@ -43,10 +44,9 @@ private const val WEB_SOCKET_QR_EXPIRED_CODE = 404
 
 class MewConnectService : Service() {
 
-    var isConnected = false
     private val binder = ServiceBinder(this)
     private val logsCollector = LogsCollector()
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private var socket: WebSocketWrapper? = null
     private lateinit var messageCrypt: MessageCrypt
     private lateinit var privateKey: String
@@ -65,6 +65,9 @@ class MewConnectService : Service() {
     var connectingListener: (() -> Unit)? = null
     var transactionConfirmListener: ((address: String, transaction: Transaction) -> Unit)? = null
     var messageSignListener: ((address: String, message: MessageToSign) -> Unit)? = null
+    var getEncryptionPublicKeyListener: (() -> Unit)? = null
+    var decryptListener: ((String) -> Unit)? = null
+    var signTypedDataV3Listener: ((String) -> Unit)? = null
     var disconnectListener: (() -> Unit)? = null
 
     override fun onCreate() {
@@ -91,7 +94,7 @@ class MewConnectService : Service() {
     }
 
     fun connect(privateKey: String, connectionId: String, walletAddress: String) {
-        logsCollector.add(TAG, "Connect")
+        logsCollector.add(TAG, "Connect (id=$connectionId, address=$walletAddress)")
         MewLog.d(TAG, "PrivateKey $privateKey")
         if (isConnected) {
             logsCollector.add(TAG, "Already connected, ignore")
@@ -238,7 +241,7 @@ class MewConnectService : Service() {
                 messageCrypt.decrypt(encryptedMessage)!!,
                 object : TypeToken<WebRtcMessage<JsonElement>>() {}.type
             )
-            logsCollector.add(TAG, "Message type: " + webRtcMessage.type.name)
+            logsCollector.add(TAG, "Message type: " + webRtcMessage.type?.name)
             MewLog.d(TAG, webRtcMessage.data.toString())
             when (webRtcMessage.type) {
                 WebRtcMessage.Type.ADDRESS -> {
@@ -254,6 +257,15 @@ class MewConnectService : Service() {
                 WebRtcMessage.Type.SIGN_MESSAGE -> {
                     messageSignListener?.invoke(walletAddress.address, JsonParser.fromJson(webRtcMessage.data, MessageToSign::class.java))
                 }
+                WebRtcMessage.Type.GET_ENCRYPTION_PUBLIC_KEY -> {
+                    getEncryptionPublicKeyListener?.invoke()
+                }
+                WebRtcMessage.Type.DECRYPT -> {
+                    decryptListener?.invoke(webRtcMessage.data.asJsonArray[0].asString)
+                }
+                WebRtcMessage.Type.SIGN_TYPED_DATA_V3 -> {
+                    signTypedDataV3Listener?.invoke(webRtcMessage.data.asString as String)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -263,8 +275,8 @@ class MewConnectService : Service() {
     fun sendSignTx(data: ByteArray) {
         try {
             val signedMessage = data.toHexString().toLowerCase(Locale.US)
-            logsCollector.add(TAG, "sendMessage")
-            MewLog.d(TAG, "sendMessage $signedMessage")
+            logsCollector.add(TAG, "sendSignTx")
+            MewLog.d(TAG, "sendSignTx $signedMessage")
             val message = WebRtcMessage(WebRtcMessage.Type.SIGN_TX, signedMessage)
             webRtc?.send(messageCrypt.encrypt(message))
         } catch (e: Exception) {
@@ -283,11 +295,44 @@ class MewConnectService : Service() {
         }
     }
 
+    fun sendTypedMessageV3(signature: String) {
+        try {
+            logsCollector.add(TAG, "sendTypedMessageV3")
+            MewLog.d(TAG, "sendTypedMessageV3 $signature")
+            val message = WebRtcMessage(WebRtcMessage.Type.SIGN_TYPED_DATA_V3, signature)
+            webRtc?.send(messageCrypt.encrypt(message))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun sendReject() {
         try {
             logsCollector.add(TAG, "sendReject")
             MewLog.d(TAG, "sendReject $connectionId")
             val message = WebRtcMessage(WebRtcMessage.Type.REJECT, RejectSign(connectionId))
+            webRtc?.send(messageCrypt.encrypt(message))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun sendEncryptionPublicKey(publicKey: String) {
+        try {
+            logsCollector.add(TAG, "sendEncryptionPublicKey")
+            MewLog.d(TAG, "sendEncryptionPublicKey $publicKey")
+            val message = WebRtcMessage(WebRtcMessage.Type.GET_ENCRYPTION_PUBLIC_KEY, publicKey)
+            webRtc?.send(messageCrypt.encrypt(message))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun sendDecrypted(decrypted: String) {
+        try {
+            logsCollector.add(TAG, "sendDecrypted")
+            MewLog.d(TAG, "sendDecrypted $decrypted")
+            val message = WebRtcMessage(WebRtcMessage.Type.DECRYPT, decrypted)
             webRtc?.send(messageCrypt.encrypt(message))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -372,6 +417,8 @@ class MewConnectService : Service() {
     }
 
     companion object {
+
+        var isConnected = false
 
         fun getIntent(context: Context) = Intent(context, MewConnectService::class.java)
 

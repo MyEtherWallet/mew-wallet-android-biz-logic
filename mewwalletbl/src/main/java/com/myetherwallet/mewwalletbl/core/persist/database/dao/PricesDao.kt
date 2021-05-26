@@ -13,7 +13,7 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 abstract class PricesDao : BaseDao<EntityPrice> {
 
     @Query("SELECT * FROM $TABLE_NAME")
-    abstract fun getAll(): List<EntityPrice>
+    abstract suspend fun getAll(): List<EntityPrice>
 
     @Query(
         "SELECT $TABLE_NAME.price " +
@@ -25,7 +25,7 @@ abstract class PricesDao : BaseDao<EntityPrice> {
                 "$TABLE_NAME.tokenId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 1"
     )
-    abstract fun getLastPrimary(address: Address): Double
+    abstract suspend fun getLastPrimary(address: Address): Double
 
     @Query(
         "SELECT $TABLE_NAME.price " +
@@ -37,7 +37,7 @@ abstract class PricesDao : BaseDao<EntityPrice> {
                 "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 1"
     )
-    abstract fun getLast(address: Address, contractAddress: Address): Double
+    abstract suspend fun getLast(address: Address, contractAddress: Address): Double
 
     @Query(
         "SELECT $TABLE_NAME.price " +
@@ -46,7 +46,10 @@ abstract class PricesDao : BaseDao<EntityPrice> {
                 "WHERE ${TokenDescriptionDao.TABLE_NAME}.address=:contractAddress " +
                 "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 1"
     )
-    abstract fun getLast(contractAddress: Address): Double
+    abstract suspend fun getLast(contractAddress: Address): Double
+
+    @Query("SELECT * FROM $TABLE_NAME WHERE $TABLE_NAME.tokenId=:descriptionId")
+    abstract suspend fun get(descriptionId: Long): EntityPrice?
 
     companion object {
         const val TABLE_NAME: String = "prices"

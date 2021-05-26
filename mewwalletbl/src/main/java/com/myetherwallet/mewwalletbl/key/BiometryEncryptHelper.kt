@@ -77,7 +77,7 @@ class BiometryEncryptHelper(context: Context, encryptStorage: EncryptStorage = P
         }
     }
 
-    internal fun onKeyPermanentlyInvalidated() {
+    fun onKeyPermanentlyInvalidated() {
         keystoreHelper.remove()
         encryptStorage.removeBiometrySalt()
         encryptStorage.removeAccessKey(KeyType.BIOMETRY)

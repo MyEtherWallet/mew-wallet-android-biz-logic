@@ -7,7 +7,8 @@ import com.myetherwallet.mewwalletbl.core.persist.database.dao.DexTokensDao
 
 @Entity(tableName = DexTokensDao.TABLE_NAME, indices = [Index(value = ["tokenDescriptionId"], unique = true)])
 data class EntityDexToken(
-    val tokenDescriptionId: Long
+    val tokenDescriptionId: Long,
+    val volume_24h: Double
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

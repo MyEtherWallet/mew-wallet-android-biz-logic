@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.PricesDao
+import java.math.BigDecimal
 import java.util.*
 
 /**
@@ -13,7 +14,8 @@ import java.util.*
 @Entity(tableName = PricesDao.TABLE_NAME, indices = [Index(value = ["tokenId"], unique = true)])
 data class EntityPrice(
     val tokenId: Long,
-    val price: Double,
+    val price: BigDecimal,
+    val sparkline: String,
     val timestamp: Date
 ) {
     @PrimaryKey(autoGenerate = true)

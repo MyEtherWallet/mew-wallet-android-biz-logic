@@ -9,7 +9,7 @@ import com.myetherwallet.mewwalletbl.data.database.Recent
 abstract class RecentDao : BaseDao<EntityRecent> {
 
     @Query("SELECT * FROM $TABLE_NAME ORDER BY id DESC")
-    abstract fun getAll(): List<Recent>
+    abstract suspend fun getAll(): List<Recent>
 
     companion object {
         const val TABLE_NAME: String = "recent"

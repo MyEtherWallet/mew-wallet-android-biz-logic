@@ -23,7 +23,7 @@ abstract class PurchaseDao : BaseDao<EntityPurchase> {
                 "ON ${TokenDescriptionDao.TABLE_NAME}.id=$TABLE_NAME.cryptoDescriptionId " +
                 "ORDER BY $TABLE_NAME.timestamp DESC"
     )
-    abstract fun getAll(): List<Purchase>
+    abstract suspend fun getAll(): List<Purchase>
 
     companion object {
         const val TABLE_NAME: String = "purchase"

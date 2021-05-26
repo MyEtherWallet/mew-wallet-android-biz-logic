@@ -21,5 +21,10 @@ data class EntityAccount(
     val hide: Boolean,
     @ColumnInfo(name = "anonymous_id")
     val anonymousId: String,
-    var nonce: String
-)
+    var nonce: String,
+    @ColumnInfo(name = "eth2_address")
+    val eth2Address: String
+) {
+
+    fun getIndex() = (id - 1).toInt()
+}

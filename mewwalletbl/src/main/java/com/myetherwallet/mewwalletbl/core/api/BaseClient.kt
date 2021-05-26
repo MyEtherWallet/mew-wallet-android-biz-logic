@@ -19,7 +19,9 @@ abstract class BaseClient : Client {
 
     val client by lazy { createClient() }
 
-    private fun createClient(): OkHttpClient {
+    private fun createClient() = setupClient().build()
+
+    open fun setupClient(): OkHttpClient.Builder {
         val okHttpClientBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
         if (MewLog.shouldDisplayLogs()) {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -27,7 +29,7 @@ abstract class BaseClient : Client {
         }
         okHttpClientBuilder.addInterceptor(AnalyticsInterceptor(::saveAnalytics))
         okHttpClientBuilder.dispatcher(createDispatcher())
-        return okHttpClientBuilder.build()
+        return okHttpClientBuilder
     }
 
     private fun saveAnalytics(isSuccessful: Boolean) {

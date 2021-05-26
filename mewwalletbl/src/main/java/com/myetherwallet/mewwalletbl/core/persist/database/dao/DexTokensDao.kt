@@ -2,7 +2,9 @@ package com.myetherwallet.mewwalletbl.core.persist.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import com.myetherwallet.mewwalletbl.data.database.EntityDexToken
+import com.myetherwallet.mewwalletbl.data.database.EntityPriceHistory
 import com.myetherwallet.mewwalletbl.data.database.ExtTokenDescription
 import com.myetherwallet.mewwalletbl.data.database.TokenDescription
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
@@ -11,7 +13,7 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 abstract class DexTokensDao : BaseDao<EntityDexToken> {
 
     @Query("SELECT * FROM $TABLE_NAME")
-    abstract fun getAll(): List<EntityDexToken>
+    abstract suspend fun getAll(): List<EntityDexToken>
 
     @Query(
         "SELECT " +
@@ -22,15 +24,15 @@ abstract class DexTokensDao : BaseDao<EntityDexToken> {
                 "${TokenDescriptionDao.TABLE_NAME}.logo," +
                 "${TokenDescriptionDao.TABLE_NAME}.address AS contract," +
                 "${PricesDao.TABLE_NAME}.price," +
-                "CASE WHEN ${TokenDescriptionDao.TABLE_NAME}.address='' THEN 0 ELSE 1 END AS isDefault " +
+                "$TABLE_NAME.volume_24h " +
                 "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
                 "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "LEFT JOIN ${PricesDao.TABLE_NAME} " +
                 "ON $TABLE_NAME.tokenDescriptionId=${PricesDao.TABLE_NAME}.tokenId " +
                 "WHERE ${TokenDescriptionDao.TABLE_NAME}.symbol IS NOT '' " +
-                "ORDER BY isDefault, $TABLE_NAME.id"
+                "ORDER BY $TABLE_NAME.id"
     )
-    abstract fun getAllTokenDescription(): List<ExtTokenDescription>
+    abstract suspend fun getAllTokenDescription(): List<ExtTokenDescription>
 
     @Query(
         "SELECT " +
@@ -44,10 +46,18 @@ abstract class DexTokensDao : BaseDao<EntityDexToken> {
                 "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "WHERE ${TokenDescriptionDao.TABLE_NAME}.address=:address"
     )
-    abstract fun getTokenDescription(address: Address): TokenDescription?
+    abstract suspend fun getTokenDescription(address: Address): TokenDescription?
 
     @Query("DELETE FROM $TABLE_NAME")
-    abstract fun deleteAll()
+    abstract suspend fun deleteAll()
+
+    @Transaction
+    open suspend fun deleteAndInsertList(entityList: List<EntityDexToken>) {
+        deleteAll()
+        entityList.forEach {
+            insertOrIgnore(it)
+        }
+    }
 
     companion object {
         const val TABLE_NAME: String = "dex_tokens"

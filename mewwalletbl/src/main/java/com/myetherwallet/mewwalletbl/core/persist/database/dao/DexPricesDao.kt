@@ -14,20 +14,20 @@ abstract class DexPricesDao : BaseDao<EntityDexPrice> {
                 "WHERE base=:from AND quote=:to AND scale=:scale AND timestamp>:expirationDate " +
                 "ORDER BY price DESC"
     )
-    abstract fun getPrices(from: Long, to: Long, scale: Int, expirationDate: Date): List<EntityDexPrice>
+    abstract suspend fun getPrices(from: Long, to: Long, scale: Int, expirationDate: Date): List<EntityDexPrice>
 
     @Query(
         "SELECT MAX(price) " +
                 "FROM $TABLE_NAME " +
                 "WHERE base=:from AND quote=:to AND timestamp>:expirationDate"
     )
-    abstract fun getBestPrice(from: Long, to: Long, expirationDate: Date): Double
+    abstract suspend fun getBestPrice(from: Long, to: Long, expirationDate: Date): Double?
 
     @Query(
         "DELETE FROM $TABLE_NAME " +
                 "WHERE base=:from AND quote=:to AND scale=:scale"
     )
-    abstract fun deletePair(from: Long, to: Long, scale: Int)
+    abstract suspend fun deletePair(from: Long, to: Long, scale: Int)
 
     companion object {
         const val TABLE_NAME: String = "dex_prices"

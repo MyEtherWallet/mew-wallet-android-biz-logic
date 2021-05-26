@@ -9,6 +9,6 @@ import retrofit2.http.POST
 
 interface WyreApi {
     @POST("v3/orders/reserve")
-    @Headers("Authorization: Bearer ***REMOVED***", "Content-type: application/json")
+    @Headers("Authorization: Bearer ", "Content-type: application/json")
     fun getReservation(@Body requestParams: WyreRequestParams): Call<WyreReservationResult>
 }

@@ -21,7 +21,7 @@ private val API_METHOD_ETH = "eth_estimateGasList"
 
 class EstimatedGasApiRepository(private val service: EstimatedGasApi) {
 
-    fun getMultipleEstimateGas(transaction: Transaction, approvalTransaction: Transaction): Either<Failure, List<BigInteger>> {
+    fun getMultipleEstimateGas(transaction: Transaction, approvalTransaction: Transaction?): Either<Failure, List<BigInteger>> {
         return when (NetworkHandler.isNetworkConnected()) {
             true -> request(service.getMultipleEstimateGas(API_METHOD_ETH, JsonRpcRequest.createMultipleEstimateGasRequest(transaction, approvalTransaction))) {
                 it.result!!.map { item -> item.hexToBigInteger() }
@@ -40,13 +40,21 @@ class EstimatedGasApiRepository(private val service: EstimatedGasApi) {
         companion object {
             private val nextId = AtomicInteger(0)
 
-            fun createMultipleEstimateGasRequest(transaction: Transaction, approval: Transaction): JsonRpcRequest<JsonElement> {
-                val params = listOf(
-                    (listOf(
-                        createJsonObject(approval),
-                        createJsonObject(transaction)
-                    ))
-                )
+            fun createMultipleEstimateGasRequest(transaction: Transaction, approval: Transaction?): JsonRpcRequest<JsonElement> {
+                val params = if (approval == null) {
+                    listOf(
+                        (listOf(
+                            createJsonObject(transaction)
+                        ))
+                    )
+                } else {
+                    listOf(
+                        (listOf(
+                            createJsonObject(approval),
+                            createJsonObject(transaction)
+                        ))
+                    )
+                }
                 return JsonRpcRequest(Method.ESTIMATE_GAS.methodName, params)
             }
 

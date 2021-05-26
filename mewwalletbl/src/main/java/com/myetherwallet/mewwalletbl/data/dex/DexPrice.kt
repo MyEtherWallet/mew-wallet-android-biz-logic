@@ -1,45 +1,26 @@
 package com.myetherwallet.mewwalletbl.data.dex
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletbl.data.database.TokenDescription
+import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import kotlinx.android.parcel.Parcelize
+import java.math.BigDecimal
 
 @Parcelize
 data class DexPrice(
-    @SerializedName("price")
-    val price: String,
-    @SerializedName("dex")
+    val fromDescription: TokenDescription,
+    val toDescription: TokenDescription,
+    val exchange: String,
     val dex: String,
-    @SerializedName("pair")
-    val pair: DexPair,
-    @SerializedName("pair_description")
-    val descriptionPair: DescriptionPair? = null,
-    @SerializedName("marketImpact")
+    val price: BigDecimal,
     val marketImpact: String? = null,
-    @SerializedName("scale")
     val scale: Int? = null
 ) : Parcelable {
-    @Parcelize
-    class DexPair(
-        @SerializedName("base")
-        val base: String,
-        @SerializedName("quote")
-        val quote: String
-    ) : Parcelable
-
-    @Parcelize
-    class DescriptionPair(
-        @SerializedName("base")
-        val base: TokenDescription,
-        @SerializedName("quote")
-        val quote: TokenDescription
-    ) : Parcelable
 
     var availability = Status.AVAILABLE
 
-    fun getPair(): Pair<String, String> {
-        return Pair(this.pair.base, this.pair.quote)
+    fun getPair(): Pair<Address, Address> {
+        return Pair(this.fromDescription.contract, this.toDescription.contract)
     }
 
     enum class Status {

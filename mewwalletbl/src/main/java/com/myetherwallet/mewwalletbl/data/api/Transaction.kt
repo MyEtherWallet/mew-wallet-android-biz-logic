@@ -1,6 +1,7 @@
 package com.myetherwallet.mewwalletbl.data.api
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigInteger
 import java.util.*
 
 data class Transaction(
@@ -22,14 +23,14 @@ data class Transaction(
     val from: String,
     @SerializedName("to")
     val to: String,
-    @SerializedName("block_hash")
-    val blockHash: String,
     @SerializedName("block_number")
     val blockNumber: Int,
     @SerializedName("status")
     val status: TransactionStatus?,
     @SerializedName("timestamp")
-    val timestamp: Date?
+    val timestamp: Date?,
+    @SerializedName("nonce")
+    val nonce: BigInteger?
 ) {
 
     fun getTransactionStatusOrPending() = status ?: TransactionStatus.PENDING

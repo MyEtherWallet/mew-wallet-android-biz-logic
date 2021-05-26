@@ -21,5 +21,11 @@ open class EntityTokenDescription(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 
-    constructor(token: Token) : this(Address.createRaw(token.address), token.decimals, token.name, token.symbol, token.icon)
+    constructor(token: Token) : this(
+        if (token.address == Address.DEFAULT_API_CONTRACT) Address.createDefault() else Address.createRaw(token.address),
+        token.decimals,
+        token.name,
+        token.symbol,
+        token.icon
+    )
 }

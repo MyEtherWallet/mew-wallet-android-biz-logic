@@ -1,5 +1,7 @@
 package com.myetherwallet.mewwalletbl.core.api
 
+import kotlin.coroutines.suspendCoroutine
+
 /**
  * Created by BArtWell on 13.09.2019.
  */

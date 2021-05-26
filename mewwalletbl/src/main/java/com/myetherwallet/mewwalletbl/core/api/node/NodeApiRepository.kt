@@ -7,6 +7,7 @@ import com.myetherwallet.mewwalletbl.core.api.Failure
 import com.myetherwallet.mewwalletbl.core.api.JsonRpcResponseConverter
 import com.myetherwallet.mewwalletbl.data.JsonRpcRequest
 import com.myetherwallet.mewwalletbl.data.JsonRpcResponse
+import com.myetherwallet.mewwalletbl.data.TransactionResponse
 import com.myetherwallet.mewwalletbl.util.NetworkHandler
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
@@ -39,7 +40,7 @@ class NodeApiRepository(private val service: NodeApi) {
         }
     }
 
-    fun getNonce(address: Address, period: String): Either<Failure, BigInteger> {
+    fun getTransactionCount(address: Address, period: String): Either<Failure, BigInteger> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_COUNT.methodName, listOf(address.address, period))
         return when (NetworkHandler.isNetworkConnected()) {
             true -> request(service.getNonce(API_METHOD_ETH, jsonRpc)) { JsonRpcResponseConverter(it).toBigInteger() }
@@ -51,6 +52,14 @@ class NodeApiRepository(private val service: NodeApi) {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.SEND_RAW_TRANSACTION.methodName, listOf(hash))
         return when (NetworkHandler.isNetworkConnected()) {
             true -> request(service.sendRawTransaction(API_METHOD_ETH, jsonRpc)) { it.result!! }
+            false, null -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    fun getTransactionByHash(hash: String): Either<Failure, TransactionResponse> {
+        val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_BY_HASH.methodName, listOf(hash))
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> request(service.getTransactionByHash(API_METHOD_ETH, jsonRpc)) { it.result!! }
             false, null -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -69,14 +78,18 @@ class NodeApiRepository(private val service: NodeApi) {
         }
     }
 
-    private fun <T : JsonRpcResponse, R> request(call: Call<T>, transform: (T: JsonRpcResponse) -> R): Either<Failure, R> {
+    private fun <Q, T : JsonRpcResponse<Q>, R> request(call: Call<T>, transform: (T: JsonRpcResponse<Q>) -> R): Either<Failure, R> {
         return try {
             val response = call.execute()
             when (response.isSuccessful) {
                 true -> {
                     val body = response.body()
                     if (body?.result == null) {
-                        Either.Left(Failure.ServerError(IllegalStateException("Body is empty")))
+                        if (body?.error == null) {
+                            Either.Left(Failure.ServerError(IllegalStateException("Body is empty")))
+                        } else {
+                            Either.Left(Failure.ServerError(IllegalStateException(body.error!!.message)))
+                        }
                     } else {
                         Either.Right(transform(body))
                     }

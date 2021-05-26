@@ -1,20 +1,22 @@
-package com.myetherwallet.mewwalletbl.core.api.dex
+package com.myetherwallet.mewwalletbl.core.api.dappradar
 
+import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.Client
+import com.myetherwallet.mewwalletbl.core.api.wyre.WyreClient
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class DexClient : Client {
+class DappRadarClient : Client {
 
     override val retrofit = createRetrofit()
 
     private fun createRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(DEX_API_END_POINT)
+            .baseUrl(DAPP_RADAR_API_END_POINT)
             .client(createClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -32,7 +34,6 @@ class DexClient : Client {
     }
 
     companion object {
-        //private const val DEX_API_END_POINT = "https://api-v2.dex.ag"
-        private const val DEX_API_END_POINT = "https://dexag.mewapi.io"
+        private const val DAPP_RADAR_API_END_POINT = "https://partner-api.dappradar.com/"
     }
 }

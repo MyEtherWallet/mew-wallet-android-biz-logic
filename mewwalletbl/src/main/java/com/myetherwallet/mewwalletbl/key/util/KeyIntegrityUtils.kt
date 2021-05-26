@@ -2,6 +2,10 @@ package com.myetherwallet.mewwalletbl.key.util
 
 import android.content.Context
 import com.myetherwallet.mewwalletbl.core.MewLog
+import com.myetherwallet.mewwalletbl.data.MessageToSign
+import com.myetherwallet.mewwalletbl.extension.getLongOrNull
+import com.myetherwallet.mewwalletbl.extension.toDate
+import com.myetherwallet.mewwalletbl.extension.toDateTimeZone
 import com.myetherwallet.mewwalletbl.key.BaseEncryptHelper
 import com.myetherwallet.mewwalletbl.key.BiometryEncryptHelper
 import com.myetherwallet.mewwalletbl.key.KeyType
@@ -9,11 +13,18 @@ import com.myetherwallet.mewwalletbl.key.PinEncryptHelper
 import com.myetherwallet.mewwalletbl.key.storage.EncryptStorage
 import com.myetherwallet.mewwalletbl.key.storage.PersistentEncryptStorage
 import com.myetherwallet.mewwalletbl.preference.Preferences
+import com.myetherwallet.mewwalletbl.util.ApplicationUtils
+import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
 import com.myetherwallet.mewwalletkit.core.extension.isNullOrEmpty
+import com.myetherwallet.mewwalletkit.core.extension.secp256k1RecoverableSign
+import com.myetherwallet.mewwalletkit.core.extension.secp256k1SerializeSignature
 
 private const val TAG = "PrivateKeyUtil"
+private const val TYPE_BIOMETRY = "biometry"
+private const val TYPE_PIN = "pin"
 
 object KeyIntegrityUtils {
+    var lastCheckoutResult: Boolean? = null
 
     fun isAccessKeyAlive(
         context: Context,
@@ -34,10 +45,14 @@ object KeyIntegrityUtils {
             accessKey = getMainAccessKey(context, encryptStorage)
         }
         if (accessKey.isNullOrEmpty()) {
-            val biometryAccessKey = biometryEncryptHelper?.accessKey
-            if (!biometryAccessKey.isNullOrEmpty()) {
-                accessKey = biometryAccessKey
-                saveMainAccessKey(context, biometryAccessKey!!)
+            try {
+                val biometryAccessKey = biometryEncryptHelper?.accessKey
+                if (!biometryAccessKey.isNullOrEmpty()) {
+                    accessKey = biometryAccessKey
+                    saveMainAccessKey(context, biometryAccessKey!!)
+                }
+            } catch (e: Exception) {
+                MewLog.e(TAG, "Cannot get biometry key", e)
             }
         }
         if (!accessKey.isNullOrEmpty()) {
@@ -50,7 +65,8 @@ object KeyIntegrityUtils {
                 false
             )
         }
-        return !accessKey.isNullOrEmpty()
+        lastCheckoutResult = !accessKey.isNullOrEmpty()
+        return lastCheckoutResult!!
     }
 
     fun isPrivateKeyAlive(encryptHelper: BaseEncryptHelper?): Boolean {
@@ -59,18 +75,16 @@ object KeyIntegrityUtils {
             Preferences.wallet.getPrivateKey(address)?.let { encryptedPrivateKey ->
                 encryptHelper?.let {
                     result = canDecryptPrivateKey(encryptHelper, encryptedPrivateKey)
-                    if (!result && encryptHelper is BiometryEncryptHelper) {
-                        encryptHelper.onKeyPermanentlyInvalidated()
-                    }
                 }
             }
         }
         val type = when (encryptHelper) {
-            is BiometryEncryptHelper -> "biometry"
-            is PinEncryptHelper -> "pin"
+            is BiometryEncryptHelper -> TYPE_BIOMETRY
+            is PinEncryptHelper -> TYPE_PIN
             else -> "unknown"
         }
         Preferences.main.savePrivateKeyTestDate(type, result)
+        lastCheckoutResult = result
         return result
     }
 
@@ -100,8 +114,10 @@ object KeyIntegrityUtils {
 
     private fun canDecryptPrivateKey(encryptHelper: BaseEncryptHelper, encryptedPrivateKey: ByteArray): Boolean {
         return try {
-            encryptHelper.decrypt(encryptedPrivateKey)
-            true
+            val privateKey = encryptHelper.decrypt(encryptedPrivateKey).hexToByteArray()
+            val hash = "4a5c5d454721bbbb25540c3317521e71c373ae36458f960d2ad46ef088110e95".hexToByteArray()
+            val signature = hash.secp256k1RecoverableSign(privateKey)
+            signature?.secp256k1SerializeSignature() != null
         } catch (e: Exception) {
             MewLog.e(TAG, "Cannot retrieve private key", e)
             false
@@ -161,5 +177,29 @@ object KeyIntegrityUtils {
             buffer.append("\n")
         }
         return buffer.toString()
+    }
+
+    fun createReport(context: Context): String {
+        var result = getAccessKeyAliveStatus(context) + "\n"
+        result += getBackupKeysAliveStatus(context)
+        result += "Biometry: " + if (Preferences.main.isBiometryEnabled()) "enabled" else "disabled" + "\n"
+
+        val jsonObject = Preferences.main.getPrivateKeyTestDates()
+
+        result += "PIN last auth " + interpretateTestDate(jsonObject.getLongOrNull(TYPE_PIN)) + "\n"
+        result += "Biometry last auth " + interpretateTestDate(jsonObject.getLongOrNull(TYPE_BIOMETRY)) + "\n"
+
+        ApplicationUtils.getAppInstallTime(context)?.let {
+            result += "Installed at " + it.toDate().toDateTimeZone() + "\n"
+        }
+        return result
+    }
+
+    private fun interpretateTestDate(date: Long?) = if (date == null) {
+        "no info"
+    } else if (date == 0L) {
+        "failed"
+    } else {
+        "success at " + date.toDate().toDateTimeZone()
     }
 }
