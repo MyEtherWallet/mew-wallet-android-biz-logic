@@ -54,18 +54,22 @@ data class BinanceStatus(
     val depositRequiredConfirms: String,
     @SerializedName("createTime")
     val createTime: Date,
+    @SerializedName("updatedAt")
+    val updatedAt: Date?,
     @SerializedName("depositAmount")
-    val depositAmount: BigDecimal,
+    var depositAmount: BigDecimal,
     @SerializedName("swapAmount")
-    val swapAmount: BigDecimal,
+    var swapAmount: BigDecimal,
     @SerializedName("depositReceivedConfirms")
     val depositReceivedConfirms: String,
     @SerializedName("depositHash")
-    val depositHash: String,
+    var depositHash: String,
     @SerializedName("swapHash")
     var swapHash: String,
     @SerializedName("exchangeGasAmount")
-    val exchangeGasAmount: String,
+    val exchangeGasAmount: BigDecimal,
+    @SerializedName("tokenPerBNB")
+    val tokenPerBNB: BigDecimal,
     @SerializedName("fiatPrice")
     val fiatPrice: BigDecimal? = null
 
@@ -85,4 +89,6 @@ data class BinanceStatus(
     var exchangeRate: BigDecimal = BigDecimal.ONE
 
     fun isPending() = status == MoveStatus.WITHDRAWINPROGRESS || status == MoveStatus.DEPOSITINPROGRESS || status == MoveStatus.WAITINGFORDEPOSIT
+
+    fun isFailed() = status == MoveStatus.FAILED || status == MoveStatus.CANCELLED
 }

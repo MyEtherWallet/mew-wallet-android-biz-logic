@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Base64
 import androidx.preference.PreferenceManager
 import com.myetherwallet.mewwalletbl.MewEnvironment
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
 import com.myetherwallet.mewwalletbl.key.KeyType
 import com.myetherwallet.mewwalletbl.key.util.Utils
@@ -48,12 +49,13 @@ private const val DEBUG_DISABLE_STAKED_TRANSACTION = "debug_disable_staked_trans
 private const val DAPP_RADAR_UPDATE_TIME = "dapp_radar_update_time"
 private const val FIRST_ACCOUNT_NACL_PUBLIC_KEY = "first_account_nacl_public_key"
 private const val INTERCOM_HASH = "intercom_hash"
-private const val WAS_MARKET_BADGE_SHOWN = "was_market_badge_shown"
 private const val WAS_EXCHANGE_DISCLAIMER_SHOWN = "was_exchange_disclaimer_shown"
 private const val WAS_DAPP_DISCLAIMER_SHOWN = "was_dapp_disclaimer_shown"
 private const val WAS_DAPP_CATALOG_DISCLAIMER_SHOWN = "was_dapp_catalog_disclaimer_shown"
 private const val GUIDE_BANNER_VERSION = "guide_banner_version"
 private const val WAS_STAKING_EXITED_SHOWN = "was_staking_exited_shown"
+private const val WAS_BLOCKCHAIN_WELCOME_SHOWN = "was_blockchain_welcome_shown"
+private const val WAS_INTRODUCE_MULTICHAIN_SHOWN = "was_introduce_multichain_shown"
 
 class MainPreferences internal constructor(context: Context) {
 
@@ -237,13 +239,9 @@ class MainPreferences internal constructor(context: Context) {
 
     fun setStakedTransactionDisabled(isDisabled: Boolean) = preferences.edit().putBoolean(DEBUG_DISABLE_STAKED_TRANSACTION, isDisabled).apply()
 
-    fun setIntercomHash(hash: String) = preferences.edit().putString(INTERCOM_HASH, hash).apply()
+    fun setIntercomHash(hash: String) = preferences.edit().putString(INTERCOM_HASH, hash).commit()
 
     fun getIntercomHash() = preferences.getString(INTERCOM_HASH, null)
-
-    fun wasMarketBadgeShown() = preferences.getBoolean(WAS_MARKET_BADGE_SHOWN, false)
-
-    fun setMarketBadgeShown() = preferences.edit().putBoolean(WAS_MARKET_BADGE_SHOWN, true).apply()
 
     fun wasExchangeDisclaimerShown() = preferences.getBoolean(WAS_EXCHANGE_DISCLAIMER_SHOWN, false)
 
@@ -272,4 +270,18 @@ class MainPreferences internal constructor(context: Context) {
     fun wasStakingExitedShown() = preferences.getBoolean(WAS_STAKING_EXITED_SHOWN, false)
 
     fun setStakingExitedShown() = preferences.edit().putBoolean(WAS_STAKING_EXITED_SHOWN, true).apply()
+
+    fun wasBlockchainWelcomeShown(blockchain: Blockchain) = preferences.getString(WAS_BLOCKCHAIN_WELCOME_SHOWN, null)?.split(",")?.contains(blockchain.name) ?: false
+
+    fun setBlockchainWelcomeShown(blockchain: Blockchain) {
+        val flags = preferences.getString(WAS_BLOCKCHAIN_WELCOME_SHOWN, null)?.split(",")?.toMutableList() ?: mutableListOf()
+        if (!flags.contains(blockchain.name)) {
+            flags.add(blockchain.name)
+            preferences.edit().putString(WAS_BLOCKCHAIN_WELCOME_SHOWN, flags.joinToString(",")).apply()
+        }
+    }
+
+    fun wasIntroduceMultichainTipShown() = preferences.getBoolean(WAS_INTRODUCE_MULTICHAIN_SHOWN, false)
+
+    fun setIntroduceMultichainTipShown() = preferences.edit().putBoolean(WAS_INTRODUCE_MULTICHAIN_SHOWN, true).apply()
 }

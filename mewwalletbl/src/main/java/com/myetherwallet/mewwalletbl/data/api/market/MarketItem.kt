@@ -22,56 +22,56 @@ data class MarketItem(
     @SerializedName("icon_png")
     val icon: String = "",
     @SerializedName("price")
-    val price: BigDecimal,
+    val price: BigDecimal?,
     @SerializedName("timestamp")
-    val timestamp: Date,
+    val timestamp: Date?,
     @SerializedName("sparkline")
     val sparkline: List<String>?
     ) : Parcelable {
 
     @IgnoredOnParcel
     @SerializedName("entry_title")
-    val entryTitle: String? = null
+    var entryTitle: String? = null
 
     @IgnoredOnParcel
     @SerializedName("description")
-    val description: Localization? = null
+    var description: Localization? = null
 
     @IgnoredOnParcel
     @SerializedName("type")
-    val interval: String? = null
+    var interval: String? = null
 
     @IgnoredOnParcel
     @SerializedName("price_change_percentage")
-    val priceChangePercentage: String? = null
+    var priceChangePercentage: String? = null
 
     @IgnoredOnParcel
     @SerializedName("ath")
-    val ath: String? = null
+    var ath: String? = null
 
     @IgnoredOnParcel
     @SerializedName("rank")
-    val rank: Int? = null
+    var rank: Int? = null
 
     @IgnoredOnParcel
     @SerializedName("tags")
-    val tags: List<Localization> = emptyList()
+    var tags: List<Localization>? = emptyList()
 
     @IgnoredOnParcel
     @SerializedName("market_cap")
-    val marketCap: BigDecimal? = null
+    var marketCap: BigDecimal? = null
 
     @IgnoredOnParcel
     @SerializedName("volume_24h")
-    val volume24h: BigDecimal? = null
+    var volume24h: BigDecimal? = null
 
     @IgnoredOnParcel
     @SerializedName("total_supply")
-    val totalSupply: BigDecimal? = null
+    var totalSupply: BigDecimal? = null
 
     @IgnoredOnParcel
     @SerializedName("circulating_supply")
-    val circulatingSupply: BigDecimal? = null
+    var circulatingSupply: BigDecimal? = null
 
     @SerializedName("currency")
     var currency: AppCurrency = AppCurrency.USD

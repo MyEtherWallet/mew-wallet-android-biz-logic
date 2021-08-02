@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.Ignore
 import com.myetherwallet.mewwalletbl.MewEnvironment
 import com.myetherwallet.mewwalletbl.data.AppCurrency
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.api.TransactionStatus
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import kotlinx.android.parcel.Parcelize
@@ -26,6 +27,7 @@ data class TransactionInfo(
     val contract: Address,
     val price: BigDecimal?,
     val nonce: BigInteger?,
+    val blockchain: Blockchain,
     @Ignore
     var currency: AppCurrency = AppCurrency.USD,
     @Ignore
@@ -45,12 +47,10 @@ data class TransactionInfo(
         logo: String?,
         contract: Address,
         price: BigDecimal?,
-        nonce: BigInteger?
-    ) : this(hash, address, fromRecipient, toRecipient, amount, status, timestamp, tokenName, symbol, logo, contract, price, nonce, AppCurrency.USD, BigDecimal.ONE)
+        nonce: BigInteger?,
+        blockchain: Blockchain
+    ) : this(hash, address, fromRecipient, toRecipient, amount, status, timestamp, tokenName, symbol, logo, contract, price, nonce, blockchain, AppCurrency.USD, BigDecimal.ONE)
 
-    fun getUrl() = if (MewEnvironment.current == MewEnvironment.Type.ROPSTEN) {
-        "https://ropsten.etherscan.io/tx/$hash"
-    } else {
-        "https://etherscan.io/tx/$hash"
-    }
+    fun getUrl() = blockchain.chainExplorer + hash
+
 }

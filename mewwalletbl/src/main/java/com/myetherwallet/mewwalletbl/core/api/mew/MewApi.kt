@@ -31,9 +31,9 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getMetaTokens(): List<Token>
 
-    @GET("balances/account")
+    @GET("v3/balances/account")
     @Headers("content-type: application/json")
-    suspend fun getBalances(@Query("address") address: String): List<TokenBalance>
+    suspend fun getBalances(@Query("chain") blockchain: String, @Query("address") address: String): List<TokenBalance>
 
     @POST("/v2/transactions/history")
     @Headers("content-type: application/json")
@@ -50,34 +50,21 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getPurchaseHistory(@Query("id") id: String, @Query("paginationToken") paginationToken: String?): PurchaseHistory
 
-    @GET("/purchase/simplex/quote")
-    @Headers("content-type: application/json")
-    suspend fun getPurchaseSimplexQuote(
-        @Query("id") id: String,
-        @Query("fiatCurrency") fiatCurrency: String,
-        @Query("requestedCurrency") requestedCurrency: String,
-        @Query("requestedAmount") requestedAmount: BigDecimal
-    ): PurchaseSimplexQuote
-
     @GET("v3/purchase/providers/android")
     @Headers("content-type: application/json")
-    suspend fun getPurchaseProviders(@Query("iso") iso: String): List<PurchaseProvider>
+    suspend fun getPurchaseProviders(@Query(value = "cryptoCurrency") cryptoCurrency: String, @Query("iso") iso: String): List<PurchaseProvider>
 
     @GET("prices/market")
     @Headers("content-type: application/json")
-    suspend fun getMarketInfo(@Query("contractAddress") address: String): MarketItem
+    suspend fun getMarketInfo(@Query(value = "chain") blockchain: String, @Query("contractAddress") address: String): MarketItem
 
     @GET("v2/prices/history")
     @Headers("content-type: application/json")
-    suspend fun getPriceHistory(@Query("contractAddress") address: String, @Query("from") from: Long, @Query("to") to: Long): PriceHistoryResponse
-
-    @GET("v2/prices/account")
-    @Headers("content-type: application/json")
-    suspend fun getPrices(@Query("address") address: String): List<Price>
+    suspend fun getPriceHistory(@Query(value = "chain") blockchain: String, @Query("contractAddress") address: String, @Query("from") from: Long, @Query("to") to: Long): PriceHistoryResponse
 
     @GET("v2/prices/list")
     @Headers("content-type: application/json")
-    suspend fun getMarketPrices(@Query("paginationToken") paginationToken: Int): MarketResponse
+    suspend fun getMarketPrices(@Query("chain") blockchain: String, @Query("paginationToken") paginationToken: Int): MarketResponse
 
     @GET("v2/market/collections")
     @Headers("content-type: application/json")
@@ -93,24 +80,26 @@ interface MewApi {
 
     @GET("v2/prices/search")
     @Headers("content-type: application/json")
-    suspend fun searchMarketPrices(@Query("q") query: String): List<MarketItem>
+    suspend fun searchMarketPrices(@Query("chain") blockchain: String, @Query("q") query: String): List<MarketItem>
 
-    @GET("v2/swap/list")
+    @GET("v3/swap/list")
     @Headers("content-type: application/json")
-    suspend fun getSwapList(): List<DexToken>
+    suspend fun getSwapList(@Query("chain") blockchain: String): List<MarketItem>
 
-    @GET("v2/swap/quote")
+    @GET("v3/swap/quote")
     @Headers("content-type: application/json")
     suspend fun getSwapPrice(
+        @Query("chain") blockchain: String,
         @Query("fromContractAddress") from: String,
         @Query("toContractAddress") to: String,
         @Query("amount") amount: String,
         @Query("includeFees") includeFees: Boolean
     ): DexPriceResult
 
-    @GET("v2/swap/trade")
+    @GET("v3/swap/trade")
     @Headers("content-type: application/json")
     suspend fun getSwapTrade(
+        @Query("chain") blockchain: String,
         @Query("address") address: String,
         @Query("dex") dex: String,
         @Query("exchange") exchange: String,
@@ -122,31 +111,34 @@ interface MewApi {
 
     @GET("v2/swap/binance/list")
     @Headers("content-type: application/json")
-    suspend fun getBinanceList(): List<BinanceToken>
+    suspend fun getBinanceList(@Query("iso") iso: String): List<BinanceToken>
 
     @GET("v2/swap/binance/networks")
     @Headers("content-type: application/json")
     suspend fun getBinanceNetworks(
+        @Query("iso") iso: String,
         @Query("symbol") symbol: String
     ): List<BinanceNetwork>
 
     @GET("v2/swap/binance/quota")
     @Headers("content-type: application/json")
     suspend fun getBinanceQuota(
+        @Query("iso") iso: String,
         @Query("address") address: String
     ): BinanceQuota
 
-    @GET("v2/swap/binance/swap?walletNetwork=BSC")
+    @GET("v2/swap/binance/swap") //?walletNetwork=BSC
     @Headers("content-type: application/json")
     suspend fun createBinanceSwap(
+        @Query("iso") iso: String,
         @Query("amount") amount: String,
         @Query("symbol") symbol: String,
         @Query("fromAddress") walletAddress: String?,
         @Query("toAddress") toAddress: String,
         @Query("fromNetwork") fromNetwork: String,
         @Query("toNetwork") toNetwork: String,
-        @Query("toAmount") toAmount: String?,
-        @Query("exchangeGasAmount") gasAmount: String?
+        @Query("exchangeGasAmount") gasAmount: String?,
+        @Query("toAmount") toAmount: String?
     ): BinanceStatus
 
     @GET("v2/swap/binance/status")
@@ -160,6 +152,10 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getBinanceHistory(@Query("address") address: String): List<BinanceStatus>
 
+    @GET("v2/swap/binance/active")
+    @Headers("content-type: application/json")
+    suspend fun getBinanceActive(@Query("address") address: String): List<BinanceStatus>
+
     @GET("/v2/prices/exchange-rates")
     @Headers("content-type: application/json")
     suspend fun getExchangeRates(): List<ExchangeRates>
@@ -168,7 +164,8 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getBinanceTransaction(
         @Query("address") address: String,
-        @Query("id") id: String
+        @Query("id") id: String,
+        @Query("fromAddress") fromAddress: String
     ): List<BinanceTransaction>
 
     @GET("/v2/stake/info")

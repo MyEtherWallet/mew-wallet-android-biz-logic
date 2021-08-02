@@ -61,7 +61,9 @@ class EntityBinanceHistory(
     @ColumnInfo(name = "swap_hash")
     val swapHash: String,
     @ColumnInfo(name = "exchange_gas_amount")
-    val exchangeGasAmount: String
+    val exchangeGasAmount: BigDecimal,
+    @ColumnInfo(name = "token_per_bnb")
+    val tokenPerBNB: BigDecimal
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
@@ -93,6 +95,7 @@ class EntityBinanceHistory(
         binanceStatus.depositReceivedConfirms,
         binanceStatus.depositHash,
         binanceStatus.swapHash,
-        binanceStatus.exchangeGasAmount
+        binanceStatus.exchangeGasAmount,
+        binanceStatus.tokenPerBNB
     )
 }

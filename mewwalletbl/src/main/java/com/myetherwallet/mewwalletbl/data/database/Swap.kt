@@ -1,6 +1,7 @@
 package com.myetherwallet.mewwalletbl.data.database
 
 import android.os.Parcelable
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.api.TransactionStatus
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import kotlinx.android.parcel.Parcelize
@@ -22,5 +23,6 @@ data class Swap(
     val accountAddress: Address,
     val toFiatPrice: Double,
     val swapStatus: TransactionStatus,
-    val updateTime: Date
+    val updateTime: Date,
+    val blockchain: Blockchain
 ) : Parcelable

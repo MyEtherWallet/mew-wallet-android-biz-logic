@@ -29,6 +29,7 @@ class MewClient : BaseClient() {
 
     private fun createRetrofit(): Retrofit {
         val gson = GsonBuilder()
+            .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             // "2019-11-08T19:41:17.000Z"
             .registerTypeAdapter(Date::class.java, DateDeserializer())
             .registerTypeAdapter(Address::class.java, AddressSerializer())

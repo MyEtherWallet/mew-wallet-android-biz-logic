@@ -1,15 +1,12 @@
 package com.myetherwallet.mewwalletbl.core.api.node
 
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.myetherwallet.mewwalletbl.data.JsonRpcRequest
 import com.myetherwallet.mewwalletbl.data.JsonRpcResponse
+import com.myetherwallet.mewwalletbl.data.TransactionReceiptResponse
 import com.myetherwallet.mewwalletbl.data.TransactionResponse
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Headers
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 /**
  * Created by BArtWell on 21.09.2019.
@@ -18,30 +15,26 @@ import retrofit2.http.Path
 interface NodeApi {
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getBalance(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    fun getBalance(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getGasPrice(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<Unit>): Call<JsonRpcResponse<String>>
+    fun getGasPrice(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Unit>): Call<JsonRpcResponse<String>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getNonce(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    fun getNonce(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun sendRawTransaction(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    fun sendRawTransaction(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getTransactionByHash(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<TransactionResponse>>
+    fun getTransactionByHash(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<TransactionResponse>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getEstimateGas(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+    fun getTransactionReceipt(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<TransactionReceiptResponse>>
 
     @POST("{networkId}")
-    @Headers("content-type: application/json")
-    fun getApprovalHandler(@Path("networkId") networkId: String, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+    fun getEstimateGas(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+
+    @POST("{networkId}")
+    fun getApprovalHandler(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
 }

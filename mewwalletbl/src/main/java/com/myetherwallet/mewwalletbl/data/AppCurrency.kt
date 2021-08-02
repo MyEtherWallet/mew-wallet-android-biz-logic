@@ -1,26 +1,42 @@
 package com.myetherwallet.mewwalletbl.data
 
-import com.myetherwallet.mewwalletbl.data.currency.BaseCurrencyFormatter
-import com.myetherwallet.mewwalletbl.data.currency.DefaultCurrencyFormatter
-import com.myetherwallet.mewwalletbl.data.currency.EndCurrencyFormatter
-import com.myetherwallet.mewwalletbl.data.currency.StartCurrencyFormatter
 import com.myetherwallet.mewwalletkit.core.extension.formatCurrency
 import com.myetherwallet.mewwalletkit.core.extension.enumValueOfOrNull
 import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 
-enum class AppCurrency(val symbol: String, private val formatterClass: Class<out BaseCurrencyFormatter> = DefaultCurrencyFormatter::class.java) {
+enum class AppCurrency {
 
-    USD("$", StartCurrencyFormatter::class.java),
-    EUR("€"),
-    RUB("₽", EndCurrencyFormatter::class.java);
+    USD, EUR, RUB, JPY, AUD, CAD, GBP;
 
-    val formatter: BaseCurrencyFormatter by lazy {
-        formatterClass
-            .getConstructor(AppCurrency::class.java)
-            .newInstance(this)
+    private val currency = Currency.getInstance(name)
+    private val format by lazy {
+        val decimalFormat = NumberFormat.getCurrencyInstance() as DecimalFormat
+        decimalFormat.currency = currency
+        decimalFormat
     }
+    val isStartsWithSymbol: Boolean by lazy { format.positiveSuffix.isNullOrEmpty() }
+    val symbol = currency.symbol ?: name
 
-    fun format(amount: BigDecimal, decimals: Int = 2, suffix: Suffix? = null) = formatter.format(amount, decimals, suffix)
+    fun format(amount: BigDecimal, decimals: Int = 2, suffix: Suffix? = null): String {
+        format.maximumFractionDigits = decimals
+        var formatted = format.format(amount)
+        if (isStartsWithSymbol && symbol.length > 1) {
+            formatted = formatted.replace(symbol, "$symbol ")
+        }
+        return if (suffix == null) {
+            formatted
+        } else {
+            if (isStartsWithSymbol) {
+                "$formatted$suffix"
+            } else {
+                formatted = formatted.replace(Regex("\\s+$symbol"), "")
+                "$formatted$suffix $symbol"
+            }
+        }
+    }
 
     companion object {
 
@@ -48,7 +64,7 @@ enum class AppCurrency(val symbol: String, private val formatterClass: Class<out
                 isStartsWithSymbol = false
                 symbol = currency
             } else {
-                isStartsWithSymbol = appCurrency.formatter.isStartsWithSymbol
+                isStartsWithSymbol = appCurrency.isStartsWithSymbol
                 symbol = appCurrency.symbol
             }
             return Pair(symbol, isStartsWithSymbol)

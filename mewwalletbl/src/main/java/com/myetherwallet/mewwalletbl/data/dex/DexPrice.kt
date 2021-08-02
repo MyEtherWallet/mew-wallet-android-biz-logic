@@ -1,15 +1,14 @@
 package com.myetherwallet.mewwalletbl.data.dex
 
 import android.os.Parcelable
-import com.myetherwallet.mewwalletbl.data.database.TokenDescription
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import kotlinx.android.parcel.Parcelize
 import java.math.BigDecimal
 
 @Parcelize
 data class DexPrice(
-    val fromDescription: TokenDescription,
-    val toDescription: TokenDescription,
+    val fromContract: Address,
+    val toContract: Address,
     val exchange: String,
     val dex: String,
     val price: BigDecimal,
@@ -20,7 +19,7 @@ data class DexPrice(
     var availability = Status.AVAILABLE
 
     fun getPair(): Pair<Address, Address> {
-        return Pair(this.fromDescription.contract, this.toDescription.contract)
+        return Pair(this.fromContract, this.toContract)
     }
 
     enum class Status {

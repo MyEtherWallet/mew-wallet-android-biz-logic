@@ -1,5 +1,6 @@
 package com.myetherwallet.mewwalletbl.core.api
 
+import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.preference.Preferences
 import okhttp3.Dispatcher
@@ -7,6 +8,12 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * Created by BArtWell on 10.04.2020.
@@ -27,9 +34,33 @@ abstract class BaseClient : Client {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
             okHttpClientBuilder.addInterceptor(loggingInterceptor)
         }
+        if (BuildConfig.DEBUG) {
+            trustAnySslCertificate(okHttpClientBuilder)
+        }
         okHttpClientBuilder.addInterceptor(AnalyticsInterceptor(::saveAnalytics))
         okHttpClientBuilder.dispatcher(createDispatcher())
         return okHttpClientBuilder
+    }
+
+    private fun trustAnySslCertificate(okHttpClientBuilder: OkHttpClient.Builder) {
+        val trustAllCerts: Array<TrustManager> = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<X509Certificate?>?, authType: String?) {
+                }
+
+                override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) {
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                    return emptyArray()
+                }
+            }
+        )
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        val sslSocketFactory: SSLSocketFactory = sslContext.socketFactory
+        okHttpClientBuilder.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+        okHttpClientBuilder.hostnameVerifier { _, _ -> true }
     }
 
     private fun saveAnalytics(isSuccessful: Boolean) {

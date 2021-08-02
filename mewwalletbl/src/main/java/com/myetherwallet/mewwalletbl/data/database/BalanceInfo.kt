@@ -18,6 +18,7 @@ import java.util.*
 @Parcelize
 open class BalanceInfo(
     val id: Long,
+    val descriptionId: Long,
     val amount: BigInteger,
     val decimals: Int,
     val name: String,
@@ -38,6 +39,7 @@ open class BalanceInfo(
 
     constructor(ext: ExtBalanceInfo) : this(
         ext.id,
+        ext.descriptionId,
         ext.amount,
         ext.decimals,
         ext.name,

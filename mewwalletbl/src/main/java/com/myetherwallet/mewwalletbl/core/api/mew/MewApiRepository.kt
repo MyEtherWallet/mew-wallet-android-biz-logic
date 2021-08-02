@@ -56,9 +56,9 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getBalances(address: Address): Either<Failure, List<TokenBalance>> {
+    suspend fun getBalances(blockchain: Blockchain, address: Address): Either<Failure, List<TokenBalance>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getBalances(address.address) }, { it })
+            true -> requestSuspend({ service.getBalances(blockchain.symbol, address.address) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -98,13 +98,6 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getAccountTokens(address: Address): Either<Failure, List<Price>> {
-        return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getPrices(address.address) }, { it })
-            false -> Either.Left(Failure.NetworkConnection())
-        }
-    }
-
     private suspend fun hashId(id: String): String {
         try {
             if (id.isHex()) {
@@ -118,7 +111,7 @@ class MewApiRepository(private val service: MewApi) {
 
     private suspend fun decryptPurchaseHistory(id: String, input: ByteArray): ByteArray? {
         try {
-            val hashedId = id.toLowerCase(Locale.US).toByteArray().keccak256()
+            val hashedId = id.lowercase(Locale.US).toByteArray().keccak256()
             val key: ByteArray = hashedId
             val iv: ByteArray = hashedId.copyOfRange(0, hashedId.size / 2)
             val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
@@ -132,16 +125,9 @@ class MewApiRepository(private val service: MewApi) {
         return null
     }
 
-    suspend fun getPurchaseSimplexQuote(id: String, requestedCurrency: String, requestedAmount: BigDecimal): Either<Failure, PurchaseSimplexQuote> {
+    suspend fun getPurchaseProvider(cryptoCurrency: String, iso: String): Either<Failure, List<PurchaseProvider>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getPurchaseSimplexQuote(ApplicationUtils.getReferenceId(id), requestedCurrency, requestedCurrency, requestedAmount) }, { it })
-            false -> Either.Left(Failure.NetworkConnection())
-        }
-    }
-
-    suspend fun getPurchaseProvider(iso: String): Either<Failure, List<PurchaseProvider>> {
-        return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getPurchaseProviders(iso) }, { it })
+            true -> requestSuspend({ service.getPurchaseProviders(cryptoCurrency,iso) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -167,32 +153,32 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getMarketPrices(paginationToken: Int): Either<Failure, MarketResponse> {
+    suspend fun getMarketPrices(blockchain: Blockchain, paginationToken: Int): Either<Failure, MarketResponse> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getMarketPrices(paginationToken) }, { it })
+            true -> requestSuspend({ service.getMarketPrices(blockchain.symbol, paginationToken) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun searchMarketPrices(query: String): Either<Failure, List<MarketItem>> {
+    suspend fun searchMarketPrices(blockchain: Blockchain, query: String): Either<Failure, List<MarketItem>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.searchMarketPrices(query) }, { it })
+            true -> requestSuspend({ service.searchMarketPrices(blockchain.symbol, query) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getMarketInfo(address: String): Either<Failure, MarketItem> {
+    suspend fun getMarketInfo(blockchain: Blockchain, address: String): Either<Failure, MarketItem> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getMarketInfo(address) }, { it })
+            true -> requestSuspend({ service.getMarketInfo(blockchain.symbol, address) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getPriceHistory(address: String, from: Date, to: Date): Either<Failure, MarketPriceVolumeHistory> {
+    suspend fun getPriceHistory(blockchain: Blockchain, address: String, from: Date, to: Date): Either<Failure, MarketPriceVolumeHistory> {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
         dateFormat.timeZone = TimeZone.getTimeZone("UTC")
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getPriceHistory(address, from.time / 1000, to.time / 1000) }) {
+            true -> requestSuspend({ service.getPriceHistory(blockchain.symbol, address, from.time / 1000, to.time / 1000) }) {
                 MarketPriceVolumeHistory(
                     it.prices.map { item ->
                         PriceHistoryItem(dateFormat.parse(item[0])!!, item[1].toBigDecimal())
@@ -206,60 +192,61 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getSwapList(): Either<Failure, List<DexToken>> {
+    suspend fun getSwapList(blockchain: Blockchain): Either<Failure, List<MarketItem>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getSwapList() }, { it })
+            true -> requestSuspend({ service.getSwapList(blockchain.symbol) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getSwapPrice(fromContract: String, toContract: String, amount: String, includeFees: Boolean): Either<Failure, DexPriceResult> {
+    suspend fun getSwapPrice(blockchain: Blockchain, fromContract: String, toContract: String, amount: String, includeFees: Boolean): Either<Failure, DexPriceResult> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getSwapPrice(fromContract, toContract, amount, includeFees) }, { it })
+            true -> requestSuspend({ service.getSwapPrice(blockchain.symbol, fromContract, toContract, amount, includeFees) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getSwapTrade(address: String, dex: String, exchange: String, fromContract: String, toContract: String, amount: String): Either<Failure, DexTradeResult> {
+    suspend fun getSwapTrade(blockchain: Blockchain, address: String, dex: String, exchange: String, fromContract: String, toContract: String, amount: String): Either<Failure, DexTradeResult> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getSwapTrade(address, dex, exchange, fromContract, toContract, amount, "android") }, { it })
+            true -> requestSuspend({ service.getSwapTrade(blockchain.symbol, address, dex, exchange, fromContract, toContract, amount, "android") }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getBinanceList(): Either<Failure, List<BinanceToken>> {
+    suspend fun getBinanceList(iso: String): Either<Failure, List<BinanceToken>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getBinanceList() }, { it })
+            true -> requestSuspend({ service.getBinanceList(iso) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    suspend fun getBinanceNetworks(symbol: String): Either<Failure, List<BinanceNetwork>> {
+    suspend fun getBinanceNetworks(iso: String, symbol: String): Either<Failure, List<BinanceNetwork>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getBinanceNetworks(symbol) }, { it })
+            true -> requestSuspend({ service.getBinanceNetworks(iso, symbol) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
     suspend fun createBinanceSwap(
+        iso: String,
         amount: String,
         symbol: String,
         fromAddress: String?,
         toAddress: String,
         fromNetwork: String,
         toNetwork: String,
-        toAmount: String?,
-        exchangeGasAmount: String?
+        exchangeGasAmount: String?,
+        toAmount: String?
     ): Either<Failure, BinanceStatus> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.createBinanceSwap(amount, symbol, fromAddress, toAddress, fromNetwork, toNetwork, toAmount, exchangeGasAmount) }, { it })
+            true -> requestSuspend({ service.createBinanceSwap(iso, amount, symbol, fromAddress, toAddress, fromNetwork, toNetwork, exchangeGasAmount, toAmount) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
 
     suspend fun getBinanceTransaction(address: String, id: String): Either<Failure, List<BinanceTransaction>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getBinanceTransaction(address, id) }, { it })
+            true -> requestSuspend({ service.getBinanceTransaction(address, id, address) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -278,9 +265,16 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getBinanceQuota(address: String): Either<Failure, BinanceQuota> {
+    suspend fun getBinanceActive(address: String): Either<Failure, List<BinanceStatus>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getBinanceQuota(address) }, { it })
+            true -> requestSuspend({ service.getBinanceActive(address) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getBinanceQuota(iso: String, address: String): Either<Failure, BinanceQuota> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getBinanceQuota(iso, address) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }

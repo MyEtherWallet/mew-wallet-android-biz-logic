@@ -10,11 +10,11 @@ data class Transaction(
     @SerializedName("address")
     val address: String?,
     @SerializedName("contract_address")
-    val contractAddress: String,
+    val contractAddress: String?,
     @SerializedName("type")
-    val type: String,
+    val type: String?,
     @SerializedName("balance")
-    val balance: String,
+    val balance: String?,
     @SerializedName("delta")
     val delta: String?,
     @SerializedName("value")

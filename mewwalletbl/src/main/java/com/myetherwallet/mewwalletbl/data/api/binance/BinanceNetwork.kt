@@ -1,8 +1,11 @@
 package com.myetherwallet.mewwalletbl.data.api.binance
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 import java.math.BigDecimal
 
+@Parcelize
 data class BinanceNetwork(
     @SerializedName("name")
     val name: String,
@@ -15,23 +18,23 @@ data class BinanceNetwork(
     @SerializedName("supportLabel")
     val supportLabel: Boolean,
     @SerializedName("labelName")
-    val labelName: String,
+    val labelName: String?,
     @SerializedName("labelRegex")
-    val labelRegex: String,
+    val labelRegex: String?,
     @SerializedName("txUrl")
-    val txUrl: String,
+    val txUrl: String?,
     @SerializedName("depositEnabled")
     val depositEnabled: Boolean,
     @SerializedName("withdrawEnabled")
     val withdrawEnabled: Boolean,
     @SerializedName("withdrawAmountUnit")
-    val withdrawAmountUnit: BigDecimal,
+    val withdrawAmountUnit: BigDecimal?,
     @SerializedName("withdrawMinAmount")
-    val withdrawMinAmount: BigDecimal,
+    val withdrawMinAmount: BigDecimal?,
     @SerializedName("withdrawMaxAmount")
-    val withdrawMaxAmount: BigDecimal,
+    val withdrawMaxAmount: BigDecimal?,
     @SerializedName("addressRegex")
-    val addressRegex: String,
+    val addressRegex: String?,
     @SerializedName("tokenStandard")
     val tokenStandard: String,
     @SerializedName("requiredConfirms")
@@ -40,4 +43,4 @@ data class BinanceNetwork(
     val tokenPerBNB: BigDecimal,
     @SerializedName("minimumTokenForGasExchange")
     val minimumTokenForGasExchange: BigDecimal
-)
+) : Parcelable

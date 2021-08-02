@@ -29,27 +29,30 @@ data class PurchaseProvider(
         it.fiatCurrency == currency && it.type == "WEB"
     }!!.limit
 
-    fun getPrice(currency: String) = prices.find { it.fiatCurrency == currency }?.price
+    fun getPrice(blockchain: Blockchain, currency: String) = prices.find { it.cryptoCurrency == blockchain.token && it.fiatCurrency == currency }?.price
 
     fun getRate(currency: String) = rates.find { it.fiatCurrency == currency }?.exchangeRate
 
     companion object {
 
-        fun getProvider(response: List<PurchaseProvider>): PurchaseProvider? {
-            hasNonZeroLimits(response, Name.SIMPLEX)?.let {
+        fun getProvider(response: List<PurchaseProvider>, blockchain: Blockchain): PurchaseProvider? {
+            hasNonZeroLimits(response, Name.SIMPLEX, blockchain)?.let {
                 return it
             }
-            hasNonZeroLimits(response, Name.WYRE)?.let {
+            hasNonZeroLimits(response, Name.WYRE, blockchain)?.let {
                 return it
             }
             return null
         }
 
-        private fun hasNonZeroLimits(response: List<PurchaseProvider>, search: Name): PurchaseProvider? {
+        private fun hasNonZeroLimits(response: List<PurchaseProvider>, search: Name, blockchain: Blockchain): PurchaseProvider? {
             val provider = response.find { it.name == search }
-            provider?.limits?.forEach {
-                if (it.type == "WEB" && it.limit.max > BigDecimal.ZERO) {
-                    return provider
+            val isProviderSupportToken = provider?.cryptoCurrencies?.find { it == blockchain.token } != null
+            if (isProviderSupportToken) {
+                provider?.limits?.forEach {
+                    if (it.type == "WEB" && it.limit.max > BigDecimal.ZERO) {
+                        return provider
+                    }
                 }
             }
             return null

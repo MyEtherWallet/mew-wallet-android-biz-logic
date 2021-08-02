@@ -1,17 +1,37 @@
 package com.myetherwallet.mewwalletbl.data.api
 
+import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.*
 
 data class TokenBalance(
-    val contract_address: Address,
-    val amount: String,
-    val timestamp: Date
+    @SerializedName("contract_address")
+    val contractAddress: Address,
+    @SerializedName("price")
+    val price: BigDecimal,
+    @SerializedName("timestamp")
+    val timestamp: Date,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("symbol")
+    val symbol: String,
+    @SerializedName("decimals")
+    val decimals: Int,
+    @SerializedName("icon")
+    val icon: String,
+    @SerializedName("website")
+    val website: String,
+    @SerializedName("sparkline")
+    val sparkline: List<String>,
+    @SerializedName("amount")
+    val amount: BigInteger
 ) {
 
-    fun getContractAddress() = if (contract_address.address == Address.DEFAULT_API_CONTRACT) {
+    fun getContract() = if (contractAddress.address == Address.DEFAULT_API_CONTRACT) {
         Address.createDefault()
     } else {
-        contract_address
+        contractAddress
     }
 }

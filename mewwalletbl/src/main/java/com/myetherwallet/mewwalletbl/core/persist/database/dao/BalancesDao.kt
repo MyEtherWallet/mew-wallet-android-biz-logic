@@ -2,6 +2,7 @@ package com.myetherwallet.mewwalletbl.core.persist.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.database.BalanceInfo
 import com.myetherwallet.mewwalletbl.data.database.EntityBalance
 import com.myetherwallet.mewwalletbl.data.database.ExtBalanceInfo
@@ -17,20 +18,8 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
 
     @Query(
         "SELECT " +
-                "$TABLE_NAME.amount," +
-                "${TokenDescriptionDao.TABLE_NAME}.decimals," +
-                "IFNULL(${PricesDao.TABLE_NAME}.price, 0) AS price " +
-                "FROM $TABLE_NAME INNER JOIN ${TokensDao.TABLE_NAME} INNER JOIN ${TokenDescriptionDao.TABLE_NAME} INNER JOIN ${PricesDao.TABLE_NAME} " +
-                "ON $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
-                "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
-                "AND ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
-                "GROUP BY $TABLE_NAME.tokenId ORDER BY $TABLE_NAME.timestamp DESC"
-    )
-    abstract suspend fun getTokensBalance(): List<TotalBalance>
-
-    @Query(
-        "SELECT " +
                 "${AccountsDao.TABLE_NAME}.id," +
+                "${TokenDescriptionDao.TABLE_NAME}.id AS descriptionId," +
                 "$TABLE_NAME.amount," +
                 "${TokenDescriptionDao.TABLE_NAME}.decimals," +
                 "${TokenDescriptionDao.TABLE_NAME}.name," +
@@ -52,13 +41,14 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
                 "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
                 "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "LEFT JOIN ${PricesDao.TABLE_NAME} ON ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
-                "WHERE ${AccountsDao.TABLE_NAME}.address=:address"
+                "WHERE ${AccountsDao.TABLE_NAME}.address=:address AND ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain"
     )
-    abstract suspend fun getLast(address: String): List<ExtBalanceInfo>
+    abstract suspend fun getLast(blockchain: Blockchain, address: String): List<ExtBalanceInfo>
 
     @Query(
         "SELECT " +
                 "${AccountsDao.TABLE_NAME}.id," +
+                "${TokenDescriptionDao.TABLE_NAME}.id AS descriptionId," +
                 "$TABLE_NAME.amount," +
                 "${TokenDescriptionDao.TABLE_NAME}.decimals," +
                 "${TokenDescriptionDao.TABLE_NAME}.name," +
@@ -80,13 +70,14 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
                 "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
                 "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "LEFT JOIN ${PricesDao.TABLE_NAME} ON ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
-                "WHERE ${AccountsDao.TABLE_NAME}.address=:address AND contract=:contract"
+                "WHERE ${AccountsDao.TABLE_NAME}.address=:address AND ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain AND contract=:contract"
     )
-    abstract suspend fun getLast(address: Address, contract: Address): List<ExtBalanceInfo>
+    abstract suspend fun getLast(blockchain: Blockchain, address: Address, contract: Address): List<ExtBalanceInfo>
 
     @Query(
         "SELECT " +
                 "${AccountsDao.TABLE_NAME}.id," +
+                "${TokenDescriptionDao.TABLE_NAME}.id AS descriptionId," +
                 "$TABLE_NAME.amount," +
                 "${TokenDescriptionDao.TABLE_NAME}.decimals," +
                 "${TokenDescriptionDao.TABLE_NAME}.name," +
@@ -108,9 +99,9 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
                 "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
                 "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "LEFT JOIN ${PricesDao.TABLE_NAME} ON ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
-                "WHERE ${TokensDao.TABLE_NAME}.isPrimary=1"
+                "WHERE ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain AND ${TokensDao.TABLE_NAME}.isPrimary=1"
     )
-    abstract suspend fun getPrimaryBalances(): List<ExtBalanceInfo>
+    abstract suspend fun getPrimaryBalances(blockchain: Blockchain): List<ExtBalanceInfo>
 
     @Query("SELECT * FROM $TABLE_NAME")
     abstract suspend fun getAll(): List<EntityBalance>

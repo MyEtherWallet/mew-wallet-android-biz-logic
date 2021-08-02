@@ -18,9 +18,9 @@ data class DexToken(
     @SerializedName("price")
     val price: BigDecimal?,
     @SerializedName("timestamp")
-    val timestamp: Date,
+    val timestamp: Date?,
     @SerializedName("volume_24h")
-    val volume_24h: String
+    val volume_24h: String?
 ) {
 
     fun getPriceOrZero() = price ?: BigDecimal.ZERO

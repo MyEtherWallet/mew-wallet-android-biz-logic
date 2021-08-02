@@ -6,5 +6,5 @@ data class PurchaseHistory(
     @SerializedName("results")
     val results: List<PurchaseHistoryItem>,
     @SerializedName("pagination_token")
-    val paginationToken: String
+    val paginationToken: String?
 )

@@ -3,8 +3,8 @@ package com.myetherwallet.mewwalletbl.preference
 import android.content.Context
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.util.ApplicationUtils
-import java.util.*
 
 /**
  * Created by BArtWell on 05.08.2019.
@@ -20,6 +20,7 @@ private const val API_ERROR_COUNT_PREFIX = "api_error_count_"
 private const val APP_LANGUAGE = "app_language"
 private const val APP_CURRENCY = "app_currency"
 private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
+private const val BLOCKCHAIN = "blockchain"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -38,6 +39,16 @@ class PersistentPreferences internal constructor(context: Context) {
     fun updateErrorRequestCount(apiName: String) = incrementIntValue(API_ERROR_COUNT_PREFIX + "_" + apiName)
 
     fun getErrorRequestCount(apiName: String) = preferences.getInt(API_ERROR_COUNT_PREFIX + "_" + apiName, 0)
+
+    fun deleteRequestCounts() {
+        for ((key, _) in preferences.all) {
+            if (key.startsWith(API_TOTAL_COUNT_PREFIX) || key.startsWith(API_ERROR_COUNT_PREFIX)) {
+                preferences.edit()
+                    .remove(key)
+                    .apply()
+            }
+        }
+    }
 
     fun setFailSwaps(isEnable: Boolean) = preferences.edit().putBoolean(SHOULD_FAIL_SWAPS, isEnable).apply()
 
@@ -67,4 +78,8 @@ class PersistentPreferences internal constructor(context: Context) {
     fun setAppCurrency(currency: AppCurrency) = preferences.edit().putString(APP_CURRENCY, currency.name).apply()
 
     fun getAppCurrency() = preferences.getString(APP_CURRENCY, null)?.let { AppCurrency.valueOf(it) } ?: ApplicationUtils.getCurrency()
+
+    fun setBlockchain(type: Blockchain) = preferences.edit().putString(BLOCKCHAIN, type.name).apply()
+
+    fun getBlockchain() = preferences.getString(BLOCKCHAIN, null)?.let { Blockchain.valueOf(it) } ?: Blockchain.ETHEREUM
 }

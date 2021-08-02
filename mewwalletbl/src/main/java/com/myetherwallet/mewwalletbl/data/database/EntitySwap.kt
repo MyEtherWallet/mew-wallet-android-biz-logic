@@ -3,6 +3,7 @@ package com.myetherwallet.mewwalletbl.data.database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.ExchangeDao
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.api.TransactionStatus
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import java.util.*
@@ -19,7 +20,8 @@ data class EntitySwap(
     val accountId: Long,
     val toAddress: Address,
     val dex: String,
-    val status: TransactionStatus
+    val status: TransactionStatus,
+    val blockchain: Blockchain
     ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

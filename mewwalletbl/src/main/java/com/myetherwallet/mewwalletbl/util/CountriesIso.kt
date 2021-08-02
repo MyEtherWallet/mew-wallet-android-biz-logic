@@ -29,6 +29,7 @@ enum class CountriesIso(val iso: String, private val usingFor: String) {
     Myanmar("mm", BINANCE),
     Serbia("rs", BINANCE),
     Sudan("sd", BINANCE),
+    SouthSudan("ss", BINANCE),
     Syria("sy", BINANCE),
     Zimbabwe("zw", BINANCE);
 

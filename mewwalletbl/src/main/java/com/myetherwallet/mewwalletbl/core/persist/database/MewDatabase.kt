@@ -22,7 +22,6 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntityTokenDescription::class,
         EntityTransaction::class,
         EntityRecent::class,
-        EntityDexToken::class,
         EntityDexPrice::class,
         EntitySwap::class,
         EntityWallet::class,
@@ -35,7 +34,8 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntityDappRadar::class,
         EntityExchangeRates::class,
         EntityBinanceHistory::class,
-        EntityLocalTransaction::class
+        EntityLocalTransaction::class,
+        EntitySwapToken::class
     ], version = MewDatabase.DB_VERSION
 )
 @TypeConverters(
@@ -68,8 +68,6 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getTransactionsDao(): TransactionsDao
 
-    abstract fun getDexTokens(): DexTokensDao
-
     abstract fun getDexPrices(): DexPricesDao
 
     abstract fun getExchangeDao(): ExchangeDao
@@ -96,8 +94,10 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getLocalTransactionsDao(): LocalTransactionsDao
 
+    abstract fun getSwapTokensDao(): SwapTokensDao
+
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 15
+        const val DB_VERSION = 18
     }
 }

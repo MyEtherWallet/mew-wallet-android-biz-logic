@@ -23,7 +23,7 @@ class ServiceNotificationHelper {
         val channelId = "com.myetherwallet.mewwalletbl.connection.socket_service"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = context.getString(R.string.service_notification_channel_name)
-            val notificationChannel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE)
+            val notificationChannel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
             notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
             notificationChannel.description = context.getString(R.string.service_notification_channel_description)
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

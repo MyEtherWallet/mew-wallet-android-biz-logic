@@ -14,6 +14,7 @@ import java.util.*
 @Parcelize
 class ExtBalanceInfo(
     val id: Long,
+    val descriptionId: Long,
     var amount: BigInteger,
     val decimals: Int,
     val name: String,
@@ -41,6 +42,7 @@ class ExtBalanceInfo(
 ) : Parcelable {
 
     constructor(id: Long,
+                descriptionId: Long,
                 amount: BigInteger,
                 decimals: Int,
                 name: String,
@@ -58,7 +60,7 @@ class ExtBalanceInfo(
                 totalFiat: Double?,
                 position: Long,
                 isHiddenToken: Boolean,
-                anonymousId: String) : this(id, amount, decimals, name, symbol, logo, contract, timestamp, address, eth2Address, price, sparkline, accountName, hide, tokensCount, totalFiat, position, isHiddenToken, anonymousId, AppCurrency.USD, BigDecimal.ONE)
+                anonymousId: String) : this(id, descriptionId, amount, decimals, name, symbol, logo, contract, timestamp, address, eth2Address, price, sparkline, accountName, hide, tokensCount, totalFiat, position, isHiddenToken, anonymousId, AppCurrency.USD, BigDecimal.ONE)
 
     fun getBalance() = amount.toTokenValue(decimals)
 

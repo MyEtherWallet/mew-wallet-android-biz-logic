@@ -2,6 +2,7 @@ package com.myetherwallet.mewwalletbl.core.persist.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.database.EntityToken
 import com.myetherwallet.mewwalletbl.data.database.ExtToken
 import com.myetherwallet.mewwalletbl.data.database.TokensCount
@@ -29,36 +30,18 @@ abstract class TokensDao : BaseDao<EntityToken> {
                 "${TokenDescriptionDao.TABLE_NAME}.logo " +
                 "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
                 "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
-                "WHERE accountId=:account"
+                "WHERE accountId=:account AND ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain"
     )
-    abstract suspend fun getAssets(account: Long): List<ExtToken>
-
-    @Query("SELECT * FROM $TABLE_NAME WHERE isPrimary=1 AND accountId=:account")
-    abstract suspend fun getPrimary(account: Long): EntityToken?
-
-    @Query(
-        "SELECT $TABLE_NAME.id FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
-                "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
-                "WHERE $TABLE_NAME.accountId=:accountId AND ${TokenDescriptionDao.TABLE_NAME}.address=:contract"
-    )
-    abstract suspend fun getTokenId(accountId: Long, contract: Address): Long
+    abstract suspend fun getAssets(blockchain: Blockchain, account: Long): List<ExtToken>
 
     @Query(
         "SELECT ${TokenDescriptionDao.TABLE_NAME}.address " +
                 "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} INNER JOIN ${AccountsDao.TABLE_NAME} " +
                 "ON $TABLE_NAME.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
                 "AND $TABLE_NAME.accountId=${AccountsDao.TABLE_NAME}.id " +
-                "WHERE ${AccountsDao.TABLE_NAME}.address=:address"
+                "WHERE ${AccountsDao.TABLE_NAME}.address=:address AND ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain"
     )
-    abstract suspend fun getContracts(address: Address): List<Address>
-
-    @Query(
-        "SELECT ${AccountsDao.TABLE_NAME}.address,COUNT($TABLE_NAME.id) AS count " +
-                "FROM $TABLE_NAME,${AccountsDao.TABLE_NAME} " +
-                "WHERE $TABLE_NAME.accountId=${AccountsDao.TABLE_NAME}.id AND $TABLE_NAME.isPrimary=0 " +
-                "GROUP BY ${AccountsDao.TABLE_NAME}.address"
-    )
-    abstract suspend fun getTokensCount(): List<TokensCount>
+    abstract suspend fun getContracts(blockchain: Blockchain, address: Address): List<Address>
 
     @Query("DELETE FROM $TABLE_NAME WHERE id=:id")
     abstract suspend fun removeToken(id: Long)

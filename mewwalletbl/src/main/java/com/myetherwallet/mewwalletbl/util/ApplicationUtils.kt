@@ -1,14 +1,16 @@
 package com.myetherwallet.mewwalletbl.util
 
+import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.content.res.Resources
+import android.content.res.TypedArray
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.Log
+import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import com.myetherwallet.mewwalletbl.AppActivityImpl
 import com.myetherwallet.mewwalletbl.core.api.Failure
@@ -22,11 +24,14 @@ import retrofit2.HttpException
 import java.math.BigDecimal
 import java.util.*
 
+
 /**
  * Created by BArtWell on 24.02.2020.
  */
 
 object ApplicationUtils {
+
+    const val ETHERIUM_ICON_URL = "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/ETH-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png"
 
     fun getDeviceName(): String {
         val manufacturer = Build.MANUFACTURER
@@ -56,7 +61,7 @@ object ApplicationUtils {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val networkCountryIso = telephonyManager.networkCountryIso
         return if (networkCountryIso.isEmpty()) {
-            Locale.getDefault().country
+            getSystemLocale().country
         } else {
             networkCountryIso
         }
@@ -95,21 +100,13 @@ object ApplicationUtils {
         }
     }
 
-    private fun getSystemLocale(): Locale {
+    fun getSystemLocale(): Locale {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return Resources.getSystem().configuration.locales[0]
         } else {
             @Suppress("DEPRECATION")
             return Resources.getSystem().configuration.locale
         }
-    }
-
-    fun setAppLocale(context: Context, language: AppLanguage) {
-        val locale = Locale(language.code)
-        val config = Configuration(context.resources.configuration)
-        Locale.setDefault(locale)
-        config.setLocale(locale)
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
     }
 
     fun getAppInstallTime(context: Context) = try {
@@ -161,5 +158,12 @@ object ApplicationUtils {
             type = "text/plain"
         }
         fragment.startActivityForResult(Intent.createChooser(intent, title), 0)
+    }
+
+    fun fetchAccentColor(context: Context): Int {
+        val typedArray: TypedArray = context.obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
+        val color = typedArray.getColor(0, 0)
+        typedArray.recycle()
+        return color
     }
 }

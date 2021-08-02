@@ -1,11 +1,14 @@
 package com.myetherwallet.mewwalletbl.core.persist.database
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.*
+import com.myetherwallet.mewwalletbl.data.Blockchain
 
 /**
  * Created by BArtWell on 18.09.2019.
@@ -32,8 +35,8 @@ object Database {
 
     private val MIGRATION_3_4 = object : Migration(3, 4) {
         override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("CREATE TABLE " + DexTokensDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, tokenDescriptionId INTEGER NOT NULL)")
-            database.execSQL("CREATE UNIQUE INDEX index_dex_tokens_tokenDescriptionId ON " + DexTokensDao.TABLE_NAME + " (tokenDescriptionId)")
+            database.execSQL("CREATE TABLE dex_tokens (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, tokenDescriptionId INTEGER NOT NULL)")
+            database.execSQL("CREATE UNIQUE INDEX index_dex_tokens_tokenDescriptionId ON dex_tokens (tokenDescriptionId)")
 
             database.execSQL("CREATE TABLE " + DexPricesDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, dex TEXT NOT NULL, price DOUBLE NOT NULL, base INTEGER NOT NULL, quote INTEGER NOT NULL)")
             database.execSQL("CREATE UNIQUE INDEX index_dex_prices_dex_base_quote ON " + DexPricesDao.TABLE_NAME + " (dex, base, quote)")
@@ -109,7 +112,7 @@ object Database {
 
     private val MIGRATION_10_11 = object : Migration(10, 11) {
         override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("ALTER TABLE " + DexTokensDao.TABLE_NAME + " ADD COLUMN volume_24h DOUBLE NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE dex_tokens ADD COLUMN volume_24h DOUBLE NOT NULL DEFAULT 0")
 
             database.execSQL("CREATE TABLE " + DappDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL DEFAULT '', name TEXT NOT NULL DEFAULT '', desc TEXT NOT NULL DEFAULT '', img TEXT NOT NULL DEFAULT '', category TEXT NOT NULL DEFAULT '')")
             database.execSQL("CREATE UNIQUE INDEX index_" + DappDao.TABLE_NAME + "_url ON " + DappDao.TABLE_NAME + " (url)")
@@ -150,42 +153,174 @@ object Database {
     private val MIGRATION_14_15 = object : Migration(14, 15) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("DROP TABLE IF EXISTS " + BinanceHistoryDao.TABLE_NAME)
-            database.execSQL("CREATE TABLE " + BinanceHistoryDao.TABLE_NAME + " (" +
-                    "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                    "address TEXT NOT NULL DEFAULT '', " +
-                    "id_key TEXT NOT NULL DEFAULT '', " +
-                    "status TEXT NOT NULL DEFAULT '', " +
-                    "symbol TEXT NOT NULL DEFAULT '', " +
-                    "icon TEXT, " +
-                    "amount DOUBLE NOT NULL, " +
-                    "from_network TEXT NOT NULL DEFAULT '', " +
-                    "to_network TEXT NOT NULL DEFAULT '', " +
-                    "from_address TEXT NOT NULL DEFAULT '', " +
-                    "to_address TEXT NOT NULL DEFAULT '', " +
-                    "deposit_address TEXT NOT NULL DEFAULT '', " +
-                    "eth_contract_address TEXT NOT NULL DEFAULT '', " +
-                    "bsc_contract_address TEXT NOT NULL DEFAULT '', " +
-                    "eth_contract_decimal INTEGER NOT NULL, " +
-                    "bsc_contract_decimal INTEGER NOT NULL, " +
-                    "swap_fee DOUBLE NOT NULL, " +
-                    "swap_fee_rate DOUBLE NOT NULL, " +
-                    "network_fee DOUBLE NOT NULL, " +
-                    "deposit_timeout INTEGER NOT NULL, " +
-                    "deposit_required_confirms TEXT NOT NULL DEFAULT '', " +
-                    "create_time INTEGER NOT NULL, " +
-                    "deposit_amount DOUBLE NOT NULL, " +
-                    "swap_amount DOUBLE NOT NULL, " +
-                    "deposit_received_confirms TEXT NOT NULL DEFAULT '', " +
-                    "deposit_hash TEXT NOT NULL DEFAULT '', " +
-                    "swap_hash TEXT NOT NULL DEFAULT '', " +
-                    "exchange_gas_amount TEXT NOT NULL DEFAULT '')")
+            database.execSQL(
+                "CREATE TABLE " + BinanceHistoryDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "address TEXT NOT NULL DEFAULT '', " +
+                        "id_key TEXT NOT NULL DEFAULT '', " +
+                        "status TEXT NOT NULL DEFAULT '', " +
+                        "symbol TEXT NOT NULL DEFAULT '', " +
+                        "icon TEXT, " +
+                        "amount DOUBLE NOT NULL, " +
+                        "from_network TEXT NOT NULL DEFAULT '', " +
+                        "to_network TEXT NOT NULL DEFAULT '', " +
+                        "from_address TEXT NOT NULL DEFAULT '', " +
+                        "to_address TEXT NOT NULL DEFAULT '', " +
+                        "deposit_address TEXT NOT NULL DEFAULT '', " +
+                        "eth_contract_address TEXT NOT NULL DEFAULT '', " +
+                        "bsc_contract_address TEXT NOT NULL DEFAULT '', " +
+                        "eth_contract_decimal INTEGER NOT NULL, " +
+                        "bsc_contract_decimal INTEGER NOT NULL, " +
+                        "swap_fee DOUBLE NOT NULL, " +
+                        "swap_fee_rate DOUBLE NOT NULL, " +
+                        "network_fee DOUBLE NOT NULL, " +
+                        "deposit_timeout INTEGER NOT NULL, " +
+                        "deposit_required_confirms TEXT NOT NULL DEFAULT '', " +
+                        "create_time INTEGER NOT NULL, " +
+                        "deposit_amount DOUBLE NOT NULL, " +
+                        "swap_amount DOUBLE NOT NULL, " +
+                        "deposit_received_confirms TEXT NOT NULL DEFAULT '', " +
+                        "deposit_hash TEXT NOT NULL DEFAULT '', " +
+                        "swap_hash TEXT NOT NULL DEFAULT '', " +
+                        "exchange_gas_amount TEXT NOT NULL DEFAULT '')"
+            )
             database.execSQL("CREATE UNIQUE INDEX index_" + BinanceHistoryDao.TABLE_NAME + "_id_key ON " + BinanceHistoryDao.TABLE_NAME + " (id_key)")
 
-            database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
-            database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
-            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + LocalTransactionsDao.TABLE_NAME + "_hash ON " + LocalTransactionsDao.TABLE_NAME + " (hash)")
+            dropAndCreateLocalTransactionsDao(database)
+        }
+    }
+
+    private val MIGRATION_15_16 = object : Migration(15, 16) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            dropAndCreateLocalTransactionsDao(database)
+        }
+    }
+
+    private val MIGRATION_16_17 = object : Migration(16, 17) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + ExchangeDao.TABLE_NAME + " ADD COLUMN blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'")
+
+            database.execSQL("ALTER TABLE " + TransactionsDao.TABLE_NAME + " ADD COLUMN blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'")
+            database.execSQL("DROP INDEX index_" + TransactionsDao.TABLE_NAME + "_account_id_from_recipient_id_nonce")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + TransactionsDao.TABLE_NAME + "_account_id_from_recipient_id_nonce_blockchain ON " + TransactionsDao.TABLE_NAME + " (account_id, from_recipient_id, nonce, blockchain)")
+
+            database.execSQL("ALTER TABLE " + TokenDescriptionDao.TABLE_NAME + " ADD COLUMN blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'")
+            database.execSQL("DROP INDEX index_" + TokenDescriptionDao.TABLE_NAME + "_address")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + TokenDescriptionDao.TABLE_NAME + "_address_blockchain ON " + TokenDescriptionDao.TABLE_NAME + " (address,blockchain)")
+
+            database.execSQL("DROP TABLE IF EXISTS " + BinanceHistoryDao.TABLE_NAME)
+            database.execSQL(
+                "CREATE TABLE " + BinanceHistoryDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "address TEXT NOT NULL DEFAULT '', " +
+                        "id_key TEXT NOT NULL DEFAULT '', " +
+                        "status TEXT NOT NULL DEFAULT '', " +
+                        "symbol TEXT NOT NULL DEFAULT '', " +
+                        "icon TEXT, " +
+                        "amount DOUBLE NOT NULL, " +
+                        "from_network TEXT NOT NULL DEFAULT '', " +
+                        "to_network TEXT NOT NULL DEFAULT '', " +
+                        "from_address TEXT NOT NULL DEFAULT '', " +
+                        "to_address TEXT NOT NULL DEFAULT '', " +
+                        "deposit_address TEXT NOT NULL DEFAULT '', " +
+                        "eth_contract_address TEXT NOT NULL DEFAULT '', " +
+                        "bsc_contract_address TEXT NOT NULL DEFAULT '', " +
+                        "eth_contract_decimal INTEGER NOT NULL, " +
+                        "bsc_contract_decimal INTEGER NOT NULL, " +
+                        "swap_fee DOUBLE NOT NULL, " +
+                        "swap_fee_rate DOUBLE NOT NULL, " +
+                        "network_fee DOUBLE NOT NULL, " +
+                        "deposit_timeout INTEGER NOT NULL, " +
+                        "deposit_required_confirms TEXT NOT NULL DEFAULT '', " +
+                        "create_time INTEGER NOT NULL, " +
+                        "deposit_amount DOUBLE NOT NULL, " +
+                        "swap_amount DOUBLE NOT NULL, " +
+                        "deposit_received_confirms TEXT NOT NULL DEFAULT '', " +
+                        "deposit_hash TEXT NOT NULL DEFAULT '', " +
+                        "swap_hash TEXT NOT NULL DEFAULT ''," +
+                        "exchange_gas_amount DOUBLE NOT NULL," +
+                        "token_per_bnb DOUBLE NOT NULL)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + BinanceHistoryDao.TABLE_NAME + "_id_key ON " + BinanceHistoryDao.TABLE_NAME + " (id_key)")
+
+            // Add default token for new blockchains
+            with(database.query("SELECT * FROM " + AccountsDao.TABLE_NAME)) {
+                if (count > 0) {
+                    Blockchain.values().filter { it != Blockchain.ETHEREUM }.forEach { blockchain ->
+                        moveToFirst()
+                        val descriptionValues = ContentValues().apply {
+                            put("address", "")
+                            put("decimals", 18)
+                            put("name", blockchain.token)
+                            put("symbol", blockchain.token)
+                            put("logo", "")
+                            put("blockchain", blockchain.name)
+                        }
+                        val descriptionId = database.insert(TokenDescriptionDao.TABLE_NAME, SQLiteDatabase.CONFLICT_IGNORE, descriptionValues)
+                        while (!isAfterLast) {
+                            val accountId = getLong(getColumnIndex("id"))
+                            val assetValues = ContentValues().apply {
+                                put("accountId", accountId)
+                                put("tokenDescriptionId", descriptionId)
+                                put("isPrimary", 1)
+                                put("isHidden", 0)
+                            }
+                            val assetId = database.insert(TokensDao.TABLE_NAME, SQLiteDatabase.CONFLICT_IGNORE, assetValues)
+                            val balanceValues = ContentValues().apply {
+                                put("tokenId", assetId)
+                                put("amount", 0)
+                                put("timestamp", 1)
+                            }
+                            database.insert(BalancesDao.TABLE_NAME, SQLiteDatabase.CONFLICT_IGNORE, balanceValues)
+                            moveToNext()
+                        }
+                    }
+                }
+            }
 
         }
+    }
+
+    private val MIGRATION_17_18 = object : Migration(17, 18) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE IF EXISTS dex_tokens")
+            database.execSQL(
+                "CREATE TABLE " + SwapTokensDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        "blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'," +
+                        "contract_address TEXT NOT NULL DEFAULT ''," +
+                        "name TEXT NOT NULL DEFAULT ''," +
+                        "symbol TEXT NOT NULL DEFAULT ''," +
+                        "icon TEXT NOT NULL DEFAULT ''," +
+                        "decimals INTEGER NOT NULL DEFAULT 18," +
+                        "timestamp INTEGER NOT NULL DEFAULT 0," +
+                        "price DOUBLE NOT NULL DEFAULT 0," +
+                        "volume_24h DOUBLE NOT NULL DEFAULT 0)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_swap_tokens_blockchain_contract_address ON " + SwapTokensDao.TABLE_NAME + " (blockchain,contract_address)")
+
+            database.execSQL("DROP TABLE IF EXISTS " + DexPricesDao.TABLE_NAME)
+            database.execSQL(
+                "CREATE TABLE " + DexPricesDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "blockchain TEXT NOT NULL," +
+                        "exchange TEXT NOT NULL, " +
+                        "dex TEXT NOT NULL, " +
+                        "price DOUBLE NOT NULL, " +
+                        "base TEXT NOT NULL, " +
+                        "quote TEXT NOT NULL, " +
+                        "scale INTEGER NOT NULL, " +
+                        "timestamp INTEGER NOT NULL, " +
+                        "marketImpact DOUBLE NOT NULL)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_dex_prices_blockchain_exchange_dex_base_quote_scale ON " + DexPricesDao.TABLE_NAME + " (blockchain,exchange,dex,base,quote,scale)")
+        }
+    }
+
+    private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
+        database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
+        database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
+        database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + LocalTransactionsDao.TABLE_NAME + "_hash ON " + LocalTransactionsDao.TABLE_NAME + " (hash)")
     }
 
     private fun dropAndCreateTransactionsDao(database: SupportSQLiteDatabase) {
@@ -211,6 +346,9 @@ object Database {
             .addMigrations(MIGRATION_12_13)
             .addMigrations(MIGRATION_13_14)
             .addMigrations(MIGRATION_14_15)
+            .addMigrations(MIGRATION_15_16)
+            .addMigrations(MIGRATION_16_17)
+            .addMigrations(MIGRATION_17_18)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

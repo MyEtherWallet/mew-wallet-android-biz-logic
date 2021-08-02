@@ -1,13 +1,22 @@
 package com.myetherwallet.mewwalletbl.data
 
+import com.myetherwallet.mewwalletbl.preference.Preferences
+import java.math.BigDecimal
 import java.util.*
+
+private const val BLOCKCHAIN = "{blockchain}"
 
 data class AnalyticsEvent internal constructor(
     val id: String,
     val timestamp: Date
 ) {
 
-    constructor(id: Id, timestamp: Date = Date()) : this(id.value, timestamp)
+    constructor(id: Id, timestamp: Date = Date()) : this(id,null, timestamp)
+
+    constructor(id: Id, blockchain: Blockchain? = null, timestamp: Date = Date()) : this(
+        if (id.value.contains(BLOCKCHAIN)) id.value.replace(BLOCKCHAIN, blockchain?.symbol ?: Preferences.persistent.getBlockchain().symbol, true) else id.value,
+        timestamp
+    )
 
     enum class Id(val value: String) {
         MAIN_ADD_ACCOUNT_CLICKED("Android-Main-AddAccount-clicked"),
@@ -41,25 +50,29 @@ data class AnalyticsEvent internal constructor(
         CAMERA_VALID_QR_CONNECTION_FAILED("Android-camera-valid-mewconnect-QRcode-scanned-connection-failed"),
         CAMERA_VALID_QR_CONNECTION_SUCCESS("Android-camera-valid-mewconnect-QRcode-scanned-connection-success"),
         CAMERA_VALID_QR_CONNECTING("Android-camera-valid-mewconnect-QRcode-scanned-connecting"),
-        EXCHANGE_SWAP_CLICKED("Android-ExchangeScreen-Swap-clicked"),
-        EXCHANGE_BUY_ETH_CLICKED("Android-ExchangeScreen-BuyEth-clicked"),
         EXCHANGE_MARKET_TOKEN_CLICKED("Android-ExchangeScreen-TokenMarket-clicked"),
         EXCHANGE_TOKEN_INFO_SWAP_CLICKED("Android-ExchangeScreen-TokenPopupSwap-clicked"),
-        SWAP_SHOWN("Android-Swap-MainScreen-shown"),
-        SWAP_LOW_LIQUIDITY("Android-Swap-MainScreen-LowLiquidity-shown"),
-        SWAP_MAX_CLICKED("Android-Swap-SwapTokensScreen-Max-clicked"),
-        SWAP_FIRST_TOKEN_CLICKED("Android-Swap-MainScreen-FirstFieldToken-clicked"),
-        SWAP_SECOND_TOKEN_CLICKED("Android-Swap-MainScreen-SecondFieldToken-clicked"),
-        SWAP_WANTED_TOKEN_SHOWN("Android-Swap-MainScreen-TokenYouWantToGetScreen-shown"),
-        SWAP_WANTED_TOKEN_SEARCH_CLICKED("Android-Swap-MainScreen-TokenYouWantToGetScreen-SearchIcon-clicked"),
-        SWAP_WANTED_TOKEN_CLICKED("Android-Swap-MainScreen-TokenYouWantToGetScreen-Token-clicked"),
-        SWAP_FIND_BEST_RATE_CLICKED("Android-Swap-MainScreen-FindBestRate-clicked"),
-        SWAP_PROVIDER_SHOWN("Android-Swap-SelectProviderScreen-shown"),
-        SWAP_PROVIDER_SELECTED("Android-Swap-SelectProviderScreen-provider-selected"),
-        SWAP_VERIFY_SHOWN("Swap-VerifySwapScreen-shown"),
-        SWAP_VERIFY_PROCEED_SWAP("Android-Swap-VerifySwapScreen-ProceedWithSwap-clicked"),
-        SWAP_INITIATED_SHOWN("Android-Swap-SwapInitiatedPopup-shown"),
-        SWAP_SUCCESS_EXECUTED("Android-Swap-successfully-executed"),
+
+        EXCHANGE_SWAP_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Swap-clicked"),
+        EXCHANGE_BUY_ETH_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Buy-clicked"),
+        SWAP_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-shown"),
+        SWAP_LOW_LIQUIDITY("Android-$BLOCKCHAIN-Swap-MainScreen-LowLiquidity-shown"),
+        SWAP_MAX_CLICKED("Android-$BLOCKCHAIN-Swap-SwapTokensScreen-Max-clicked"),
+        SWAP_FIRST_TOKEN_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-FirstFieldToken-clicked"),
+        SWAP_SECOND_TOKEN_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-SecondFieldToken-clicked"),
+        SWAP_WANTED_TOKEN_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-shown"),
+        SWAP_WANTED_TOKEN_SEARCH_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-SearchIcon-clicked"),
+        SWAP_WANTED_TOKEN_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-Token-clicked"),
+        SWAP_FIND_BEST_RATE_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-FindBestRate-clicked"),
+        SWAP_PROVIDER_SHOWN("Android-$BLOCKCHAIN-Swap-SelectProviderScreen-shown"),
+        SWAP_PROVIDER_SELECTED("Android-$BLOCKCHAIN-Swap-SelectProviderScreen-provider-selected"),
+        SWAP_VERIFY_SHOWN("Android-$BLOCKCHAIN-Swap-VerifySwapScreen-shown"),
+        SWAP_VERIFY_PROCEED_SWAP("Android-$BLOCKCHAIN-Swap-VerifySwapScreen-ProceedWithSwap-clicked"),
+        SWAP_INITIATED_SHOWN("Android-$BLOCKCHAIN-Swap-SwapInitiatedPopup-shown"),
+        SWAP_SUCCESS_EXECUTED("Android-$BLOCKCHAIN-Swap-successfully-executed"),
+        SWAP_VERIFY_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-VerifySwapScreen-FeeDisclaimer-Clicked"),
+        SWAP_VERIFY_CHOOSE_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-ChooseFeeOverlay-FeeDisclaimer-Clicked"),
+
         PUSH_NOTIFICATION_RECEIVED("Android-broadcast-push-notification-received"),
         COMIC_MAIN_CLICKED("Android-Main-Comic-banner-clicked"),
         COMIC_EDUCATION_CLICKED("Android-Education-center-Comic-banner-clicked"),
@@ -108,8 +121,6 @@ data class AnalyticsEvent internal constructor(
         MARKET_OVERVIEW_TOPLOSERS_CLICKED("Android-Market-Overview-TopLosers-Clicked"),
         MARKET_TOKEN_INFO_SWAP_CLICKED("Android-Market-TokenPopupSwap-Clicked"),
 
-        SWAP_VERIFY_FEE_DISCLAIMER_CLICKED("Android-Swap-VerifySwapScreen-FeeDisclaimer-Clicked"),
-        SWAP_VERIFY_CHOOSE_FEE_DISCLAIMER_CLICKED("Android-Swap-ChooseFeeOverlay-FeeDisclaimer-Clicked"),
         SEND_INPUT_FEE_DISCLAIMER_CLICKED("Android-SendInputScreen-FeeDisclaimer-Clicked"),
         SEND_CHOOSE_FEE_DISCLAIMER_CLICKED("Android-Send-ChooseFeeOverlay-FeeDisclaimer-Clicked"),
 
@@ -130,31 +141,34 @@ data class AnalyticsEvent internal constructor(
 
         SURVEY_SUBMIT_CLICKED("Android-Survey-Submit-Clicked"),
 
-        EXCHANGE_BINANCE_CLICKED("Android-ExchangeScreen-BinanceBridge-Clicked"),
-        BINANCE_MOVETOBSC_CLICKED("Android-Binance-MoveToBsc-Clicked"),
-        BINANCE_MOVETOETH_CLICKED("Android-Binance-MoveToEth-Clicked"),
+        EXCHANGE_BINANCE_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-BinanceBridge-Clicked"),
+        BINANCE_ACTIVEBRIDGESCREEN_SHOWN("Android-$BLOCKCHAIN-Binance-ActiveBridgesScreen-Shown"),
+        BINANCE_MAINSCREEN_SHOWN("Android-$BLOCKCHAIN-Binance-MainScreen-Shown"),
+        BINANCE_MOVETOBSCSCREEN_MAX_CLICKED("Android-$BLOCKCHAIN-Binance-MainScreen-Max-Clicked"),
+        BINANCE_MOVETOBSCSCREEN_TOKEN_CLICKED("Android-$BLOCKCHAIN-Binance-MainScreen-FieldToken-Clicked"),
+        BINANCE_WANTED_TOKEN_SHOWN("Android-$BLOCKCHAIN-Binance-MainScreen-TokenYouWantToMoveScreen-Shown"),
+        BINANCE_SUGGESTSWAP_SHOWN("Android-$BLOCKCHAIN-Binance-MainScreen-TokenYouWantToMoveScreen-SuggestSwapPopup-Shown"),
+        BINANCE_MOVETOBSCSCREEN_NEXT_CLICKED("Android-$BLOCKCHAIN-Binance-MainScreen-Next-Clicked"),
+        BINANCE_VERIFY_SHOWN("Android-$BLOCKCHAIN-Binance-VerifyTransferScreen-Shown"),
+        BINANCE_VERIFY_ERROR("Android-Binance-VerifyTransferScreen-CreateBridge-Error"),
+        BINANCE_GOTBNB_SHOWN("Android-Binance-GotBnbScreen-Shown"),
+        BINANCE_VERIFY_PROCEED_MOVE("Android-$BLOCKCHAIN-Binance-VerifyTransferScreen-ProceedWithTransfer-Clicked"),
+        BINANCE_INITIATED_SHOWN("Android-$BLOCKCHAIN-Binance-TransferInitiatedPopup-Shown"),
+        BINANCE_INITIATED_SEND_TRANSACTION_SUCCESS("Android-$BLOCKCHAIN-Binance-TransferInitiatedPopup-SendTransaction-Success"),
+        BINANCE_INITIATED_SEND_TRANSACTION_FAIL("Android-$BLOCKCHAIN-Binance-TransferInitiatedPopup-SendTransaction-Fail"),
+        BINANCE_DEPOSITDETAILS_SHOWN("Android-$BLOCKCHAIN-Binance-DepositDetailsScreen-Shown"),
 
-        BINANCE_MOVETOBSCSCREEN_SHOWN("Android-Binance-MoveToBscScreen-Shown"),
-        BINANCE_MOVETOBSCSCREEN_MAX_CLICKED("Android-Binance-MoveToBscScreen-Max-Clicked"),
-        BINANCE_MOVETOBSCSCREEN_TOKEN_CLICKED("Android-Binance-MoveToBscScreen-FieldToken-Clicked"),
-        BINANCE_WANTED_TOKEN_SHOWN("Android-Binance-MoveToBscScreen-TokenYouWantToMoveScreen-Shown"),
-        BINANCE_SUGGESTSWAP_SHOWN("Android-Binance-MoveToBscScreen-TokenYouWantToGetScreen-SuggestSwapPopup-Shown"),
-        BINANCE_MOVETOBSCSCREEN_NEXT_CLICKED("Android-Binance-MoveToBscScreen-Next-Clicked"),
-        BINANCE_VERIFY_SHOWN("Android-Binance-VerifyMoveScreen-Shown"),
-        BINANCE_YOURBSCADDRESSSCREEN_SHOWN("Android-Binance-YourBscAddressScreen-Shown"),
-        BINANCE_VERIFY_PROCEED_MOVE("Android-Binance-VerifyMoveScreen-ProceedWithMove-Clicked"),
-        BINANCE_INITIATED_SHOWN("Android-Binance-MoveInitiatedPopup-Shown"),
-        BINANCE_INITIATED_SEND_TRANSACTION_SUCCESS("Android-Binance-MoveInitiatedPopup-SendTransaction-Success"),
-        BINANCE_INITIATED_SEND_TRANSACTION_FAIL("Android-Binance-MoveInitiatedPopup-SendTransaction-Fail"),
-        BINANCE_DEPOSITDETAILS_SHOWN("Android-Binance-DepositDetailsScreen-Shown"),
+        BLOCKCHAIN_MAIN_SELECTOR_CLICKED("Android-Main-BlockchainSelector-Clicked"),
+        BLOCKCHAIN_SWAP_SELECTOR_CLICKED("Android-Swap-BlockchainSelector-Clicked"),
+        BLOCKCHAIN_MARKETS_SELECTOR_CLICKED("Android-Market-BlockchainSelector-Clicked"),
+        BLOCKCHAIN_EARN_SELECTOR_CLICKED("Android-Earn-BlockchainSelector-Clicked"),
+        BLOCKCHAIN_BROWSER_SELECTOR_CLICKED("Android-DAPP-BlockchainSelector-Clicked"),
 
-        BINANCE_MOVETOETHSCREEN_SHOWN("Android-Binance-MoveToEthScreen-Shown"),
-        BINANCE_MOVETOETH_DISCLAIMER_SHOWN("Android-Binance-MoveToEthScreen-Disclaimer-Shown"),
-        BINANCE_SENDETHSCREEN_SHOWN("Android-Binance-SendEthScreen-Shown"),
-        BINANCE_SENDETHSCREEN_DEPOSITADDRESS_SHOWN("Android-Binance-SendEthScreen-DepositAddress-Shown"),
-        BINANCE_SENDETHSCREEN_QR_SHOWN("Android-Binance-SendEthScreen-QrPopup-Shown"),
-        BINANCE_SENDETHSCREEN_COPYADDRESS_CLICKED("Android-Binance-SendEthScreen-CopyAddress-Clicked"),
-        BINANCE_SENDETHSCREEN_CHOOSEDEPOSIT_SHOWN("Android-Binance-SendEthScreen-ChooseDepositAddress-Shown")
+        BLOCKCHAIN_MAIN_CHANGED("Android-Main-Blockchain-Changed-$BLOCKCHAIN"),
+        BLOCKCHAIN_SWAP_CHANGED("Android-Swap-Blockchain-Changed-$BLOCKCHAIN"),
+        BLOCKCHAIN_MARKETS_CHANGED("Android-Market-Blockchain-Changed-$BLOCKCHAIN"),
+        BLOCKCHAIN_EARN_CHANGED("Android-Earn-Blockchain-Changed-$BLOCKCHAIN"),
+        BLOCKCHAIN_BROWSER_CHANGED("Android-DAPP-Blockchain-Changed-$BLOCKCHAIN")
 
     }
 
@@ -182,6 +196,8 @@ data class AnalyticsEvent internal constructor(
 
         fun createClickMarketCollectionTokenEvent(symbol: String) = AnalyticsEvent("Android-Market-Collection-${symbol.format()}-token-Clicked", Date())
 
-        private fun String?.format() = this?.toUpperCase(Locale.US)?.replace(" ", "_")
+        fun createBnbAmountSelectedEvent(amount: BigDecimal) = AnalyticsEvent("Android-Binance-GotBnbScreen-${amount.toPlainString()}BNB-Selected", Date())
+
+        fun String?.format() = this?.uppercase(Locale.US)?.replace(" ", "_")
     }
 }

@@ -5,7 +5,7 @@ import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
 
 data class MarketResponse(
     @SerializedName("results")
-    val results: List<MarketItem>,
+    val results: MutableList<MarketItem>,
     @SerializedName("paginationToken")
     val paginationToken: String?
 )
