@@ -12,13 +12,13 @@ import com.myetherwallet.mewwalletbl.data.database.EntityWallet
 abstract class WalletsDao : BaseDao<EntityWallet> {
 
     @Query("SELECT * FROM $TABLE_NAME")
-    abstract fun getAll(): List<EntityWallet>
+    abstract suspend fun getAll(): List<EntityWallet>
 
     @Query("SELECT COUNT(id) FROM $TABLE_NAME")
-    abstract fun getCount(): Int
+    abstract suspend fun getCount(): Int
 
     @Query("SELECT id FROM $TABLE_NAME LIMIT 1")
-    abstract fun getFirstId(): Long?
+    abstract suspend fun getFirstId(): Long?
 
     companion object {
         const val TABLE_NAME: String = "wallets"

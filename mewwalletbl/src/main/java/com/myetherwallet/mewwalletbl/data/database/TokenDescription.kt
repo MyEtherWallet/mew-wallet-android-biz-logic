@@ -22,12 +22,12 @@ data class TokenDescription(
         entity.address
     )
 
-    constructor(data: ExtTokenDescription) : this(
+    constructor(data: SwapTokenDescription) : this(
         data.id,
         data.decimals,
         data.name,
         data.symbol,
-        data.logo,
-        data.contract
+        data.icon,
+        data.contractAddress
     )
 }

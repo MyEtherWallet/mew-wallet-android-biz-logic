@@ -1,15 +1,29 @@
 package com.myetherwallet.mewwalletbl.util
 
+import android.R
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.content.res.Resources
+import android.content.res.TypedArray
 import android.os.Build
 import android.telephony.TelephonyManager
+import android.text.TextUtils
+import android.util.Log
+import android.util.TypedValue
+import androidx.fragment.app.Fragment
+import com.myetherwallet.mewwalletbl.AppActivityImpl
+import com.myetherwallet.mewwalletbl.core.api.Failure
+import com.myetherwallet.mewwalletbl.core.persist.database.Database
+import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
 import com.myetherwallet.mewwalletbl.preference.Preferences
+import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import retrofit2.HttpException
+import java.math.BigDecimal
 import java.util.*
+
 
 /**
  * Created by BArtWell on 24.02.2020.
@@ -17,11 +31,37 @@ import java.util.*
 
 object ApplicationUtils {
 
+    const val ETHERIUM_ICON_URL = "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/ETH-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png"
+
+    fun getDeviceName(): String {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+
+        val deviceInfo: String
+        val manufacturerLength = if (TextUtils.isEmpty(manufacturer)) 0 else manufacturer.length
+        val manufacturerFromModel = if (model.length > manufacturerLength)
+            TextUtils.substring(model, 0, manufacturerLength)
+        else
+            ""
+        deviceInfo = if (TextUtils.equals(manufacturer, manufacturerFromModel)) {
+            model
+        } else {
+            "$manufacturer $model"
+        }
+        return deviceInfo
+    }
+
+    private fun getSamsungBlockchainStatusInfo() = if (Preferences.main.getStorageType() == KeysStorageType.SAMSUNG) {
+        ", Samsung Blockchain v. " + SamsungBlockchainUtils.getApiLevel() + " linked"
+    } else {
+        ""
+    }
+
     fun getCountryIso(context: Context): String {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val networkCountryIso = telephonyManager.networkCountryIso
         return if (networkCountryIso.isEmpty()) {
-            Locale.getDefault().country
+            getSystemLocale().country
         } else {
             networkCountryIso
         }
@@ -37,7 +77,30 @@ object ApplicationUtils {
         else -> AppLanguage.ENGLISH
     }
 
-    private fun getSystemLocale(): Locale {
+    fun getCurrency(): AppCurrency {
+        val currency = try {
+            Currency.getInstance(Locale.getDefault())
+        } catch (e: Exception) {
+            Currency.getInstance(Locale.US)
+        }
+        return when (currency.currencyCode) {
+            "EUR" -> AppCurrency.EUR
+            "RUB" -> AppCurrency.RUB
+            else -> AppCurrency.USD
+        }
+    }
+
+    fun getCurrencyAndRate(): Pair<AppCurrency, BigDecimal> {
+        val currentCurrency = Preferences.persistent.getAppCurrency()
+        val savedCurrency = Database.instance.getCurrencyDao().get(currentCurrency.name)?.exchangeRate
+        if (savedCurrency == null) {
+            return AppCurrency.getDefault()
+        } else {
+            return Pair(currentCurrency, savedCurrency)
+        }
+    }
+
+    fun getSystemLocale(): Locale {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             return Resources.getSystem().configuration.locales[0]
         } else {
@@ -46,12 +109,14 @@ object ApplicationUtils {
         }
     }
 
-    fun setAppLocale(context: Context, language: AppLanguage) {
-        val locale = Locale(language.code)
-        val config = Configuration(context.resources.configuration)
-        Locale.setDefault(locale)
-        config.setLocale(locale)
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+    fun getAppInstallTime(context: Context) = try {
+        context
+            .packageManager
+            .getPackageInfo(context.packageName, 0)
+            .firstInstallTime
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 
     fun restartApp(context: Context) {
@@ -61,5 +126,44 @@ object ApplicationUtils {
         val mainIntent = Intent.makeRestartActivityTask(componentName)
         context.startActivity(mainIntent)
         Runtime.getRuntime().exit(0)
+    }
+
+    fun sendFailureToSentry(activity: Activity?, failure: Failure, hint: String) {
+        failure.throwable?.let { throwable ->
+            val hintWithMessage = if (throwable is HttpException) {
+                hint + " [" + throwable.response() + "]"
+            } else {
+                hint
+            }
+            sendMessageToSentry(activity, hintWithMessage + "\n\n" + Log.getStackTraceString(throwable))
+        }
+    }
+
+    fun sendExceptionToSentry(activity: Activity?, throwable: Throwable, hint: String? = null) {
+        if (activity is AppActivityImpl) {
+            activity.sendExceptionToSentry(throwable, hint)
+        }
+    }
+
+    fun sendMessageToSentry(activity: Activity?, report: String) {
+        if (activity is AppActivityImpl) {
+            activity.sendMessageToSentry(report)
+        }
+    }
+
+    fun shareAddress(fragment: Fragment, address: Address, title: String) {
+        val intent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, address.address)
+            type = "text/plain"
+        }
+        fragment.startActivityForResult(Intent.createChooser(intent, title), 0)
+    }
+
+    fun fetchAccentColor(context: Context): Int {
+        val typedArray: TypedArray = context.obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
+        val color = typedArray.getColor(0, 0)
+        typedArray.recycle()
+        return color
     }
 }

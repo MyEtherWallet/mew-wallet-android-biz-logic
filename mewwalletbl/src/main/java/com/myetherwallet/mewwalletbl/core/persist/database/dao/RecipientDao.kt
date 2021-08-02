@@ -10,12 +10,12 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 abstract class RecipientDao : BaseDao<EntityRecipient> {
 
     @Query("SELECT * FROM $TABLE_NAME")
-    abstract fun getAll(): List<EntityRecipient>
+    abstract suspend fun getAll(): List<EntityRecipient>
 
     @Query("SELECT id FROM $TABLE_NAME WHERE address=:address")
-    abstract fun get(address: Address): Long?
+    abstract suspend fun get(address: Address): Long?
 
-    fun getExistsIdOrInsert(address: Address): Long {
+    suspend fun getExistsIdOrInsert(address: Address): Long {
         val id = Database.instance.getRecipientDao().insertOrIgnore(EntityRecipient(address))
         return if (id == -1L) {
             Database.instance.getRecipientDao().get(address)!!

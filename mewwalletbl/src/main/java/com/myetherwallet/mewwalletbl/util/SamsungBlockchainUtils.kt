@@ -10,12 +10,10 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.bip.bip44.Network
 import com.myetherwallet.mewwalletkit.core.extension.encode
 import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
-import com.myetherwallet.mewwalletkit.core.extension.toByteArrayWithoutLeadingZeroByte
+import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
-import com.samsung.android.sdk.coldwallet.ScwCoinType
-import com.samsung.android.sdk.coldwallet.ScwDeepLink
-import com.samsung.android.sdk.coldwallet.ScwErrorCode
-import com.samsung.android.sdk.coldwallet.ScwService
+import com.myetherwallet.mewwalletkit.eip.eip155.TransactionSignature
+import com.samsung.android.sdk.coldwallet.*
 import com.samsung.android.sdk.coldwallet.ScwService.ScwSignEthPersonalMessageCallback
 import java.math.BigInteger
 import java.util.concurrent.CountDownLatch
@@ -26,6 +24,7 @@ import java.util.concurrent.CountDownLatch
  */
 
 private const val TAG = "SamsungBlockchainUtils"
+private const val SDK_MIN_VERSION = 1
 
 object SamsungBlockchainUtils {
 
@@ -36,7 +35,11 @@ object SamsungBlockchainUtils {
     fun isAvailable() = getInstance() != null
 
     fun checkInitialized(): State? {
-        val seedHash = getInstance().seedHash
+        val seedHash = try {
+            getInstance().seedHash
+        } catch (e: Exception) {
+            null
+        }
         if (seedHash.isNullOrEmpty()) {
             return State.NOT_INITIALIZED
         } else {
@@ -67,19 +70,27 @@ object SamsungBlockchainUtils {
         cachedAddress = null
     }
 
+    fun getApiLevel() = getInstance().keystoreApiLevel
+
     fun checkUpdated(callback: () -> Unit) {
         MewLog.d(TAG, "Checking for update")
-        val updateCallback = object : ScwService.ScwCheckForMandatoryAppUpdateCallback() {
-            override fun onMandatoryAppUpdateNeeded(needed: Boolean) {
-                if (needed) {
-                    MewLog.d(TAG, "Update needed. Open Samsung Keystore application and update it")
-                    callback()
-                } else {
-                    MewLog.d(TAG, "Already updated")
+        val keystoreApiLevel = getApiLevel()
+        if (keystoreApiLevel >= SDK_MIN_VERSION) {
+            val updateCallback = object : ScwService.ScwCheckForMandatoryAppUpdateCallback() {
+                override fun onMandatoryAppUpdateNeeded(needed: Boolean) {
+                    if (needed) {
+                        MewLog.d(TAG, "Update needed (mandatory update requested). Open Samsung Keystore application and update it")
+                        callback()
+                    } else {
+                        MewLog.d(TAG, "Already updated")
+                    }
                 }
             }
+            getInstance().checkForMandatoryAppUpdate(updateCallback)
+        } else {
+            MewLog.d(TAG, "Update needed (keystore version less minimal $keystoreApiLevel). Open Samsung Keystore application and update it")
+            callback()
         }
-        getInstance().checkForMandatoryAppUpdate(updateCallback)
     }
 
     fun startDeepLink(context: Context?, deepLink: DeepLink) {
@@ -126,7 +137,12 @@ object SamsungBlockchainUtils {
                     errorCallback?.invoke(errorCode, errorMessage ?: "Unknown error")
                 }
             }
-            getInstance().getAddressList(callback, arrayListOf(ScwService.getHdPath(ScwCoinType.ETH, index), Network.ANONYMIZED_ID.path + "/" + index))
+            try {
+                getInstance().getAddressList(callback, arrayListOf(ScwService.getHdPath(ScwCoinType.ETH, index), Network.ANONYMIZED_ID.path + "/" + index))
+            } catch (e: ScwApiLevelException) {
+                MewLog.d(TAG, "Keystore is outdated", e)
+                errorCallback?.invoke(-998, "Keystore is outdated")
+            }
         }
     }
 
@@ -177,7 +193,14 @@ object SamsungBlockchainUtils {
         val signCallback = object : ScwService.ScwSignEthTransactionCallback() {
             override fun onSuccess(signed: ByteArray) {
                 MewLog.d(TAG, "Sign success")
-                callback(fixV(signed, transaction.chainId!!))
+                val chainId = transaction.chainId!!
+                // Samsung encoding V field incorrectly
+                val v = getFixedV(signed, chainId)
+                // Length can be changed during fix, so we need to rebuild transaction
+                transaction.signature = parseSignature(signed, v, chainId)
+                val encoded = transaction.encode()!!
+                MewLog.d(TAG, "Signature " + encoded.toHexString())
+                callback(encoded)
             }
 
             override fun onFailure(errorCode: Int, errorMessage: String?) {
@@ -185,7 +208,15 @@ object SamsungBlockchainUtils {
                 callback(null)
             }
         }
-        getInstance().signEthTransaction(signCallback, transaction.encode()!!, ScwService.getHdPath(ScwCoinType.ETH, index))
+        getInstance().signEthTransaction(signCallback, transaction.encode()!!, ScwService.getHdPath(ScwCoinType.ETH, index), transaction.chainId!!.toLong())
+    }
+
+    private fun parseSignature(signedTransaction: ByteArray, v: BigInteger, chainId: BigInteger): TransactionSignature {
+        val signedTransactionLength = signedTransaction.size
+        val rStart = signedTransactionLength - 65
+        val r = signedTransaction.copyOfRange(rStart, rStart + 32)
+        val s = signedTransaction.copyOfRange(signedTransactionLength - 32, signedTransactionLength)
+        return TransactionSignature(r, s, v, chainId)
     }
 
     fun sign(index: Int, message: MessageToSign, callback: (ByteArray?) -> Unit) {
@@ -203,14 +234,9 @@ object SamsungBlockchainUtils {
         getInstance().signEthPersonalMessage(signCallback, message.text.hexToByteArray(), ScwService.getHdPath(ScwCoinType.ETH, index))
     }
 
-    private fun fixV(encoded: ByteArray, chainId: BigInteger): ByteArray {
+    private fun getFixedV(encoded: ByteArray, chainId: BigInteger): BigInteger {
         val position = encoded.size - 67
-        val normalizedV = normalizeV(encoded[position], chainId)
-        var signedTransaction = byteArrayOf()
-        signedTransaction += encoded.copyOfRange(0, position)
-        signedTransaction += normalizedV.toByteArrayWithoutLeadingZeroByte()
-        signedTransaction += encoded.copyOfRange(position + 1, encoded.size)
-        return signedTransaction
+        return normalizeV(encoded[position], chainId)
     }
 
     private fun normalizeV(vByte: Byte, chainId: BigInteger): BigInteger {

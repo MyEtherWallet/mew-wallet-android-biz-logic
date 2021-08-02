@@ -2,9 +2,12 @@ package com.myetherwallet.mewwalletbl.data.database
 
 import android.os.Parcelable
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
+import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toTokenValue
 import kotlinx.android.parcel.Parcelize
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 
@@ -15,6 +18,7 @@ import java.util.*
 @Parcelize
 open class BalanceInfo(
     val id: Long,
+    val descriptionId: Long,
     val amount: BigInteger,
     val decimals: Int,
     val name: String,
@@ -23,13 +27,19 @@ open class BalanceInfo(
     val contract: Address,
     val timestamp: Date,
     val address: Address,
-    val price: Double,
+    val price: BigDecimal,
+    val isHiddenToken: Boolean,
     @ColumnInfo(name = "anonymous_id")
-    val anonymousId: String
+    val anonymousId: String,
+    @Ignore
+    var currency: AppCurrency = AppCurrency.USD,
+    @Ignore
+    var exchangeRate: BigDecimal = BigDecimal.ONE
 ) : Parcelable {
 
     constructor(ext: ExtBalanceInfo) : this(
         ext.id,
+        ext.descriptionId,
         ext.amount,
         ext.decimals,
         ext.name,
@@ -39,7 +49,10 @@ open class BalanceInfo(
         ext.timestamp,
         ext.address,
         ext.price,
-        ext.anonymousId
+        ext.isHiddenToken,
+        ext.anonymousId,
+        ext.currency,
+        ext.exchangeRate
     )
 
     fun getBalance() = amount.toTokenValue(decimals)

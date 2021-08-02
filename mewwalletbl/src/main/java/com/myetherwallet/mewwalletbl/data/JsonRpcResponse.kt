@@ -6,7 +6,9 @@ import com.google.gson.annotations.SerializedName
  * Created by BArtWell on 13.09.2019.
  */
 
-open class JsonRpcResponse(
+open class JsonRpcResponse<T>(
     @SerializedName("result")
-    var result: String?
+    var result: T?,
+    @SerializedName("error")
+    var error: JsonRpcResponseError?
 )

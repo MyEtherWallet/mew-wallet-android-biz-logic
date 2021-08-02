@@ -2,12 +2,12 @@ package com.myetherwallet.mewwalletbl.core.api
 
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.analytics.AnalyticsApiRepository
-import com.myetherwallet.mewwalletbl.core.api.dex.DexApiRepository
+import com.myetherwallet.mewwalletbl.core.api.dappradar.DappRadarRepository
 import com.myetherwallet.mewwalletbl.core.api.mew.MewApiRepository
+import com.myetherwallet.mewwalletbl.core.api.node.EstimatedGasApiRepository
 import com.myetherwallet.mewwalletbl.core.api.node.NodeApiRepository
 import com.myetherwallet.mewwalletbl.core.api.wyre.WyreApiRepository
 import com.myetherwallet.mewwalletbl.core.persist.database.Database
-import com.myetherwallet.mewwalletbl.core.api.node.EstimatedGasApiRepository
 import kotlinx.coroutines.*
 
 /**
@@ -15,14 +15,14 @@ import kotlinx.coroutines.*
  */
 private const val TAG = "BaseInteractor"
 
-abstract class BaseInteractor<out Type, in Params> where Type : Any {
+abstract class BaseInteractor<out Type, in Params>(private val viewModelScope: CoroutineScope? = null) where Type : Any {
 
     val nodeApiRepository by lazy { NodeApiRepository(ApiManager.getNodeApi()) }
     val mewApiRepository by lazy { MewApiRepository(ApiManager.getMewApi()) }
-    val dexApiRepository by lazy { DexApiRepository(ApiManager.getDexApi()) }
     val analyticsApiRepository by lazy { AnalyticsApiRepository(ApiManager.getAnalyticsApi()) }
     val wyreApiRepository by lazy { WyreApiRepository(ApiManager.getWyreApi()) }
     val estimatedGasApiRepository by lazy { EstimatedGasApiRepository(ApiManager.getEstimatedGasApi()) }
+    val dappRadarApiRepository by lazy { DappRadarRepository(ApiManager.getDappRadarApi()) }
 
     abstract suspend fun run(params: Params): Either<Failure, Type>
 
@@ -39,7 +39,8 @@ abstract class BaseInteractor<out Type, in Params> where Type : Any {
                 }
             }
         }
-        GlobalScope.launch(Dispatchers.Main) { onResult.invoke(job.await()) }
+        val scope = viewModelScope ?: GlobalScope
+        scope.launch(Dispatchers.IO) { onResult.invoke(job.await()) }
     }
 
     fun executeSync(params: Params): Either<Failure, Type> {

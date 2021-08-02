@@ -22,12 +22,20 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntityTokenDescription::class,
         EntityTransaction::class,
         EntityRecent::class,
-        EntityDexToken::class,
         EntityDexPrice::class,
-        EntityMarket::class,
         EntitySwap::class,
         EntityWallet::class,
-        EntityPurchase::class
+        EntityPurchase::class,
+        EntityPriceHistory::class,
+        EntityStakedInfo::class,
+        EntityDapp::class,
+        EntityBrowserFavorite::class,
+        EntityBrowserRecent::class,
+        EntityDappRadar::class,
+        EntityExchangeRates::class,
+        EntityBinanceHistory::class,
+        EntityLocalTransaction::class,
+        EntitySwapToken::class
     ], version = MewDatabase.DB_VERSION
 )
 @TypeConverters(
@@ -36,7 +44,9 @@ import com.myetherwallet.mewwalletbl.data.database.*
     BigDecimalConverter::class,
     AddressTypeConverter::class,
     TransactionStatusTypeConverter::class,
-    PurchaseStateTypeConverter::class
+    PurchaseStateTypeConverter::class,
+    StakedStatusConverter::class,
+    MoveStatusConverter::class
 )
 abstract class MewDatabase : RoomDatabase() {
 
@@ -58,11 +68,7 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getTransactionsDao(): TransactionsDao
 
-    abstract fun getDexTokens(): DexTokensDao
-
     abstract fun getDexPrices(): DexPricesDao
-
-    abstract fun getMarket(): MarketDao
 
     abstract fun getExchangeDao(): ExchangeDao
 
@@ -70,8 +76,28 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getPurchaseDao(): PurchaseDao
 
+    abstract fun getPriceHistoryDao(): PriceHistoryDao
+
+    abstract fun getStakedHistoryDao(): StakedHistoryDao
+
+    abstract fun getDappDao(): DappDao
+
+    abstract fun getBrowserFavoriteDao(): BrowserFavoriteDao
+
+    abstract fun getBrowserRecentDao(): BrowserRecentDao
+
+    abstract fun getDappRadarDao(): DappRadarDao
+
+    abstract fun getCurrencyDao(): CurrencyDao
+
+    abstract fun getBinanceHistoryDao(): BinanceHistoryDao
+
+    abstract fun getLocalTransactionsDao(): LocalTransactionsDao
+
+    abstract fun getSwapTokensDao(): SwapTokensDao
+
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 6
+        const val DB_VERSION = 18
     }
 }

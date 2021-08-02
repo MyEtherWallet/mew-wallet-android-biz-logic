@@ -13,17 +13,18 @@ import java.util.*
 
 class DateDeserializer : JsonDeserializer<Date> {
 
-    private var dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-
-    init {
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-    }
+    private val formatStrings = listOf("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss")
 
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Date? {
-        json?.asString?.let {
-            try {
-                return dateFormat.parse(it)
-            } catch (e: Exception) {
+        json?.asString?.let { value ->
+            formatStrings.forEach { pattern ->
+                with(SimpleDateFormat(pattern, Locale.US)) {
+                    try {
+                        timeZone = TimeZone.getTimeZone("UTC")
+                        return parse(value)
+                    } catch (e: Exception) {
+                    }
+                }
             }
         }
         return null

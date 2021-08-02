@@ -2,6 +2,7 @@ package com.myetherwallet.mewwalletbl.data
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.myetherwallet.mewwalletkit.core.extension.*
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -14,4 +15,16 @@ data class MessageToSign(
     val hash: String,
     @SerializedName("text")
     val text: String
-) : Parcelable
+) : Parcelable {
+
+    companion object {
+
+        fun calculateHash(text: String): ByteArray {
+            return if (text.isHex(true)) {
+                text.removeHexPrefix().hexToByteArray().hashPersonalMessage()
+            } else {
+                text.hashPersonalMessage()
+            }
+        }
+    }
+}

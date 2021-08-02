@@ -2,7 +2,6 @@ package com.myetherwallet.mewwalletbl.core.json
 
 import com.google.gson.*
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
-import com.myetherwallet.mewwalletkit.core.extension.hexToBigInteger
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.lang.reflect.Type
 import java.math.BigInteger
@@ -14,10 +13,11 @@ import java.math.BigInteger
 class TransactionDeserializer : JsonDeserializer<Transaction> {
 
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Transaction? {
-        val gasLimit = if (json?.asJsonObject?.has("gasLimit") == true) {
-            json.asJsonObject?.get("gasLimit")?.asString?.hexToBigInteger()!!
-        } else if (json?.asJsonObject?.has("gas") == true) {
-            json.asJsonObject?.get("gas")?.asString?.hexToBigInteger()!!
+        val jsonObject = json?.asJsonObject
+        val gasLimit = if (jsonObject?.has("gasLimit") == true) {
+            BigIntegerSerializer.hexToBigInteger(json.asJsonObject?.get("gasLimit")!!)
+        } else if (jsonObject?.has("gas") == true) {
+            BigIntegerSerializer.hexToBigInteger(json.asJsonObject?.get("gas")!!)
         } else {
             BigInteger.ZERO
         }
@@ -28,6 +28,12 @@ class TransactionDeserializer : JsonDeserializer<Transaction> {
             .create()
         val transaction = gson.fromJson(json, Transaction::class.java)
         transaction.gasLimit = gasLimit
+        if (jsonObject?.has("nonce") != true || jsonObject.get("nonce")?.isJsonNull == true) {
+            transaction.nonce = BigInteger.ZERO
+        }
+        if (jsonObject?.has("data") != true || jsonObject.get("data")?.isJsonNull == true) {
+            transaction.data = byteArrayOf()
+        }
         return transaction
     }
 }

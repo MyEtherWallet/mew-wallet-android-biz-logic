@@ -10,7 +10,7 @@ import java.math.BigInteger
  * Created by BArtWell on 13.09.2019.
  */
 
-class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse) {
+class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<String>) {
 
     private val endOfDataIndex = jsonRpcResponse.result!!.lastIndexOf("01")
     private var offset = endOfDataIndex

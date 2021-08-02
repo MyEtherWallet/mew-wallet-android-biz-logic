@@ -48,9 +48,13 @@ class PinEncryptHelper(context: Context, private val pinString: String, encryptS
         val encryptedMasterKey = AES.encrypt(masterKey, accessKey)
         encryptStorage.setAccessKey(encryptedAccessKey, KeyType.PIN)
         encryptStorage.setMasterKey(encryptedMasterKey, KeyType.PIN)
-        encryptStorage.setSignature(signPin(), KeyType.PIN)
+        setSignature()
 
         KeyIntegrityUtils.saveBackupKeys(context, encryptStorage, accessKey, true)
+    }
+
+    fun setSignature() {
+        encryptStorage.setSignature(signPin(), KeyType.PIN)
     }
 
     private fun generateMasterKey(): ByteArray {

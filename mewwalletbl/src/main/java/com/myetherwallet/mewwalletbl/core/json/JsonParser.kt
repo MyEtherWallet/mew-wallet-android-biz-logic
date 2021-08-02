@@ -6,8 +6,11 @@ import com.google.gson.JsonElement
 import com.myetherwallet.mewwalletbl.data.EncryptedMessage
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
+import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.lang.reflect.Type
+import java.math.BigDecimal
 import java.math.BigInteger
 
 /**
@@ -18,6 +21,7 @@ object JsonParser {
 
     private val gson: Gson = GsonBuilder()
         .registerTypeAdapter(BigInteger::class.java, BigIntegerSerializer())
+        .registerTypeAdapter(BigDecimal::class.java, BigDecimalSerializer())
         .registerTypeAdapter(ByteArray::class.java, ByteArraySerializer())
         .registerTypeAdapter(EncryptedMessage::class.java, EncryptedMessageSerializer())
         .registerTypeAdapter(Address::class.java, AddressSerializer())
@@ -39,4 +43,18 @@ object JsonParser {
     fun <T> toJson(data: T): String = gson.toJson(data)
 
     fun <T> toJsonObject(data: T) = JSONObject(toJson(data))
+
+    fun isObject(json: String): Boolean = try {
+        JSONObject(json)
+        true
+    } catch (e: JSONException) {
+        false
+    }
+
+    fun isArray(json: String): Boolean = try {
+        JSONArray(json)
+        true
+    } catch (e: JSONException) {
+        false
+    }
 }

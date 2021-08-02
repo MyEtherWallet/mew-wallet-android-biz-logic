@@ -2,6 +2,7 @@ package com.myetherwallet.mewwalletbl.preference
 
 import android.content.Context
 import android.util.Base64
+import java.util.*
 
 private const val PREFERENCES_NAME = "wallet"
 private const val MNEMONIC = "mnemonic"
@@ -16,8 +17,15 @@ class WalletPreferences internal constructor(context: Context) {
         preferences.edit().putString(PREFIX_PRIVATE_KEY + address, Base64.encodeToString(privateKey, Base64.DEFAULT)).apply()
     }
 
-    fun getPrivateKey(address: String) = preferences.getString(PREFIX_PRIVATE_KEY + address, null)?.let {
-        Base64.decode(it, Base64.DEFAULT)
+    fun getPrivateKey(address: String): ByteArray? {
+        for ((key, value) in preferences.all) {
+            if (key.lowercase(Locale.US) == (PREFIX_PRIVATE_KEY + address).lowercase(Locale.US)) {
+                return (value as String?)?.let {
+                    Base64.decode(it, Base64.DEFAULT)
+                }
+            }
+        }
+        return null
     }
 
     fun setMnemonic(mnemonic: ByteArray) {

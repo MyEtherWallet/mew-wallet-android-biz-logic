@@ -1,0 +1,7 @@
+<resources>
+    <string name="service_notification_channel_name" comment="Service notification - channel name (system settings)">Сервис подключения MEWconnect</string>
+    <string name="service_notification_channel_description" comment="Service notification - channel description (system settings)">Отображается при подключении приложения</string>
+    <string name="service_notification_title" comment="Service notification - title">MEWconnect</string>
+    <string name="service_notification_text" comment="Service notification - text">Подключен</string>
+    <string name="service_notification_disconnect" comment="Service notification - button">Отключиться</string>
+</resources>

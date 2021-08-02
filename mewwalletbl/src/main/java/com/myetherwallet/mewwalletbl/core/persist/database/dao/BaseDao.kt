@@ -23,6 +23,12 @@ interface BaseDao<T> {
     @Insert
     fun insert(vararg obj: T): LongArray
 
+    @Insert
+    fun insert(obj: List<T>): LongArray
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertOrIgnore(obj: List<T>): LongArray
+
     @Update
     fun update(obj: T)
 

@@ -7,7 +7,7 @@ import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-class Contact private constructor(
+class Contact constructor(
     var address: Address?,
     var ens: String? = null,
     var name: String? = null

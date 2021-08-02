@@ -34,7 +34,7 @@ class MessageCrypt(private val privateKey: String) {
 
     fun signMessage(data: String): String {
         val hash = data.hashPersonalMessage()
-        val signature = hash?.secp256k1RecoverableSign(this.privateKey.hexToByteArray())
+        val signature = hash.secp256k1RecoverableSign(this.privateKey.hexToByteArray())
         val serialized = signature?.secp256k1SerializeSignature()
         val cropped = serialized!!.copyOfRange(0, 64)
         return (byteArrayOf((serialized[64].toInt() + 27).toByte()) + cropped).toHexString()

@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application>
+        <meta-data android:name="scw_app_id" android:value="${samsungBlockchainAppId}" />
 
         <provider
                 android:name=".MewWalletBlProvider"

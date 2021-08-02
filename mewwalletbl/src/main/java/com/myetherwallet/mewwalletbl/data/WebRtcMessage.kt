@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
  */
 
 data class WebRtcMessage<T>(
-    val type: Type,
+    val type: Type?,
     val data: T
 ) : BaseMessage() {
 
@@ -19,6 +19,12 @@ data class WebRtcMessage<T>(
         @SerializedName("signMessage")
         SIGN_MESSAGE,
         @SerializedName("reject")
-        REJECT
+        REJECT,
+        @SerializedName("eth_getEncryptionPublicKey")
+        GET_ENCRYPTION_PUBLIC_KEY,
+        @SerializedName("eth_decrypt")
+        DECRYPT,
+        @SerializedName("eth_signTypedData_v3")
+        SIGN_TYPED_DATA_V3
     }
 }

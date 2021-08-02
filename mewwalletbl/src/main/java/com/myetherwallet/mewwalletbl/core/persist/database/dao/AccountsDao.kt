@@ -12,26 +12,29 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 @Dao
 abstract class AccountsDao : BaseDao<EntityAccount> {
 
-    @Query("SELECT * FROM $TABLE_NAME WHERE address=:address")
-    abstract fun get(address: Address): EntityAccount?
+    @Query("SELECT * FROM $TABLE_NAME WHERE address=:address COLLATE NOCASE")
+    abstract suspend fun get(address: Address): EntityAccount?
 
     @Query("SELECT * FROM $TABLE_NAME ORDER BY position ASC")
-    abstract fun getAll(): List<EntityAccount>
+    abstract suspend fun getAll(): List<EntityAccount>
 
     @Query("SELECT COUNT(id) FROM $TABLE_NAME")
-    abstract fun getCount(): Int
+    abstract suspend fun getCount(): Int
 
     @Query("SELECT MAX(id) FROM $TABLE_NAME")
-    abstract fun getLastId(): Int?
+    abstract suspend fun getLastId(): Int?
 
-    @Query("INSERT INTO $TABLE_NAME VALUES(null,(SELECT COUNT(*) FROM $TABLE_NAME)+1,:walletId,:address,:name,0,:anonymousId,'')")
-    abstract fun insert(walletId: Long, address: String, name: String, anonymousId: String): Long
+    @Query("INSERT INTO $TABLE_NAME VALUES(null,(SELECT COUNT(*) FROM $TABLE_NAME)+1,:walletId,:address,:name,0,:anonymousId,'',:eth2Address)")
+    abstract suspend fun insert(walletId: Long, address: String, name: String, anonymousId: String, eth2Address: String): Long
 
     @Query("UPDATE $TABLE_NAME SET address=:address WHERE id=:id")
-    abstract fun updateAddress(id: Int, address: String)
+    abstract suspend fun updateAddress(id: Int, address: String)
+
+    @Query("UPDATE $TABLE_NAME SET eth2_address=:eth2Address WHERE id=:id")
+    abstract suspend fun updateEth2Address(id: Long, eth2Address: String)
 
     @Query("SELECT * FROM $TABLE_NAME ORDER BY id LIMIT 1")
-    abstract fun getFirst(): EntityAccount?
+    abstract suspend fun getFirst(): EntityAccount?
 
     companion object {
         const val TABLE_NAME: String = "accounts"
