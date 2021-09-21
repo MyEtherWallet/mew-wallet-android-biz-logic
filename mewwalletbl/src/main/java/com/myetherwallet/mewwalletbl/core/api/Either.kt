@@ -1,7 +1,5 @@
 package com.myetherwallet.mewwalletbl.core.api
 
-import kotlin.coroutines.suspendCoroutine
-
 /**
  * Created by BArtWell on 13.09.2019.
  */
@@ -16,7 +14,7 @@ sealed class Either<out L, out R> {
     fun <L> left(a: L) = Left(a)
     fun <R> right(b: R) = Right(b)
 
-    fun either(fnL: (L) -> Any, fnR: (R) -> Any): Any =
+    fun either(fnL: (L) -> Unit, fnR: (R) -> Unit): Any =
         when (this) {
             is Left -> fnL(a)
             is Right -> fnR(b)

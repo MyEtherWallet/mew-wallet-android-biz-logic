@@ -28,6 +28,14 @@ class NodeApiRepository(private val service: NodeApi) {
         }
     }
 
+    fun getBlockByNumberWithTransactions(block: String, blockchain: Blockchain? = null): Either<Failure, BlockResponseWithTransactions> {
+        val jsonRpc = JsonRpcRequest<Any>(JsonRpcRequest.Method.GET_BLOCK_BY_NUMBER.methodName, listOf(block, true))
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> request(service.getBlockByNumberWithTransactions(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc)) { it.result!! }
+            false, null -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
     fun getGasPrice(blockchain: Blockchain? = null): Either<Failure, BigInteger> {
         val jsonRpc = JsonRpcRequest<Unit>(JsonRpcRequest.Method.GAS_PRICE.methodName, emptyList())
         return when (NetworkHandler.isNetworkConnected()) {
@@ -52,18 +60,18 @@ class NodeApiRepository(private val service: NodeApi) {
         }
     }
 
-    fun getTransactionByHash(hash: String): Either<Failure, TransactionResponse> {
+    fun getTransactionByHash(hash: String, blockchain: Blockchain? = null): Either<Failure, TransactionResponse> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_BY_HASH.methodName, listOf(hash))
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> request(service.getTransactionByHash(getNodeUrlPrefix(), createHeaders(), jsonRpc)) { it.result!! }
+            true -> request(service.getTransactionByHash(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc)) { it.result!! }
             false, null -> Either.Left(Failure.NetworkConnection())
         }
     }
 
-    fun getTransactionReceipt(hash: String): Either<Failure, TransactionReceiptResponse> {
+    fun getTransactionReceipt(hash: String, blockchain: Blockchain? = null): Either<Failure, TransactionReceiptResponse> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_RECEIPT.methodName, listOf(hash))
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> request(service.getTransactionReceipt(getNodeUrlPrefix(), createHeaders(), jsonRpc)) { it.result!! }
+            true -> request(service.getTransactionReceipt(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc)) { it.result!! }
             false, null -> Either.Left(Failure.NetworkConnection())
         }
     }

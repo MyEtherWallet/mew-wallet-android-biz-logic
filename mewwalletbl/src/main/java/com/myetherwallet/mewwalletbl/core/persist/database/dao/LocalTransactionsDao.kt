@@ -8,7 +8,10 @@ import com.myetherwallet.mewwalletbl.data.database.EntityLocalTransaction
 abstract class LocalTransactionsDao : BaseDao<EntityLocalTransaction> {
 
     @Query("SELECT * FROM $TABLE_NAME WHERE hash=:hash")
-    abstract suspend fun get(hash: String) : EntityLocalTransaction?
+    abstract suspend fun get(hash: String): EntityLocalTransaction?
+
+    @Query("UPDATE $TABLE_NAME SET was_resend=1 WHERE hash=:txHash")
+    abstract suspend fun updateResendState(txHash: String)
 
     companion object {
         const val TABLE_NAME: String = "local_transactions"

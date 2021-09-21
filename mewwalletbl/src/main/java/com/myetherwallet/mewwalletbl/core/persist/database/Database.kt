@@ -317,6 +317,13 @@ object Database {
         }
     }
 
+    private val MIGRATION_18_19 = object : Migration(18, 19) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN signed_tx TEXT DEFAULT NULL")
+            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN was_resend INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
     private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
         database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
@@ -349,6 +356,7 @@ object Database {
             .addMigrations(MIGRATION_15_16)
             .addMigrations(MIGRATION_16_17)
             .addMigrations(MIGRATION_17_18)
+            .addMigrations(MIGRATION_18_19)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

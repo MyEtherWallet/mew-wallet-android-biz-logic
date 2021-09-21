@@ -9,17 +9,15 @@ import com.myetherwallet.mewwalletbl.data.api.binance.*
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
 import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
-import com.myetherwallet.mewwalletbl.data.dex.DexToken
 import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
 import com.myetherwallet.mewwalletbl.data.staked.*
-import com.myetherwallet.mewwalletbl.util.ApplicationUtils
+import com.myetherwallet.mewwalletbl.data.ws.GetIntercomHashResponse
 import com.myetherwallet.mewwalletbl.util.NetworkHandler
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.*
 import okio.IOException
 import retrofit2.Call
 import retrofit2.HttpException
-import java.math.BigDecimal
 import java.security.spec.AlgorithmParameterSpec
 import java.text.SimpleDateFormat
 import java.util.*
@@ -77,16 +75,9 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun sendFcmToken(token: String, addresses: List<String>): Either<Failure, Any> {
+    suspend fun getSurveyUrl(iso: String): Either<Failure, String> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.sendFcmToken(SendFcmTokenRequest(token, addresses)) }, { it })
-            false -> Either.Left(Failure.NetworkConnection())
-        }
-    }
-
-    suspend fun sendSurvey(email: String, message: String, rating: Int): Either<Failure, Any> {
-        return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.sendSurvey(SendSurveyRequest(email, message, rating)) }, { it })
+            true -> requestSuspend({ service.getSurveyUrl(iso) }, { it.url })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -127,7 +118,7 @@ class MewApiRepository(private val service: MewApi) {
 
     suspend fun getPurchaseProvider(cryptoCurrency: String, iso: String): Either<Failure, List<PurchaseProvider>> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getPurchaseProviders(cryptoCurrency,iso) }, { it })
+            true -> requestSuspend({ service.getPurchaseProviders(cryptoCurrency, iso) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }
@@ -335,9 +326,16 @@ class MewApiRepository(private val service: MewApi) {
         }
     }
 
-    suspend fun getIntercomHash(id: String, iso: String): Either<Failure, String> {
+    suspend fun sendFcmToken(token: String, addresses: List<String>): Either<Failure, Any> {
         return when (NetworkHandler.isNetworkConnected()) {
-            true -> requestSuspend({ service.getIntercomHash(id, iso) }, { it.result })
+            true -> requestSuspend({ service.sendFcmToken(SendFcmTokenRequest(token, addresses)) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getIntercomHash(id: String, iso: String): Either<Failure, GetIntercomHashResponse> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getIntercomHash(id, iso) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }

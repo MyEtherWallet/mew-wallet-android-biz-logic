@@ -32,11 +32,12 @@ android {
 
         buildConfigField "String", "NODE_API_END_POINT", "\"" + secretsProperties['nodeApiEndPoint'] + "\""
         buildConfigField "String", "MEW_MAINNET_API_END_POINT", "\"" + secretsProperties['mewMainnetApiEndPoint'] + "\""
+        buildConfigField "String", "MEW_MAINNET_SOCKET_END_POINT", "\"" + secretsProperties['mewMainnetSocketEndPoint'] + "\""
         buildConfigField "String", "MEW_DEVELOPMENT_API_END_POINT", "\"" + secretsProperties['mewDevelopmentApiEndPoint'] + "\""
         buildConfigField "String", "MEW_STAGING_API_END_POINT", "\"" + secretsProperties['mewStagingApiEndPoint'] + "\""
         buildConfigField "String", "MEW_QA_API_END_POINT", "\"" + secretsProperties['mewQaApiEndPoint'] + "\""
         buildConfigField "String", "WEB_RTC_STUN_END_POINT", "\"" + secretsProperties['webRtcStunEndPoint'] + "\""
-        buildConfigField "String", "SOCKET_END_POINT", "\"" + secretsProperties['socketEndPoint'] + "\""
+        buildConfigField "String", "MEW_CONNECT_SOCKET_END_POINT", "\"" + secretsProperties['mewConnectSocketEndPoint'] + "\""
         buildConfigField "String", "ANALYTICS_END_POINT", "\"" + secretsProperties['analyticsEndPoint'] + "\""
         buildConfigField "String", "DEX_PROXY", "\"" + secretsProperties['dexProxy'] + "\""
         buildConfigField "String", "ESTIMATED_GAS_API_END_POINT", "\"" + secretsProperties['estimatedGasApiEndPoint'] + "\""
@@ -85,7 +86,7 @@ dependencies {
     implementation 'ru.bartwell:ultradebugger.wrapper:1.4.1'
     debugImplementation 'ru.bartwell:ultradebugger:1.4.1'
 
-    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
 
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

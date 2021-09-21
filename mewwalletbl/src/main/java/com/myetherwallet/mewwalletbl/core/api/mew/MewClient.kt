@@ -26,6 +26,7 @@ private const val TAG = "MewClient"
 class MewClient : BaseClient() {
 
     override val retrofit = createRetrofit()
+    var awsLimitListener: (() -> Unit)? = null
 
     private fun createRetrofit(): Retrofit {
         val gson = GsonBuilder()
@@ -47,6 +48,7 @@ class MewClient : BaseClient() {
 
     override fun setupClient(): OkHttpClient.Builder {
         val builder = super.setupClient()
+        builder.addInterceptor(CatchAwsLimitErrorInterceptor())
         builder.addInterceptor(RetryInterceptor())
         return builder
     }
@@ -55,6 +57,17 @@ class MewClient : BaseClient() {
 
     companion object {
         const val NAME = "Mew"
+    }
+
+    private inner class CatchAwsLimitErrorInterceptor : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request()
+            val response = chain.proceed(request)
+            if (response.code == 429) {
+                awsLimitListener?.invoke()
+            }
+            return response
+        }
     }
 
     private class RetryInterceptor : Interceptor {

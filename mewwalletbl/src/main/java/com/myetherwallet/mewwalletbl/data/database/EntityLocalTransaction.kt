@@ -5,7 +5,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.LocalTransactionsDao
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import com.myetherwallet.mewwalletkit.core.extension.addHexPrefix
+import com.myetherwallet.mewwalletkit.core.extension.encode
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.math.BigInteger
@@ -22,7 +25,11 @@ class EntityLocalTransaction(
     val input: String,
     val gas: BigInteger,
     @ColumnInfo(name = "gas_price")
-    val gasPrice: BigInteger
+    val gasPrice: BigInteger,
+    @ColumnInfo(name = "signed_tx")
+    val signedTx: String?,
+    @ColumnInfo(name = "was_resend")
+    val wasResend: Int = 0
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
@@ -35,6 +42,8 @@ class EntityLocalTransaction(
         transaction.value,
         transaction.data.toHexString(),
         transaction.gasLimit,
-        transaction.gasPrice
+        transaction.gasPrice,
+        transaction.encode()?.toHexString()?.addHexPrefix(),
+        0
     )
 }

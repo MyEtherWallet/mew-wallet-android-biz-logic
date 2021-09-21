@@ -1,6 +1,5 @@
 package com.myetherwallet.mewwalletbl.util
 
-import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -9,10 +8,10 @@ import android.content.res.TypedArray
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import android.util.Log
-import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import com.myetherwallet.mewwalletbl.AppActivityImpl
+import com.myetherwallet.mewwalletbl.R
+import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.Failure
 import com.myetherwallet.mewwalletbl.core.persist.database.Database
 import com.myetherwallet.mewwalletbl.data.AppCurrency
@@ -20,6 +19,7 @@ import com.myetherwallet.mewwalletbl.data.AppLanguage
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
 import com.myetherwallet.mewwalletbl.preference.Preferences
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import org.json.JSONObject
 import retrofit2.HttpException
 import java.math.BigDecimal
 import java.util.*
@@ -29,9 +29,13 @@ import java.util.*
  * Created by BArtWell on 24.02.2020.
  */
 
+private const val TAG = "ApplicationUtils"
+
 object ApplicationUtils {
 
     const val ETHERIUM_ICON_URL = "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/ETH-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png"
+
+    private var lastSentryFailureText = ""
 
     fun getDeviceName(): String {
         val manufacturer = Build.MANUFACTURER
@@ -129,13 +133,23 @@ object ApplicationUtils {
     }
 
     fun sendFailureToSentry(activity: Activity?, failure: Failure, hint: String) {
-        failure.throwable?.let { throwable ->
-            val hintWithMessage = if (throwable is HttpException) {
-                hint + " [" + throwable.response() + "]"
-            } else {
-                hint
+        val message = failure.throwable?.let { throwable ->
+            try {
+                val errorBody = (throwable as HttpException)
+                    .response()!!
+                    .errorBody()!!
+                    .string()
+                JSONObject(errorBody).getString("msg")
+            } catch (e: Exception) {
+                MewLog.w(TAG, "Unable to retrieve server error", e)
+                throwable.message
             }
-            sendMessageToSentry(activity, hintWithMessage + "\n\n" + Log.getStackTraceString(throwable))
+        } ?: "Empty throwable"
+        val hintWithMessage = "$hint [$message]"
+        MewLog.e(TAG, hintWithMessage, failure.throwable)
+        if (lastSentryFailureText != hintWithMessage) {
+            lastSentryFailureText = hintWithMessage
+            sendMessageToSentry(activity, hintWithMessage)
         }
     }
 

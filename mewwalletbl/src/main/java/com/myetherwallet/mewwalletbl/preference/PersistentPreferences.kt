@@ -5,6 +5,7 @@ import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
 import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.util.ApplicationUtils
+import java.util.*
 
 /**
  * Created by BArtWell on 05.08.2019.
@@ -21,6 +22,8 @@ private const val APP_LANGUAGE = "app_language"
 private const val APP_CURRENCY = "app_currency"
 private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
 private const val BLOCKCHAIN = "blockchain"
+private const val IS_SURVEY_FINISHED = "is_survey_finished"
+private const val SURVEY_DATE = "survey_date"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -82,4 +85,16 @@ class PersistentPreferences internal constructor(context: Context) {
     fun setBlockchain(type: Blockchain) = preferences.edit().putString(BLOCKCHAIN, type.name).apply()
 
     fun getBlockchain() = preferences.getString(BLOCKCHAIN, null)?.let { Blockchain.valueOf(it) } ?: Blockchain.ETHEREUM
+
+    fun setSurveyFinished() = preferences.edit().putBoolean(IS_SURVEY_FINISHED, true).apply()
+
+    fun isSurveyFinished() = preferences.getBoolean(IS_SURVEY_FINISHED, false)
+
+    fun saveSurveyDate() {
+        preferences.edit().putInt(SURVEY_DATE, getDayOfYear()).apply()
+    }
+
+    fun isSurveyShownToday() = preferences.getInt(SURVEY_DATE, 0) == getDayOfYear()
+
+    private fun getDayOfYear() = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
 }
