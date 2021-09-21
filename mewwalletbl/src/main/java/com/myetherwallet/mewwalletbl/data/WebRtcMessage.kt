@@ -25,6 +25,8 @@ data class WebRtcMessage<T>(
         @SerializedName("eth_decrypt")
         DECRYPT,
         @SerializedName("eth_signTypedData_v3")
-        SIGN_TYPED_DATA_V3
+        SIGN_TYPED_DATA_V3,
+        @SerializedName("eth_signTypedData_v4")
+        SIGN_TYPED_DATA_V4
     }
 }

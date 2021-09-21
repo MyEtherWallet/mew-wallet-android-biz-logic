@@ -6,12 +6,11 @@ import com.myetherwallet.mewwalletbl.data.api.binance.*
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
 import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
-import com.myetherwallet.mewwalletbl.data.dex.DexToken
 import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
 import com.myetherwallet.mewwalletbl.data.staked.*
+import com.myetherwallet.mewwalletbl.data.ws.GetIntercomHashResponse
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import retrofit2.http.*
-import java.math.BigDecimal
 
 /**
  * Created by BArtWell on 13.09.2019.
@@ -42,9 +41,6 @@ interface MewApi {
     @GET("transactions/{hash}")
     @Headers("content-type: application/json")
     suspend fun getTransaction(@Path("hash") address: String): Transaction
-
-    @PUT("push/register/android")
-    suspend fun sendFcmToken(@Body body: SendFcmTokenRequest): Any
 
     @GET("purchase/history")
     @Headers("content-type: application/json")
@@ -203,10 +199,13 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getAddressTypeInfo(@Query("address") address: Address): AddressTypeInfo
 
-    @POST("/v2/survey")
-    suspend fun sendSurvey(@Body request: SendSurveyRequest): Any
+    @GET("/poll")
+    suspend fun getSurveyUrl(@Query("locale") locale: String): SurveyResponse
+
+    @PUT("push/register/android")
+    suspend fun sendFcmToken(@Body body: SendFcmTokenRequest): Any
 
     @GET("/v2/support/verification?platform=android")
     @Headers("content-type: application/json")
-    suspend fun getIntercomHash(@Query("id") id: String, @Query("iso") iso: String): ApiResult<String>
+    suspend fun getIntercomHash(@Query("id") id: String, @Query("iso") iso: String): GetIntercomHashResponse
 }

@@ -32,7 +32,7 @@ enum class AppCurrency {
             if (isStartsWithSymbol) {
                 "$formatted$suffix"
             } else {
-                formatted = formatted.replace(Regex("\\s+$symbol"), "")
+                formatted = formatted.replace(Regex("\\s+\\$symbol"), "")
                 "$formatted$suffix $symbol"
             }
         }

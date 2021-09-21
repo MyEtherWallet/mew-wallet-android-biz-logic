@@ -58,7 +58,8 @@ class JsonRpcRequest<T>(
         APPROVAL_HANDLER("eth_call"),
         ESTIMATE_GAS("eth_estimateGas"),
         GET_TRANSACTION_BY_HASH("eth_getTransactionByHash"),
-        GET_TRANSACTION_RECEIPT("eth_getTransactionReceipt");
+        GET_TRANSACTION_RECEIPT("eth_getTransactionReceipt"),
+        GET_BLOCK_BY_NUMBER("eth_getBlockByNumber");
 
         override fun toString() = methodName
     }

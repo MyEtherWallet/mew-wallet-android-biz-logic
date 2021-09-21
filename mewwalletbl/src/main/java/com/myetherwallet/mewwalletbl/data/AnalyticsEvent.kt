@@ -24,6 +24,7 @@ data class AnalyticsEvent internal constructor(
         MAIN_BUY_BIG_CLICKED("Android-Main-Buy-big-clicked"),
         MAIN_GUIDE_CLICKED("Android-Main-WhatIsEthereum-clicked"),
         MAIN_KEY_CORRUPTED("Android-KeyCorrupted-Authorization"),
+        MAIN_BALANCE_ABOVE_THRESHOLD("Android-General-Balance-Above-Threshold"),
         GENERATING_KEY_CORRUPTED_POPUP_SHOWN("Android-KeyCorrupted-CreateWallet-Popup-shown"),
         GENERATING_KEY_INVALID_MNEMONIC("Android-CreateWallet-MnemonicCheckout-failed"),
         MAIN_KEY_RESTORED("Android-KeyRestored"),
@@ -63,6 +64,7 @@ data class AnalyticsEvent internal constructor(
         SWAP_WANTED_TOKEN_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-shown"),
         SWAP_WANTED_TOKEN_SEARCH_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-SearchIcon-clicked"),
         SWAP_WANTED_TOKEN_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-TokenYouWantToGetScreen-Token-clicked"),
+        SWAP_LOW_BALANCE_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-LowBalance-shown"),
         SWAP_FIND_BEST_RATE_CLICKED("Android-$BLOCKCHAIN-Swap-MainScreen-FindBestRate-clicked"),
         SWAP_PROVIDER_SHOWN("Android-$BLOCKCHAIN-Swap-SelectProviderScreen-shown"),
         SWAP_PROVIDER_SELECTED("Android-$BLOCKCHAIN-Swap-SelectProviderScreen-provider-selected"),
@@ -72,6 +74,10 @@ data class AnalyticsEvent internal constructor(
         SWAP_SUCCESS_EXECUTED("Android-$BLOCKCHAIN-Swap-successfully-executed"),
         SWAP_VERIFY_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-VerifySwapScreen-FeeDisclaimer-Clicked"),
         SWAP_VERIFY_CHOOSE_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-ChooseFeeOverlay-FeeDisclaimer-Clicked"),
+
+        BUY_AMOUNTS_LIST_SHOWN("Android-$BLOCKCHAIN-Buy-AmountsList-Shown"),
+        BUY_CUSTOM_AMOUNT_SHOWN("Android-$BLOCKCHAIN-Buy-CustomAmount-Shown"),
+        BUY_SIMPLEX_PAGE_SHOWN("Android-$BLOCKCHAIN-Buy-SimplexPage-Shown"),
 
         PUSH_NOTIFICATION_RECEIVED("Android-broadcast-push-notification-received"),
         COMIC_MAIN_CLICKED("Android-Main-Comic-banner-clicked"),
@@ -128,18 +134,10 @@ data class AnalyticsEvent internal constructor(
 
         ERROR_SWAP_SAVE_PURCHASE_HISTORY("Android-Error-Swap-SavePurchaseHistory-failed"),
 
-        SURVEY_SHOWN("Android-Survey-Shown"),
-        SURVEY_RATE1("Android-Survey-Rate1-Sent"),
-        SURVEY_RATE2("Android-Survey-Rate2-Sent"),
-        SURVEY_RATE3("Android-Survey-Rate3-Sent"),
-        SURVEY_RATE4("Android-Survey-Rate4-Sent"),
-        SURVEY_RATE5("Android-Survey-Rate5-Sent"),
-        SURVEY_TEXTSUBMIT_CLICKED("Android-Survey-TextSubmit-Clicked"),
-        SURVEY_EMAILSUBMIT_CLICKED("Android-Survey-EmailSubmit-Clicked"),
-        SURVEY_MARKET_OPENED("Android-Survey-Market-Opened"),
-        SURVEY_RECOMMEND_CLICKED("Android-Survey-Recommend-Clicked"),
-
-        SURVEY_SUBMIT_CLICKED("Android-Survey-Submit-Clicked"),
+        SURVEY_SHOWN("Android-SurveyBottomSheet-Shown"),
+        SURVEY_GO_TO_CLICKED("Android-SurveyBottomSheet-GoTo-Clicked"),
+        SURVEY_LATER_CLICKED("Android-SurveyBottomSheet-Later-Clicked"),
+        SURVEY_DO_NOT_SHOW_CLICKED("Android-SurveyBottomSheet-DoNotShow-Clicked"),
 
         EXCHANGE_BINANCE_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-BinanceBridge-Clicked"),
         BINANCE_ACTIVEBRIDGESCREEN_SHOWN("Android-$BLOCKCHAIN-Binance-ActiveBridgesScreen-Shown"),
@@ -168,8 +166,9 @@ data class AnalyticsEvent internal constructor(
         BLOCKCHAIN_SWAP_CHANGED("Android-Swap-Blockchain-Changed-$BLOCKCHAIN"),
         BLOCKCHAIN_MARKETS_CHANGED("Android-Market-Blockchain-Changed-$BLOCKCHAIN"),
         BLOCKCHAIN_EARN_CHANGED("Android-Earn-Blockchain-Changed-$BLOCKCHAIN"),
-        BLOCKCHAIN_BROWSER_CHANGED("Android-DAPP-Blockchain-Changed-$BLOCKCHAIN")
+        BLOCKCHAIN_BROWSER_CHANGED("Android-DAPP-Blockchain-Changed-$BLOCKCHAIN"),
 
+        ERROR_AWS_TOO_MANY_REQUESTS("Android-Error-AWS-TooManyRequests")
     }
 
     companion object {

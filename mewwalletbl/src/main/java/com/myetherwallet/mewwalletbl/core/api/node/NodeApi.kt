@@ -1,10 +1,7 @@
 package com.myetherwallet.mewwalletbl.core.api.node
 
 import com.google.gson.JsonElement
-import com.myetherwallet.mewwalletbl.data.JsonRpcRequest
-import com.myetherwallet.mewwalletbl.data.JsonRpcResponse
-import com.myetherwallet.mewwalletbl.data.TransactionReceiptResponse
-import com.myetherwallet.mewwalletbl.data.TransactionResponse
+import com.myetherwallet.mewwalletbl.data.*
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -37,4 +34,7 @@ interface NodeApi {
 
     @POST("{networkId}")
     fun getApprovalHandler(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+
+    @POST("{networkId}")
+    fun getBlockByNumberWithTransactions(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Any>): Call<JsonRpcResponse<BlockResponseWithTransactions>>
 }

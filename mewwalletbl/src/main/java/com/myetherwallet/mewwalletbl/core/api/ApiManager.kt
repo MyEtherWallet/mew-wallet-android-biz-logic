@@ -28,7 +28,10 @@ object ApiManager {
 
     fun getNodeApi(): NodeApi = nodeClient.retrofit.create(NodeApi::class.java)
 
-    fun getMewApi(): MewApi = mewClient.retrofit.create(MewApi::class.java)
+    fun getMewApi(awsLimitListener: (() -> Unit)?): MewApi {
+        mewClient.awsLimitListener = awsLimitListener
+        return mewClient.retrofit.create(MewApi::class.java)
+    }
 
     fun getAnalyticsApi(): AnalyticsApi = analyticsClient.retrofit.create(AnalyticsApi::class.java)
 
