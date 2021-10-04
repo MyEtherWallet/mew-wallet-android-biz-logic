@@ -17,7 +17,7 @@ import retrofit2.HttpException
 import java.math.BigInteger
 import java.util.concurrent.atomic.AtomicInteger
 
-private val API_METHOD_ETH = "eth_estimateGasList"
+private val API_METHOD_ETH = "eth"
 
 class EstimatedGasApiRepository(private val service: EstimatedGasApi) {
 

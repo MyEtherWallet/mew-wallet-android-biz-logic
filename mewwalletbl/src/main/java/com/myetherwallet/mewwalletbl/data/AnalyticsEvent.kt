@@ -168,7 +168,34 @@ data class AnalyticsEvent internal constructor(
         BLOCKCHAIN_EARN_CHANGED("Android-Earn-Blockchain-Changed-$BLOCKCHAIN"),
         BLOCKCHAIN_BROWSER_CHANGED("Android-DAPP-Blockchain-Changed-$BLOCKCHAIN"),
 
-        ERROR_AWS_TOO_MANY_REQUESTS("Android-Error-AWS-TooManyRequests")
+        ERROR_AWS_TOO_MANY_REQUESTS("Android-Error-AWS-TooManyRequests"),
+
+        YEARN_MAINSCREEN_YEARNBANNER_CLICKED("Android-Yearn-MainScreen-YearnBanner-Clicked"),
+        YEARN_BALANCESCREEN_MOREABOUTRISKS_CLICKED("Android-Yearn-BalanceScreen-MoreAboutRisks-Clicked"),
+
+        YEARN_DEPOSITAMOUNTSCREEN_SHOWN("Android-Yearn-DepositAmountScreen-Shown"),
+        YEARN_DEPOSITAMOUNTSCREEN_MAX_CLICKED("Android-Yearn-DepositAmountScreen-Max-Clicked"),
+        YEARN_DEPOSITAMOUNTSCREEN_DEPOSIT_CLICKED("Android-Yearn-DepositAmountScreen-Deposit-Clicked"),
+        YEARN_DEPOSITAMOUNTSCREEN_GETMORETOKEN_CLICKED("Android-Yearn-DepositAmountScreen-GetMoreToken-Clicked"),
+
+        YEARN_DEPOSITVERIFYSCREEN_SHOWN("Android-Yearn-DepositVerifyScreen-Shown"),
+        YEARN_DEPOSITVERIFYSCREEN_ERROR("Android-Yearn-DepositVerifyScreen-CreateTx-Error"),
+        YEARN_DEPOSITVERIFYSCREEN_CONFIRM_CLICKED("Android-Yearn-DepositVerifyScreen-Confirm-Clicked"),
+        YEARN_DEPOSIT_INITIATED_SHOWN("Android-Yearn-DepositInitiatedPopup-Shown"),
+        YEARN_DEPOSIT_INITIATED_SEND_SUCCESS("Android-Yearn-DepositInitiatedPopup-SendTransaction-Success"),
+
+        YEARN_WITHDRAWAMOUNTSCREEN_SHOWN("Android-Yearn-WithdrawAmountScreen-Shown"),
+        YEARN_WITHDRAWAMOUNTSCREEN_MAX_CLICKED("Android-Yearn-WithdrawAmountScreen-Max-Clicked"),
+        YEARN_WITHDRAWAMOUNTSCREEN_HALF_CLICKED("Android-Yearn-WithdrawAmountScreen-Half-Clicked"),
+        YEARN_WITHDRAWAMOUNTSCREEN_QUARTER_CLICKED("Android-Yearn-WithdrawAmountScreen-Quarter-Clicked"),
+        YEARN_WITHDRAWAMOUNTSCREEN_WITHDRAW_CLICKED("Android-Yearn-WithdrawAmountScreen-Withdraw-Clicked"),
+
+        YEARN_WITHDRAWVERIFYSCREEN_SHOWN("Android-Yearn-WithdrawVerifyScreen-Shown"),
+        YEARN_WITHDRAWVERIFYSCREEN_CONFIRM_CLICKED("Android-Yearn-WithdrawVerifyScreen-Confirm-Clicked"),
+        YEARN_WITHDRAWVERIFYSCREEN_BUY_CLICKED("Android-Yearn-WithdrawVerifyScreen-Buy-Clicked"),
+        YEARN_WITHDRAWVERIFYSCREEN_ERROR("Android-Yearn-WithdrawVerifyScreen-CreateTx-Error"),
+        YEARN_WITHDRAW_INITIATED_SHOWN("Android-Yearn-WithdrawInitiatedPopup-Shown"),
+        YEARN_WITHDRAW_INITIATED_SEND_SUCCESS("Android-Yearn-WithdrawInitiatedPopup-SendTransaction-Success")
     }
 
     companion object {
@@ -196,6 +223,8 @@ data class AnalyticsEvent internal constructor(
         fun createClickMarketCollectionTokenEvent(symbol: String) = AnalyticsEvent("Android-Market-Collection-${symbol.format()}-token-Clicked", Date())
 
         fun createBnbAmountSelectedEvent(amount: BigDecimal) = AnalyticsEvent("Android-Binance-GotBnbScreen-${amount.toPlainString()}BNB-Selected", Date())
+
+        fun createClickYearnDeposit(symbol: String) = AnalyticsEvent("Android-Yearn-BalanceScreen-Deposit-${symbol.format()}-Clicked", Date())
 
         fun String?.format() = this?.uppercase(Locale.US)?.replace(" ", "_")
     }

@@ -24,6 +24,7 @@ private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
 private const val BLOCKCHAIN = "blockchain"
 private const val IS_SURVEY_FINISHED = "is_survey_finished"
 private const val SURVEY_DATE = "survey_date"
+private const val WAS_YEARN_BADGE_SHOWN = "was_yearn_badge_shown"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -97,4 +98,8 @@ class PersistentPreferences internal constructor(context: Context) {
     fun isSurveyShownToday() = preferences.getInt(SURVEY_DATE, 0) == getDayOfYear()
 
     private fun getDayOfYear() = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+
+    fun wasYearnBadgeShown() = preferences.getBoolean(WAS_YEARN_BADGE_SHOWN, false)
+
+    fun setYearnBadgeShown() = preferences.edit().putBoolean(WAS_YEARN_BADGE_SHOWN, true).apply()
 }

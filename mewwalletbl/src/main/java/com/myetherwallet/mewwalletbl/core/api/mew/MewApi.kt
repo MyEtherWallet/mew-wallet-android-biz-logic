@@ -5,6 +5,10 @@ import com.myetherwallet.mewwalletbl.data.api.*
 import com.myetherwallet.mewwalletbl.data.api.binance.*
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnDepositResult
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnHistoryItem
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnInfo
 import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
 import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
 import com.myetherwallet.mewwalletbl.data.staked.*
@@ -208,4 +212,25 @@ interface MewApi {
     @GET("/v2/support/verification?platform=android")
     @Headers("content-type: application/json")
     suspend fun getIntercomHash(@Query("id") id: String, @Query("iso") iso: String): GetIntercomHashResponse
+
+    @GET("/v2/yearn/deposit")
+    @Headers("content-type: application/json")
+    suspend fun getYearnDeposit(@Query("address") address: Address, @Query("amount") amount: String, @Query("token") token: String): YearnDepositResult
+
+    @GET("/v2/yearn/withdraw")
+    @Headers("content-type: application/json")
+    suspend fun getYearnWithdraw(@Query("address") address: Address, @Query("amount") amount: String, @Query("token") token: String): YearnDepositResult
+
+    @GET("/v2/yearn/balances")
+    @Headers("content-type: application/json")
+    suspend fun getYearnBalance(@Query("address") address: Address): List<YearnBalance>
+
+    @GET("/v2/yearn/info")
+    @Headers("content-type: application/json")
+    suspend fun getYearnInfo(): List<YearnInfo>
+
+    @GET("/v2/yearn/history")
+    @Headers("content-type: application/json")
+    suspend fun getYearnHistory(@Query("address") address: Address): List<YearnHistoryItem>
+
 }

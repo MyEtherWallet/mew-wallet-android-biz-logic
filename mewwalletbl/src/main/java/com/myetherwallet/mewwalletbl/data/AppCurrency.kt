@@ -12,17 +12,18 @@ enum class AppCurrency {
     USD, EUR, RUB, JPY, AUD, CAD, GBP;
 
     private val currency = Currency.getInstance(name)
-    private val format by lazy {
-        val decimalFormat = NumberFormat.getCurrencyInstance() as DecimalFormat
-        decimalFormat.currency = currency
-        decimalFormat
-    }
+    private val format by lazy { createDecimalFormat() }
     val isStartsWithSymbol: Boolean by lazy { format.positiveSuffix.isNullOrEmpty() }
     val symbol = currency.symbol ?: name
 
     fun format(amount: BigDecimal, decimals: Int = 2, suffix: Suffix? = null): String {
         format.maximumFractionDigits = decimals
-        var formatted = format.format(amount)
+
+        var formatted = if(!isStartsWithSymbol && suffix != null) {
+            createDecimalFormat(true).format(amount).trim()
+        } else {
+            format.format(amount)
+        }
         if (isStartsWithSymbol && symbol.length > 1) {
             formatted = formatted.replace(symbol, "$symbol ")
         }
@@ -32,10 +33,20 @@ enum class AppCurrency {
             if (isStartsWithSymbol) {
                 "$formatted$suffix"
             } else {
-                formatted = formatted.replace(Regex("\\s+\\$symbol"), "")
                 "$formatted$suffix $symbol"
             }
         }
+    }
+
+    private fun createDecimalFormat(cutSymbol: Boolean = false): DecimalFormat {
+        val decimalFormat = NumberFormat.getCurrencyInstance() as DecimalFormat
+        decimalFormat.currency = currency
+        if (cutSymbol) {
+            val symbols = decimalFormat.decimalFormatSymbols
+            symbols.currencySymbol = ""
+            decimalFormat.decimalFormatSymbols = symbols
+        }
+        return decimalFormat
     }
 
     companion object {

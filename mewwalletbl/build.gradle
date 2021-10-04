@@ -42,7 +42,6 @@ android {
         buildConfigField "String", "DEX_PROXY", "\"" + secretsProperties['dexProxy'] + "\""
         buildConfigField "String", "ESTIMATED_GAS_API_END_POINT", "\"" + secretsProperties['estimatedGasApiEndPoint'] + "\""
         buildConfigField "String", "STAKED_END_POINT", "\"" + secretsProperties['stakedEndPoint'] + "\""
-        buildConfigField "String", "WYRE_TOKEN", "\"" + secretsProperties['wyreToken'] + "\""
         buildConfigField "String", "DAPP_RADAR_TOKEN", "\"" + secretsProperties['dappRadarToken'] + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
