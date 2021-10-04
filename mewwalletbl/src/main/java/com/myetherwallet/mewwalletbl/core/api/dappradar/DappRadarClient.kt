@@ -1,9 +1,7 @@
 package com.myetherwallet.mewwalletbl.core.api.dappradar
 
-import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.Client
-import com.myetherwallet.mewwalletbl.core.api.wyre.WyreClient
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

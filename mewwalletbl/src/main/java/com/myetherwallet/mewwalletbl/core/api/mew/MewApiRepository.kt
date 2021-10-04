@@ -8,6 +8,10 @@ import com.myetherwallet.mewwalletbl.data.api.*
 import com.myetherwallet.mewwalletbl.data.api.binance.*
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnDepositResult
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnHistoryItem
+import com.myetherwallet.mewwalletbl.data.api.yearn.YearnInfo
 import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
 import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
 import com.myetherwallet.mewwalletbl.data.staked.*
@@ -214,6 +218,41 @@ class MewApiRepository(private val service: MewApi) {
     suspend fun getBinanceNetworks(iso: String, symbol: String): Either<Failure, List<BinanceNetwork>> {
         return when (NetworkHandler.isNetworkConnected()) {
             true -> requestSuspend({ service.getBinanceNetworks(iso, symbol) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getYearnDeposit(address: Address, amount: String, token: String): Either<Failure, YearnDepositResult> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getYearnDeposit(address, amount, token) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getYearnWithdraw(address: Address, amount: String, token: String): Either<Failure, YearnDepositResult> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getYearnWithdraw(address, amount, token) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getYearnBalance(address: Address): Either<Failure, List<YearnBalance>> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getYearnBalance(address) }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getYearnInfo(): Either<Failure, List<YearnInfo>> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getYearnInfo() }, { it })
+            false -> Either.Left(Failure.NetworkConnection())
+        }
+    }
+
+    suspend fun getYearnHistory(address: Address): Either<Failure, List<YearnHistoryItem>> {
+        return when (NetworkHandler.isNetworkConnected()) {
+            true -> requestSuspend({ service.getYearnHistory(address) }, { it })
             false -> Either.Left(Failure.NetworkConnection())
         }
     }

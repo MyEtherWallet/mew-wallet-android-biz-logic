@@ -56,6 +56,7 @@ private const val GUIDE_BANNER_VERSION = "guide_banner_version"
 private const val WAS_STAKING_EXITED_SHOWN = "was_staking_exited_shown"
 private const val WAS_BLOCKCHAIN_WELCOME_SHOWN = "was_blockchain_welcome_shown"
 private const val WAS_INTRODUCE_MULTICHAIN_SHOWN = "was_introduce_multichain_shown"
+private const val WAS_YEARN_DISCLAIMER_SHOWN = "was_yearn_disclaimer_shown"
 
 class MainPreferences internal constructor(context: Context) {
 
@@ -284,4 +285,8 @@ class MainPreferences internal constructor(context: Context) {
     fun wasIntroduceMultichainTipShown() = preferences.getBoolean(WAS_INTRODUCE_MULTICHAIN_SHOWN, false)
 
     fun setIntroduceMultichainTipShown() = preferences.edit().putBoolean(WAS_INTRODUCE_MULTICHAIN_SHOWN, true).apply()
+
+    fun wasYearnDisclaimerShown() = preferences.getBoolean(WAS_YEARN_DISCLAIMER_SHOWN, false)
+
+    fun setYearnDisclaimerShown() = preferences.edit().putBoolean(WAS_YEARN_DISCLAIMER_SHOWN, true).apply()
 }

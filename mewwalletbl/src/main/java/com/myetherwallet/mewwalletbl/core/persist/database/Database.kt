@@ -324,6 +324,38 @@ object Database {
         }
     }
 
+    private val MIGRATION_19_20 = object : Migration(19, 20) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                "CREATE TABLE " + YearnHistoryDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "account_address TEXT NOT NULL," +
+                        "type TEXT NOT NULL," +
+                        "symbol TEXT NOT NULL," +
+                        "contract_address TEXT NOT NULL," +
+                        "icon TEXT NOT NULL, " +
+                        "price DOUBLE NOT NULL DEFAULT 0, " +
+                        "amount DOUBLE NOT NULL DEFAULT 0, " +
+                        "decimals INTEGER NOT NULL DEFAULT 18, " +
+                        "timestamp INTEGER NOT NULL, " +
+                        "tx_hash TEXT)"
+            )
+            database.execSQL(
+                "CREATE TABLE " + YearnBalanceDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "account_address TEXT NOT NULL," +
+                        "contract_address TEXT NOT NULL," +
+                        "symbol TEXT NOT NULL," +
+                        "icon TEXT NOT NULL, " +
+                        "price DOUBLE NOT NULL DEFAULT 0, " +
+                        "amount DOUBLE NOT NULL DEFAULT 0, " +
+                        "profit DOUBLE NOT NULL DEFAULT 0, " +
+                        "decimals INTEGER NOT NULL DEFAULT 18)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_" + YearnBalanceDao.TABLE_NAME + "_account_address_contract_address ON " + YearnBalanceDao.TABLE_NAME + " (account_address,contract_address)")
+        }
+    }
+
     private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
         database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
@@ -357,6 +389,7 @@ object Database {
             .addMigrations(MIGRATION_16_17)
             .addMigrations(MIGRATION_17_18)
             .addMigrations(MIGRATION_18_19)
+            .addMigrations(MIGRATION_19_20)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

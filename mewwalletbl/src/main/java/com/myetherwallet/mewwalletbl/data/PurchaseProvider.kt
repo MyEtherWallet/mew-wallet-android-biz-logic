@@ -12,7 +12,7 @@ import java.math.BigDecimal
 @Parcelize
 data class PurchaseProvider(
     @SerializedName("name")
-    val name: Name,
+    val name: Name?,
     @SerializedName("fiat_currencies")
     val fiatCurrencies: List<String>,
     @SerializedName("crypto_currencies")
@@ -39,9 +39,6 @@ data class PurchaseProvider(
             hasNonZeroLimits(response, Name.SIMPLEX, blockchain)?.let {
                 return it
             }
-            hasNonZeroLimits(response, Name.WYRE, blockchain)?.let {
-                return it
-            }
             return null
         }
 
@@ -64,6 +61,6 @@ data class PurchaseProvider(
     }
 
     enum class Name {
-        WYRE, SIMPLEX
+        SIMPLEX
     }
 }
