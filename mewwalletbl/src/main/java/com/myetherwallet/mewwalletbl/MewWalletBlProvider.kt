@@ -7,7 +7,6 @@ import android.net.Uri
 import com.myetherwallet.mewwalletbl.core.persist.database.Database
 import com.myetherwallet.mewwalletbl.preference.Preferences
 import com.myetherwallet.mewwalletbl.util.NetworkHandler
-import ru.bartwell.ultradebugger.wrapper.UltraDebuggerWrapper
 
 /**
  * Created by BArtWell on 17.07.2019.
@@ -19,8 +18,6 @@ internal class MewWalletBlProvider : ContentProvider() {
         Database.init(context!!)
         Preferences.init(context!!)
         NetworkHandler.init(context!!)
-        UltraDebuggerWrapper.setEnabled(false/*BuildConfig.DEBUG*/)
-        UltraDebuggerWrapper.start(context!!, 8090)
         return true
     }
 

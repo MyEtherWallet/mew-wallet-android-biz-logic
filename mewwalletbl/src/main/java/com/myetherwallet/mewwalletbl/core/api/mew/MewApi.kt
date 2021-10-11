@@ -3,6 +3,9 @@ package com.myetherwallet.mewwalletbl.core.api.mew
 import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletbl.data.api.*
 import com.myetherwallet.mewwalletbl.data.api.binance.*
+import com.myetherwallet.mewwalletbl.data.api.lido.LidoBalance
+import com.myetherwallet.mewwalletbl.data.api.lido.LidoInfo
+import com.myetherwallet.mewwalletbl.data.api.lido.LidoTransactionResult
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
@@ -233,4 +236,15 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getYearnHistory(@Query("address") address: Address): List<YearnHistoryItem>
 
+    @GET("/v2/lido/info")
+    @Headers("content-type: application/json")
+    suspend fun getLidoInfo(): LidoInfo
+
+    @GET("/v2/lido/submit?platform=android")
+    @Headers("content-type: application/json")
+    suspend fun submitLido(@Query("address") address: Address, @Query("amount") amount: String): LidoTransactionResult
+
+    @GET("/v2/lido/balance")
+    @Headers("content-type: application/json")
+    suspend fun getLidoBalance(@Query("address") address: Address): TokenBalance
 }

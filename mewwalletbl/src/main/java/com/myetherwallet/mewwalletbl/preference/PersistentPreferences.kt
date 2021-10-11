@@ -25,6 +25,7 @@ private const val BLOCKCHAIN = "blockchain"
 private const val IS_SURVEY_FINISHED = "is_survey_finished"
 private const val SURVEY_DATE = "survey_date"
 private const val WAS_YEARN_BADGE_SHOWN = "was_yearn_badge_shown"
+private const val WAS_LIDO_BADGE_SHOWN = "was_lido_badge_shown"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -102,4 +103,8 @@ class PersistentPreferences internal constructor(context: Context) {
     fun wasYearnBadgeShown() = preferences.getBoolean(WAS_YEARN_BADGE_SHOWN, false)
 
     fun setYearnBadgeShown() = preferences.edit().putBoolean(WAS_YEARN_BADGE_SHOWN, true).apply()
+
+    fun wasLidoBadgeShown() = preferences.getBoolean(WAS_LIDO_BADGE_SHOWN, false)
+
+    fun setLidoBadgeShown() = preferences.edit().putBoolean(WAS_LIDO_BADGE_SHOWN, true).apply()
 }

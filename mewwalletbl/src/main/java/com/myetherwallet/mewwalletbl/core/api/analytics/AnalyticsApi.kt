@@ -1,7 +1,7 @@
 package com.myetherwallet.mewwalletbl.core.api.analytics
 
-import com.myetherwallet.mewwalletbl.data.*
-import retrofit2.Call
+import com.myetherwallet.mewwalletbl.data.AnalyticsEventsRequest
+import com.myetherwallet.mewwalletbl.data.AnalyticsLogsRequest
 import retrofit2.http.*
 
 /**
@@ -12,9 +12,9 @@ interface AnalyticsApi {
 
     @POST("analytics/record/{platform}")
     @Headers("content-type: application/json")
-    fun submit(@Path("platform") platform: String, @Query("iso") iso: String, @Body events: AnalyticsEventsRequest): Call<Any>
+    suspend fun submit(@Path("platform") platform: String, @Query("iso") iso: String, @Body events: AnalyticsEventsRequest): Any
 
     @POST("/analytics/logs")
     @Headers("content-type: application/json")
-    fun uploadLogs(@Body logs: AnalyticsLogsRequest): Call<Any>
+    suspend fun uploadLogs(@Body logs: AnalyticsLogsRequest): Any
 }

@@ -10,6 +10,7 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
@@ -21,6 +22,8 @@ import javax.net.ssl.X509TrustManager
 
 private const val DEFAULT_MAX_REQUESTS = 100
 private const val DEFAULT_MAX_REQUESTS_PER_HOST = 25
+private const val TIMEOUT = 30L
+
 
 abstract class BaseClient : Client {
 
@@ -37,6 +40,10 @@ abstract class BaseClient : Client {
         if (BuildConfig.DEBUG) {
             trustAnySslCertificate(okHttpClientBuilder)
         }
+        okHttpClientBuilder.callTimeout(TIMEOUT, TimeUnit.SECONDS)
+        okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+        okHttpClientBuilder.readTimeout(TIMEOUT, TimeUnit.SECONDS)
+        okHttpClientBuilder.writeTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.addInterceptor(AnalyticsInterceptor(::saveAnalytics))
         okHttpClientBuilder.dispatcher(createDispatcher())
         return okHttpClientBuilder

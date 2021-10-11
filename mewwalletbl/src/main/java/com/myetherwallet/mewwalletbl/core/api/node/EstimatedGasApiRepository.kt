@@ -3,32 +3,22 @@ package com.myetherwallet.mewwalletbl.core.api.node
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
-import com.myetherwallet.mewwalletbl.core.api.Either
-import com.myetherwallet.mewwalletbl.core.api.Failure
-import com.myetherwallet.mewwalletbl.data.JsonEstimatedGasResponse
-import com.myetherwallet.mewwalletbl.util.NetworkHandler
+import com.myetherwallet.mewwalletbl.core.api.BaseRepository
 import com.myetherwallet.mewwalletkit.core.extension.addHexPrefix
 import com.myetherwallet.mewwalletkit.core.extension.hexToBigInteger
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.core.extension.toHexStringWithoutStartZeros
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
-import retrofit2.Call
-import retrofit2.HttpException
-import java.math.BigInteger
 import java.util.concurrent.atomic.AtomicInteger
 
 private val API_METHOD_ETH = "eth"
 
-class EstimatedGasApiRepository(private val service: EstimatedGasApi) {
+class EstimatedGasApiRepository(private val service: EstimatedGasApi) : BaseRepository() {
 
-    fun getMultipleEstimateGas(transaction: Transaction, approvalTransaction: Transaction?): Either<Failure, List<BigInteger>> {
-        return when (NetworkHandler.isNetworkConnected()) {
-            true -> request(service.getMultipleEstimateGas(API_METHOD_ETH, JsonRpcRequest.createMultipleEstimateGasRequest(transaction, approvalTransaction))) {
-                it.result!!.map { item -> item.hexToBigInteger() }
-            }
-            false, null -> Either.Left(Failure.NetworkConnection())
+    suspend fun getMultipleEstimateGas(transaction: Transaction, approvalTransaction: Transaction?) =
+        requestSuspend({ service.getMultipleEstimateGas(API_METHOD_ETH, JsonRpcRequest.createMultipleEstimateGasRequest(transaction, approvalTransaction)) }) {
+            it.result!!.map { item -> item.hexToBigInteger() }
         }
-    }
 
     class JsonRpcRequest<T>(
         @SerializedName("method")
@@ -80,25 +70,4 @@ class EstimatedGasApiRepository(private val service: EstimatedGasApi) {
             override fun toString() = methodName
         }
     }
-
-    private fun <T : JsonEstimatedGasResponse, R> request(call: Call<T>, transform: (T: JsonEstimatedGasResponse) -> R): Either<Failure, R> {
-        return try {
-            val response = call.execute()
-            when (response.isSuccessful) {
-                true -> {
-                    val body = response.body()
-                    if (body?.result == null) {
-                        Either.Left(Failure.ServerError(IllegalStateException("Body is empty")))
-                    } else {
-                        Either.Right(transform(body))
-                    }
-                }
-                false -> Either.Left(Failure.ServerError(HttpException(response)))
-            }
-        } catch (exception: Throwable) {
-            exception.printStackTrace()
-            Either.Left(Failure.UnknownError(exception))
-        }
-    }
-
 }

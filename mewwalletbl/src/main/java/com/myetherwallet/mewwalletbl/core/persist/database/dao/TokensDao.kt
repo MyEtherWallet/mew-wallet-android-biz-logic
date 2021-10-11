@@ -2,8 +2,10 @@ package com.myetherwallet.mewwalletbl.core.persist.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.myetherwallet.mewwalletbl.core.persist.database.Database
 import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.database.EntityToken
+import com.myetherwallet.mewwalletbl.data.database.EntityTokenDescription
 import com.myetherwallet.mewwalletbl.data.database.ExtToken
 import com.myetherwallet.mewwalletbl.data.database.TokensCount
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
@@ -51,6 +53,18 @@ abstract class TokensDao : BaseDao<EntityToken> {
 
     @Query("UPDATE $TABLE_NAME SET isHidden=:isHidden WHERE tokenDescriptionId=:descriptionId")
     abstract suspend fun updateHidden(descriptionId: Long, isHidden: Boolean)
+
+    @Query("SELECT id FROM $TABLE_NAME WHERE accountId=:accountId AND tokenDescriptionId=:descriptionId")
+    abstract suspend fun get(accountId: Long, descriptionId: Long): Long
+
+    suspend fun getExistsIdOrInsert(entity: EntityToken): Long {
+        val id = Database.instance.getTokensDao().insertOrIgnore(entity)
+        return if (id == -1L) {
+            Database.instance.getTokensDao().get(entity.accountId, entity.tokenDescriptionId)
+        } else {
+            id
+        }
+    }
 
     companion object {
         const val TABLE_NAME: String = "tokens"

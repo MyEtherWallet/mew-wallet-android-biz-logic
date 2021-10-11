@@ -195,7 +195,25 @@ data class AnalyticsEvent internal constructor(
         YEARN_WITHDRAWVERIFYSCREEN_BUY_CLICKED("Android-Yearn-WithdrawVerifyScreen-Buy-Clicked"),
         YEARN_WITHDRAWVERIFYSCREEN_ERROR("Android-Yearn-WithdrawVerifyScreen-CreateTx-Error"),
         YEARN_WITHDRAW_INITIATED_SHOWN("Android-Yearn-WithdrawInitiatedPopup-Shown"),
-        YEARN_WITHDRAW_INITIATED_SEND_SUCCESS("Android-Yearn-WithdrawInitiatedPopup-SendTransaction-Success")
+        YEARN_WITHDRAW_INITIATED_SEND_SUCCESS("Android-Yearn-WithdrawInitiatedPopup-SendTransaction-Success"),
+
+        LIDO_MAINSCREEN_LIDOBANNER_CLICKED("Android-Lido-MainScreen-LidoBanner-Clicked"),
+        LIDO_BALANCESCREEN_MOREABOUTRISKS_CLICKED("Android-Lido-BalanceScreen-MoreAboutRisks-Clicked"),
+        LIDO_BALANCESCREEN_TRANSACTION_DETAILS_CLICKED("Android-Lido-BalanceScreen-TransactionDetails-Clicked"),
+        LIDO_BALANCESCREEN_TOKENINFO_CLICKED("Android-Lido-BalanceScreen-TokenInfo-Clicked"),
+
+        LIDO_AMOUNTSCREEN_SHOWN("Android-Lido-AmountScreen-Shown"),
+        LIDO_AMOUNTSCREEN_MAX_CLICKED("Android-Lido-AmountScreen-Max-Clicked"),
+        LIDO_AMOUNTSCREEN_BUYETHER_CLICKED("Android-Lido-AmountScreen-BuyEther-Clicked"),
+        LIDO_AMOUNTSCREEN_REVIEW_CLICKED("Android-Lido-AmountScreen-Review-Clicked"),
+
+        LIDO_VERIFYSCREEN_SHOWN("Android-Lido-VerifyScreen-Shown"),
+        LIDO_VERIFYSCREEN_CREATE_TX_ERROR("Android-Lido-VerifyScreen-CreateTx-Error"),
+        LIDO_VERIFYSCREEN_NOT_ENOUGH("Android-Lido-VerifyScreen-NotEnoughEther"),
+        LIDO_VERIFYSCREEN_CONFIRM_CLICKED("Android-Lido-VerifyScreen-Confirm-Clicked"),
+        LIDO_SEND_INITIATED_SHOWN("Android-Lido-SendInitiatedPopup-Shown"),
+        LIDO_SEND_INITIATED_SUCCESS("Android-Lido-SendInitiatedPopup-SendTransaction-Success"),
+        LIDO_SEND_INITIATED_FAIL("Android-Lido-SendInitiatedPopup-SendTransaction-Fail")
     }
 
     companion object {

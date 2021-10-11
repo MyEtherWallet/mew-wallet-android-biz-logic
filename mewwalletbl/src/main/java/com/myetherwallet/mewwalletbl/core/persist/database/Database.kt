@@ -356,6 +356,17 @@ object Database {
         }
     }
 
+    private val MIGRATION_20_21 = object : Migration(20, 21) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                "CREATE TABLE " + LidoHistoryDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                        "tx_hash TEXT)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_" + LidoHistoryDao.TABLE_NAME + "_tx_hash ON " + LidoHistoryDao.TABLE_NAME + " (tx_hash)")
+        }
+    }
+
     private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
         database.execSQL("CREATE TABLE " + LocalTransactionsDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, hash TEXT NOT NULL DEFAULT '', nonce TEXT NOT NULL DEFAULT '', from_address TEXT NOT NULL DEFAULT '', to_address TEXT NOT NULL DEFAULT '', value TEXT NOT NULL DEFAULT '', input TEXT NOT NULL DEFAULT '', gas TEXT NOT NULL DEFAULT '', gas_price TEXT NOT NULL DEFAULT '')")
@@ -390,6 +401,7 @@ object Database {
             .addMigrations(MIGRATION_17_18)
             .addMigrations(MIGRATION_18_19)
             .addMigrations(MIGRATION_19_20)
+            .addMigrations(MIGRATION_20_21)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }
