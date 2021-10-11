@@ -5,7 +5,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.myetherwallet.mewwalletbl.core.persist.database.converter.*
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.*
-import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
 import com.myetherwallet.mewwalletbl.data.database.*
 
 /**
@@ -38,7 +37,8 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntityLocalTransaction::class,
         EntitySwapToken::class,
         EntityYearnHistory::class,
-        EntityYearnBalance::class
+        EntityYearnBalance::class,
+        EntityLidoHistory::class
     ], version = MewDatabase.DB_VERSION
 )
 @TypeConverters(
@@ -104,8 +104,10 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getYearnBalanceDao(): YearnBalanceDao
 
+    abstract fun getLidoHistoryDao(): LidoHistoryDao
+
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 20
+        const val DB_VERSION = 21
     }
 }

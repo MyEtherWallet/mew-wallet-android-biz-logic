@@ -12,29 +12,29 @@ import retrofit2.http.*
 interface NodeApi {
 
     @POST("{networkId}")
-    fun getBalance(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    suspend fun getBalance(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun getGasPrice(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Unit>): Call<JsonRpcResponse<String>>
+    suspend fun getGasPrice(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Unit>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun getNonce(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    suspend fun getNonce(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun sendRawTransaction(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<String>>
+    suspend fun sendRawTransaction(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun getTransactionByHash(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<TransactionResponse>>
+    suspend fun getTransactionByHash(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): JsonRpcResponse<TransactionResponse>
 
     @POST("{networkId}")
-    fun getTransactionReceipt(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): Call<JsonRpcResponse<TransactionReceiptResponse>>
+    suspend fun getTransactionReceipt(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<String>): JsonRpcResponse<TransactionReceiptResponse>
 
     @POST("{networkId}")
-    fun getEstimateGas(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+    suspend fun getEstimateGas(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun getApprovalHandler(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): Call<JsonRpcResponse<String>>
+    suspend fun getApprovalHandler(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<JsonElement>): JsonRpcResponse<String>
 
     @POST("{networkId}")
-    fun getBlockByNumberWithTransactions(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Any>): Call<JsonRpcResponse<BlockResponseWithTransactions>>
+    suspend fun getBlockByNumberWithTransactions(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Any>): JsonRpcResponse<BlockResponseWithTransactions>
 }

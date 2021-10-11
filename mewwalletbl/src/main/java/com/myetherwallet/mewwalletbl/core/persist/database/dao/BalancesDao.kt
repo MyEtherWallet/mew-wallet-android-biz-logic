@@ -103,6 +103,41 @@ abstract class BalancesDao : BaseDao<EntityBalance> {
     )
     abstract suspend fun getPrimaryBalances(blockchain: Blockchain): List<ExtBalanceInfo>
 
+    @Query(
+        "SELECT " +
+                "${AccountsDao.TABLE_NAME}.id," +
+                "${TokenDescriptionDao.TABLE_NAME}.id AS descriptionId," +
+                "$TABLE_NAME.amount," +
+                "${TokenDescriptionDao.TABLE_NAME}.decimals," +
+                "${TokenDescriptionDao.TABLE_NAME}.name," +
+                "${TokenDescriptionDao.TABLE_NAME}.symbol," +
+                "${TokenDescriptionDao.TABLE_NAME}.logo," +
+                "${TokenDescriptionDao.TABLE_NAME}.address AS contract," +
+                "${TABLE_NAME}.timestamp AS timestamp," +
+                "${AccountsDao.TABLE_NAME}.address," +
+                "${AccountsDao.TABLE_NAME}.eth2_address," +
+                "${PricesDao.TABLE_NAME}.price AS price," +
+                "${PricesDao.TABLE_NAME}.sparkline," +
+                "${AccountsDao.TABLE_NAME}.name AS accountName," +
+                "${AccountsDao.TABLE_NAME}.hide, " +
+                "${AccountsDao.TABLE_NAME}.position," +
+                "${TokensDao.TABLE_NAME}.isHidden AS isHiddenToken," +
+                "${AccountsDao.TABLE_NAME}.anonymous_id " +
+
+                "FROM $TABLE_NAME " +
+                "INNER JOIN ${AccountsDao.TABLE_NAME} " +
+                "INNER JOIN ${TokensDao.TABLE_NAME} " +
+                "INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+                "INNER JOIN ${PricesDao.TABLE_NAME} " +
+                "ON ${AccountsDao.TABLE_NAME}.id=${TokensDao.TABLE_NAME}.accountId " +
+                "AND $TABLE_NAME.tokenId=${TokensDao.TABLE_NAME}.id " +
+                "AND ${TokensDao.TABLE_NAME}.tokenDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
+                "AND ${TokenDescriptionDao.TABLE_NAME}.id=${PricesDao.TABLE_NAME}.tokenId " +
+
+                "WHERE ${TokenDescriptionDao.TABLE_NAME}.blockchain=:blockchain " +
+                "AND ${TokenDescriptionDao.TABLE_NAME}.address=:contract")
+    abstract suspend fun getBalancesByContract(blockchain: Blockchain, contract: Address): List<ExtBalanceInfo>
+
     @Query("SELECT * FROM $TABLE_NAME")
     abstract suspend fun getAll(): List<EntityBalance>
 

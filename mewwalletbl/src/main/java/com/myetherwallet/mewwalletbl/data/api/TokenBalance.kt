@@ -26,7 +26,9 @@ data class TokenBalance(
     @SerializedName("sparkline")
     val sparkline: List<String>,
     @SerializedName("amount")
-    val amount: BigInteger
+    val amount: BigInteger,
+    @SerializedName("locked_amount")
+    val lockedAmount: BigInteger?
 ) {
 
     fun getContract() = if (contractAddress.address == Address.DEFAULT_API_CONTRACT) {
