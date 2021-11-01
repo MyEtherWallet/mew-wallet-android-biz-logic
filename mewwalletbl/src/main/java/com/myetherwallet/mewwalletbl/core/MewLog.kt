@@ -13,7 +13,8 @@ import com.myetherwallet.mewwalletbl.BuildConfig
 
 object MewLog {
 
-    internal fun shouldDisplayLogs() = BuildConfig.DEBUG
+    internal fun shouldDisplayLogs() = !BuildConfig.IS_MASTER_VERSION
+
     private fun canDisplayToasts() = false
 
     fun v(tag: String, msg: String) {
@@ -21,7 +22,6 @@ object MewLog {
             Log.v(tag, msg)
         }
     }
-
 
     fun v(tag: String, msg: String, tr: Throwable) {
         if (shouldDisplayLogs()) {

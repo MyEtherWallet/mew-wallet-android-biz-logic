@@ -24,6 +24,7 @@ private const val DEFAULT_MAX_REQUESTS = 100
 private const val DEFAULT_MAX_REQUESTS_PER_HOST = 25
 private const val TIMEOUT = 30L
 
+private const val TAG = "BaseClient"
 
 abstract class BaseClient : Client {
 
@@ -37,10 +38,20 @@ abstract class BaseClient : Client {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
             okHttpClientBuilder.addInterceptor(loggingInterceptor)
         }
+        if (!BuildConfig.IS_MASTER_VERSION) {
+            try {
+                val clazz = Class.forName("ru.bartwell.loggy.LoggyInterceptor")
+                val loggy = clazz.getConstructor().newInstance()
+                okHttpClientBuilder.addInterceptor(loggy as Interceptor)
+            } catch (e: Exception) {
+                MewLog.w(TAG, "Unable to init loggy", e)
+            }
+        }
         if (BuildConfig.DEBUG) {
             trustAnySslCertificate(okHttpClientBuilder)
         }
-        okHttpClientBuilder.callTimeout(TIMEOUT, TimeUnit.SECONDS)
+//        Cause 'IOException: Canceled' with some servers
+//        okHttpClientBuilder.callTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.readTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.writeTimeout(TIMEOUT, TimeUnit.SECONDS)

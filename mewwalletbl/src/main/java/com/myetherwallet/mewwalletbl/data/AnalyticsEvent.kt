@@ -56,6 +56,7 @@ data class AnalyticsEvent internal constructor(
 
         EXCHANGE_SWAP_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Swap-clicked"),
         EXCHANGE_BUY_ETH_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Buy-clicked"),
+        WALLET_MAINSCREEN_SHOWN("Android-Wallet-MainScreen-Shown"),
         SWAP_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-shown"),
         SWAP_LOW_LIQUIDITY("Android-$BLOCKCHAIN-Swap-MainScreen-LowLiquidity-shown"),
         SWAP_MAX_CLICKED("Android-$BLOCKCHAIN-Swap-SwapTokensScreen-Max-clicked"),
@@ -74,6 +75,7 @@ data class AnalyticsEvent internal constructor(
         SWAP_SUCCESS_EXECUTED("Android-$BLOCKCHAIN-Swap-successfully-executed"),
         SWAP_VERIFY_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-VerifySwapScreen-FeeDisclaimer-Clicked"),
         SWAP_VERIFY_CHOOSE_FEE_DISCLAIMER_CLICKED("Android-$BLOCKCHAIN-Swap-ChooseFeeOverlay-FeeDisclaimer-Clicked"),
+        SWAP_MAINSCREEN_SHOWN("Android-Swap-MainScreen-shown"),
 
         BUY_AMOUNTS_LIST_SHOWN("Android-$BLOCKCHAIN-Buy-AmountsList-Shown"),
         BUY_CUSTOM_AMOUNT_SHOWN("Android-$BLOCKCHAIN-Buy-CustomAmount-Shown"),
@@ -86,6 +88,8 @@ data class AnalyticsEvent internal constructor(
         CORRUPTED_KEYS_REPORT("Android-Corrupted-Keys-Report"),
         APPLICATION_LAUNCHED_WITH_SAMSUNG_STORAGE("Android-App-launchedWithSamsungStorage"),
         APPLICATION_LAUNCHED_WITH_MEW_STORAGE("Android-App-launchedWithMewStorage"),
+        APPLICATION_LAUNCHED_IN_DARK_MODE("Android-App-launchedInDarkMode"),
+        APPLICATION_LAUNCHED_IN_LIGHT_MODE("Android-App-launchedInLightMode"),
 
         MAIN_TRANSACTION_CLICKED("Android-Main-transaction-Clicked"),
         ACCOUNT_DETAILS_TRANSACTION_CLICKED("Android-AccountDetails-transaction-history-Clicked"),
@@ -118,6 +122,8 @@ data class AnalyticsEvent internal constructor(
         EARN_ETH2_STAKEONETH2SCREEN_STAKEMORE_CLICKED("Android-EARN-Eth2-StakeOnEth2Screen-StakeMore-Clicked"),
         EARN_ETH2_STAKEONETH2SCREEN_CANIWITHDRAW_CLICKED("Android-EARN-Eth2-StakeOnEth2Screen-CanIWithdraw-Clicked"),
         EARN_ETH2_STAKEONETH2SCREEN_YOUWILLNEEDTOENABLEAGAINALERT_SHOWN("Android-EARN-Eth2-StakeOnEth2Screen-YouWillNeedToEnableAgainAlert-Shown"),
+
+        DAPP_MAINSCREEN_SHOWN("Android-Dapp-MainScreen-Shown"),
 
         MARKET_MAINSCREEN_SHOWN("Android-Market-MainScreen-Shown"),
         MARKET_ALLTOKENS_SELECTED("Android-Market-AllTokens-Selected"),
