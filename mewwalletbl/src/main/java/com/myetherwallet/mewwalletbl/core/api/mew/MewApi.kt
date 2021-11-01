@@ -210,6 +210,7 @@ interface MewApi {
     suspend fun getSurveyUrl(@Query("locale") locale: String): SurveyResponse
 
     @PUT("push/register/android")
+    @Headers("content-type: application/json")
     suspend fun sendFcmToken(@Body body: SendFcmTokenRequest): Any
 
     @GET("/v2/support/verification?platform=android")

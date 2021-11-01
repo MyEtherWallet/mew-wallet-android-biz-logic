@@ -1,7 +1,6 @@
 package com.myetherwallet.mewwalletbl.core.api.mew
 
 import com.google.gson.GsonBuilder
-import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.MewEnvironment
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.BaseClient
@@ -51,15 +50,6 @@ class MewClient : BaseClient() {
         val builder = super.setupClient()
         builder.addInterceptor(CatchAwsLimitErrorInterceptor())
         builder.addInterceptor(RetryInterceptor())
-        if (!BuildConfig.IS_MASTER_VERSION) {
-            try {
-                val clazz = Class.forName("ru.bartwell.loggy.LoggyInterceptor")
-                val loggy = clazz.getConstructor().newInstance()
-                builder.addInterceptor(loggy as Interceptor)
-            } catch (e: Exception) {
-                MewLog.w(TAG, "Unable to init loggy", e)
-            }
-        }
         return builder
     }
 

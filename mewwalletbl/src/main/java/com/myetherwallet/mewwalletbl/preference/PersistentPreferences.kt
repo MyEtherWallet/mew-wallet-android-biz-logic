@@ -4,6 +4,7 @@ import android.content.Context
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
 import com.myetherwallet.mewwalletbl.data.Blockchain
+import com.myetherwallet.mewwalletbl.data.AppTheme
 import com.myetherwallet.mewwalletbl.util.ApplicationUtils
 import java.util.*
 
@@ -19,6 +20,7 @@ private const val DEBUG_BINANCE_BRIDGE = "debug_binance_bridge"
 private const val API_TOTAL_COUNT_PREFIX = "api_total_count_"
 private const val API_ERROR_COUNT_PREFIX = "api_error_count_"
 private const val APP_LANGUAGE = "app_language"
+private const val APP_THEME = "app_theme"
 private const val APP_CURRENCY = "app_currency"
 private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
 private const val BLOCKCHAIN = "blockchain"
@@ -26,6 +28,7 @@ private const val IS_SURVEY_FINISHED = "is_survey_finished"
 private const val SURVEY_DATE = "survey_date"
 private const val WAS_YEARN_BADGE_SHOWN = "was_yearn_badge_shown"
 private const val WAS_LIDO_BADGE_SHOWN = "was_lido_badge_shown"
+private const val RATER_DATA = "rater_data"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -80,6 +83,10 @@ class PersistentPreferences internal constructor(context: Context) {
 
     fun getAppLanguage() = preferences.getString(APP_LANGUAGE, null)?.let { AppLanguage.valueOf(it) } ?: ApplicationUtils.getSystemLanguage()
 
+    fun setAppTheme(appTheme: AppTheme) = preferences.edit().putString(APP_THEME, appTheme.name).apply()
+
+    fun getAppTheme() = preferences.getString(APP_THEME, null)?.let { AppTheme.valueOf(it) } ?: AppTheme.DEFAULT
+
     fun setAppCurrency(currency: AppCurrency) = preferences.edit().putString(APP_CURRENCY, currency.name).apply()
 
     fun getAppCurrency() = preferences.getString(APP_CURRENCY, null)?.let { AppCurrency.valueOf(it) } ?: ApplicationUtils.getCurrency()
@@ -107,4 +114,8 @@ class PersistentPreferences internal constructor(context: Context) {
     fun wasLidoBadgeShown() = preferences.getBoolean(WAS_LIDO_BADGE_SHOWN, false)
 
     fun setLidoBadgeShown() = preferences.edit().putBoolean(WAS_LIDO_BADGE_SHOWN, true).apply()
+
+    fun setRaterData(json: String) =preferences.edit().putString(RATER_DATA, json).apply()
+
+    fun getRaterData() =preferences.getString(RATER_DATA, "{}")!!
 }

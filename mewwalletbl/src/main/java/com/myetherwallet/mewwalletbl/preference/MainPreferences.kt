@@ -38,11 +38,9 @@ private const val FORCE_BACKUP_DIALOG_DATE = "force_backup_dialog_date"
 private const val WAS_APP_CRASHED = "was_app_crashed"
 private const val APP_CRASH_EXCEPTION = "app_crash_exception"
 private const val RATE_STARTS_COUNT = "rate_starts_count"
-private const val RATE_STARTS_THRESHOLD = "rate_starts_threshold"
+private const val RATER_APP_VERSION = "rater_app_version"
 private const val IS_TOKENS_ICONS_CACHED = "is_tokens_icons_cached"
 private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
-private const val DEFAULT_RATE_STARTS_THRESHOLD = 20
-private const val IS_DEBUG_RATER_SHOWN = "is_debug_rater_shown"
 private const val NO_CRASH_SESSION_COUNT = "no_crash_session_count"
 private const val DEBUG_WALLET_BALANCE = "debug_wallet_balance"
 private const val DEBUG_DISABLE_STAKED_TRANSACTION = "debug_disable_staked_transaction"
@@ -122,9 +120,9 @@ class MainPreferences internal constructor(context: Context) {
 
     fun setRateStartsCount(count: Int) = preferences.edit().putInt(RATE_STARTS_COUNT, count).apply()
 
-    fun setRateStartsThreshold(count: Int) = preferences.edit().putInt(RATE_STARTS_THRESHOLD, count).apply()
+    fun setRaterAppVersion(version: Int) = preferences.edit().putInt(RATER_APP_VERSION, version).apply()
 
-    fun getRateStartsThreshold() = preferences.getInt(RATE_STARTS_THRESHOLD, DEFAULT_RATE_STARTS_THRESHOLD)
+    fun getRaterAppVersion() = preferences.getInt(RATER_APP_VERSION, 0)
 
     fun isTokensIconsCached() = preferences.getBoolean(IS_TOKENS_ICONS_CACHED, false)
 
@@ -223,10 +221,6 @@ class MainPreferences internal constructor(context: Context) {
     }
 
     fun getPrivateKeyTestDates() = preferences.getString(PRIVATE_KEY_TEST_DATE, null)?.let { JSONObject(it) } ?: JSONObject()
-
-    fun setDebugRaterShown(isShown: Boolean) = preferences.edit().putBoolean(IS_DEBUG_RATER_SHOWN, isShown).apply()
-
-    fun isDebugRaterShown() = preferences.getBoolean(IS_DEBUG_RATER_SHOWN, false)
 
     fun setNoCrashSessionCount(count: Int) = preferences.edit().putInt(NO_CRASH_SESSION_COUNT, count).apply()
 

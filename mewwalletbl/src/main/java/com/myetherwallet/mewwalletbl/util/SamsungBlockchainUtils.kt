@@ -24,7 +24,7 @@ import java.util.concurrent.CountDownLatch
  */
 
 private const val TAG = "SamsungBlockchainUtils"
-private const val SDK_MIN_VERSION = 1
+private const val SDK_MIN_VERSION = 11
 
 object SamsungBlockchainUtils {
 
@@ -75,6 +75,7 @@ object SamsungBlockchainUtils {
     fun checkUpdated(callback: () -> Unit) {
         MewLog.d(TAG, "Checking for update")
         val keystoreApiLevel = getApiLevel()
+        MewLog.d(TAG, "ApiLevel = $keystoreApiLevel (required $SDK_MIN_VERSION)")
         if (keystoreApiLevel >= SDK_MIN_VERSION) {
             val updateCallback = object : ScwService.ScwCheckForMandatoryAppUpdateCallback() {
                 override fun onMandatoryAppUpdateNeeded(needed: Boolean) {
