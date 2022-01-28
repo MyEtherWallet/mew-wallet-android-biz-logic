@@ -8,9 +8,7 @@ import com.myetherwallet.mewwalletbl.data.MessageToSign
 import com.myetherwallet.mewwalletbl.preference.Preferences
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.bip.bip44.Network
-import com.myetherwallet.mewwalletkit.core.extension.encode
 import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
-import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import com.myetherwallet.mewwalletkit.eip.eip155.TransactionSignature
 import com.samsung.android.sdk.coldwallet.*
@@ -119,7 +117,7 @@ object SamsungBlockchainUtils {
     fun getAddress(index: Int, successCallback: (Pair<Address, String>?) -> Unit, errorCallback: ((Int, String) -> Unit)? = null) {
         MewLog.d(TAG, "Request addresses")
         if (isAvailable()) {
-            MewLog.d(TAG, "Blockchain not available")
+            MewLog.d(TAG, "Blockchain is available")
             val callback = object : ScwService.ScwGetAddressListCallback() {
                 override fun onSuccess(addressList: List<String>) {
                     MewLog.d(TAG, "Addresses: " + addressList.joinToString(" "))
@@ -134,8 +132,9 @@ object SamsungBlockchainUtils {
                 }
 
                 override fun onFailure(errorCode: Int, errorMessage: String?) {
-                    MewLog.d(TAG, "Cannot get addresses ($errorCode, ${getErrorName(errorCode)}, $errorMessage)")
-                    errorCallback?.invoke(errorCode, errorMessage ?: "Unknown error")
+                    val errorName = getErrorName(errorCode)
+                    MewLog.d(TAG, "Cannot get addresses ($errorCode, $errorName, $errorMessage)")
+                    errorCallback?.invoke(errorCode, errorMessage ?: errorName)
                 }
             }
             try {
@@ -194,14 +193,14 @@ object SamsungBlockchainUtils {
         val signCallback = object : ScwService.ScwSignEthTransactionCallback() {
             override fun onSuccess(signed: ByteArray) {
                 MewLog.d(TAG, "Sign success")
-                val chainId = transaction.chainId!!
-                // Samsung encoding V field incorrectly
-                val v = getFixedV(signed, chainId)
-                // Length can be changed during fix, so we need to rebuild transaction
-                transaction.signature = parseSignature(signed, v, chainId)
-                val encoded = transaction.encode()!!
-                MewLog.d(TAG, "Signature " + encoded.toHexString())
-                callback(encoded)
+//                val chainId = transaction.chainId!!
+//                // Samsung encoding V field incorrectly
+//                val v = getFixedV(signed, chainId)
+//                // Length can be changed during fix, so we need to rebuild transaction
+//                transaction.signature = parseSignature(signed, v, chainId)
+//                val encoded = transaction.serialize()!!
+//                MewLog.d(TAG, "Signature " + encoded.toHexString())
+                callback(signed)
             }
 
             override fun onFailure(errorCode: Int, errorMessage: String?) {
@@ -209,7 +208,7 @@ object SamsungBlockchainUtils {
                 callback(null)
             }
         }
-        getInstance().signEthTransaction(signCallback, transaction.encode()!!, ScwService.getHdPath(ScwCoinType.ETH, index), transaction.chainId!!.toLong())
+        getInstance().signEthTransaction(signCallback, transaction.serialize()!!, ScwService.getHdPath(ScwCoinType.ETH, index), transaction.chainId!!.toLong())
     }
 
     private fun parseSignature(signedTransaction: ByteArray, v: BigInteger, chainId: BigInteger): TransactionSignature {

@@ -1,30 +1,33 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'org.jetbrains.kotlin.android.extensions'
+apply plugin: 'kotlin-parcelize'
 apply from: "${rootProject.projectDir}/flavors.gradle"
-
-androidExtensions {
-    experimental = true
-}
 
 def secretsPropertiesFile = rootProject.file("../MEWwalletBL/secrets.properties")
 def secretsProperties = new Properties()
 secretsProperties.load(new FileInputStream(secretsPropertiesFile))
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+        sourceSets {
+            debug.assets.srcDirs += files("$projectDir/schemas".toString())
+        }
+        testOptions {
+            unitTests{
+                includeAndroidResources = true
             }
         }
 
@@ -67,30 +70,38 @@ dependencies {
     implementation project(path: ':mewwalletkit')
     implementation project(path: ':secp256k1')
 
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
 
     implementation 'com.samsung.android.sdk.coldwallet:KeystoreSDK_v1.5.1@aar'
 
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-    implementation 'org.webrtc:google-webrtc:1.0.27225'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2-native-mt'
+    // Newer versions of WebRTC are not connecting
+    implementation 'org.webrtc:google-webrtc:1.0.27306'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
-    api 'androidx.room:room-runtime:2.3.0'
-    kapt 'androidx.room:room-compiler:2.3.0'
-    implementation 'androidx.room:room-ktx:2.3.0'
+//    api 'androidx.room:room-runtime:2.3.0'
+//    kapt 'androidx.room:room-compiler:2.3.0'
+//    implementation 'androidx.room:room-ktx:2.3.0'
 
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    def roomVersion = '2.4.1'
+    api("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    androidTestImplementation("androidx.room:room-testing:$roomVersion")
+    implementation("androidx.room:room-paging:$roomVersion")
+
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'com.google.android.material:material:1.5.0'
     appGalleryDevImplementation(name: 'loggy', ext: 'aar')
     playMarketDevImplementation(name: 'loggy', ext: 'aar')
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
 
-    implementation 'androidx.core:core-ktx:1.6.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.7.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -99,5 +110,6 @@ dependencies {
 
 repositories {
     mavenCentral()
+    // Should be avoided but 'Direct local .aar file dependencies are not supported' error on Android Tests launching
     flatDir { dirs "libs" }
 }

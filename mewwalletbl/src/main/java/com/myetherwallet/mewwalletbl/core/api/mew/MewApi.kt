@@ -2,15 +2,16 @@ package com.myetherwallet.mewwalletbl.core.api.mew
 
 import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletbl.data.api.*
-import com.myetherwallet.mewwalletbl.data.api.binance.*
-import com.myetherwallet.mewwalletbl.data.api.lido.LidoBalance
+import com.myetherwallet.mewwalletbl.data.api.binance.BinanceNetwork
+import com.myetherwallet.mewwalletbl.data.api.binance.BinanceStatus
+import com.myetherwallet.mewwalletbl.data.api.binance.BinanceToken
+import com.myetherwallet.mewwalletbl.data.api.binance.BinanceTransaction
 import com.myetherwallet.mewwalletbl.data.api.lido.LidoInfo
 import com.myetherwallet.mewwalletbl.data.api.lido.LidoTransactionResult
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnDepositResult
-import com.myetherwallet.mewwalletbl.data.api.yearn.YearnHistoryItem
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnInfo
 import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
 import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
@@ -24,18 +25,6 @@ import retrofit2.http.*
  */
 
 interface MewApi {
-
-    @POST("prices")
-    @Headers("content-type: application/json")
-    suspend fun getPrices(@Body request: RequestByContracts): List<SimplePrice>
-
-    @POST("tokens")
-    @Headers("content-type: application/json")
-    suspend fun getTokens(@Body request: RequestByContracts): List<Token>
-
-    @GET("tokens/meta")
-    @Headers("content-type: application/json")
-    suspend fun getMetaTokens(): List<Token>
 
     @GET("v3/balances/account")
     @Headers("content-type: application/json")
@@ -122,13 +111,6 @@ interface MewApi {
         @Query("iso") iso: String,
         @Query("symbol") symbol: String
     ): List<BinanceNetwork>
-
-    @GET("v2/swap/binance/quota")
-    @Headers("content-type: application/json")
-    suspend fun getBinanceQuota(
-        @Query("iso") iso: String,
-        @Query("address") address: String
-    ): BinanceQuota
 
     @GET("v2/swap/binance/swap") //?walletNetwork=BSC
     @Headers("content-type: application/json")
@@ -233,10 +215,6 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getYearnInfo(): List<YearnInfo>
 
-    @GET("/v2/yearn/history")
-    @Headers("content-type: application/json")
-    suspend fun getYearnHistory(@Query("address") address: Address): List<YearnHistoryItem>
-
     @GET("/v2/lido/info")
     @Headers("content-type: application/json")
     suspend fun getLidoInfo(): LidoInfo
@@ -248,4 +226,8 @@ interface MewApi {
     @GET("/v2/lido/balance")
     @Headers("content-type: application/json")
     suspend fun getLidoBalance(@Query("address") address: Address): TokenBalance
+
+    @POST("/prices/market")
+    @Headers("content-type: application/json")
+    suspend fun getMarketTokens(@Body contracts: MarketTokensRequest): List<MarketItem>
 }

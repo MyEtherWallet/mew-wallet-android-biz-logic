@@ -27,6 +27,7 @@ class BinderWrapper<T : Service>(private val context: Context, private val inten
         serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 MewLog.d(TAG, "Service bound")
+                @Suppress("UNCHECKED_CAST")
                 service = (binder as ServiceBinder<T>).service
                 isBinded = true
                 onConnected()

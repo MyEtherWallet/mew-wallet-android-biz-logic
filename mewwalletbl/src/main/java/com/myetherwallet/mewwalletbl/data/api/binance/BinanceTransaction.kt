@@ -3,7 +3,8 @@ package com.myetherwallet.mewwalletbl.data.api.binance
 import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
-import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
+import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
+import com.myetherwallet.mewwalletkit.eip.eip1559.Eip1559Transaction
 import java.math.BigInteger
 
 data class BinanceTransaction(
@@ -18,7 +19,7 @@ data class BinanceTransaction(
     @SerializedName("gas")
     val gas: BigInteger
 ) {
-    fun toTransaction(nonce: BigInteger, gasPrice: BigInteger, chainId: BigInteger, contractAddress: Address? = null) = Transaction(
+    fun toTransaction(nonce: BigInteger, chainId: BigInteger, gasPrice: BigInteger, contractAddress: Address? = null) = LegacyTransaction(
         nonce,
         gasPrice,
         gas,
@@ -26,6 +27,20 @@ data class BinanceTransaction(
         value,
         data.hexToByteArray(),
         from,
+        null,
+        chainId
+    )
+
+    fun toTransaction(nonce: BigInteger, chainId: BigInteger, maxFeePerGas: BigInteger, maxPriorityFeePerGas: BigInteger, contractAddress: Address? = null) = Eip1559Transaction(
+        nonce,
+        maxPriorityFeePerGas,
+        maxFeePerGas,
+        gas,
+        contractAddress ?: to,
+        value,
+        data.hexToByteArray(),
+        from,
+        null,
         null,
         chainId
     )

@@ -17,7 +17,7 @@ private const val TAG = "BiometryEncryptHelper"
 class BiometryEncryptHelper(context: Context, encryptStorage: EncryptStorage = PersistentEncryptStorage()) : BaseEncryptHelper(context, KeyType.BIOMETRY, encryptStorage) {
 
     fun prepareForInit(biometryCallback: (Cipher, (Cipher) -> Unit) -> Unit, callback: () -> Unit) =
-        prepare(true, { cipher, error, function -> biometryCallback(cipher!!, function) }, callback)
+        prepare(true, { cipher, _, function -> biometryCallback(cipher!!, function) }, callback)
 
     fun prepareForUse(biometryCallback: (Cipher?, EncryptHelperError, (Cipher) -> Unit) -> Unit, callback: () -> Unit) = prepare(false, biometryCallback, callback)
 

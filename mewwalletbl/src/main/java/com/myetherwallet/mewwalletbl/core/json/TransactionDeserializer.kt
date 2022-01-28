@@ -2,6 +2,7 @@ package com.myetherwallet.mewwalletbl.core.json
 
 import com.google.gson.*
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
+import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.lang.reflect.Type
 import java.math.BigInteger
@@ -26,7 +27,8 @@ class TransactionDeserializer : JsonDeserializer<Transaction> {
             .registerTypeAdapter(ByteArray::class.java, ByteArraySerializer())
             .registerTypeAdapter(Address::class.java, AddressSerializer())
             .create()
-        val transaction = gson.fromJson(json, Transaction::class.java)
+        val transaction = gson.fromJson(json, LegacyTransaction::class.java)
+        transaction.eipType = Transaction.EIPTransactionType.LEGACY
         transaction.gasLimit = gasLimit
         if (jsonObject?.has("nonce") != true || jsonObject.get("nonce")?.isJsonNull == true) {
             transaction.nonce = BigInteger.ZERO

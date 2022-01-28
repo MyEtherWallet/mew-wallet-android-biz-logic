@@ -11,7 +11,7 @@ data class AnalyticsEvent internal constructor(
     val timestamp: Date
 ) {
 
-    constructor(id: Id, timestamp: Date = Date()) : this(id,null, timestamp)
+    constructor(id: Id, timestamp: Date = Date()) : this(id, null, timestamp)
 
     constructor(id: Id, blockchain: Blockchain? = null, timestamp: Date = Date()) : this(
         if (id.value.contains(BLOCKCHAIN)) id.value.replace(BLOCKCHAIN, blockchain?.symbol ?: Preferences.persistent.getBlockchain().symbol, true) else id.value,
@@ -124,6 +124,7 @@ data class AnalyticsEvent internal constructor(
         EARN_ETH2_STAKEONETH2SCREEN_YOUWILLNEEDTOENABLEAGAINALERT_SHOWN("Android-EARN-Eth2-StakeOnEth2Screen-YouWillNeedToEnableAgainAlert-Shown"),
 
         DAPP_MAINSCREEN_SHOWN("Android-Dapp-MainScreen-Shown"),
+        DAPP_BROWSER_LAUNCHED("Android-Dapp-Browser-Launched"),
 
         MARKET_MAINSCREEN_SHOWN("Android-Market-MainScreen-Shown"),
         MARKET_ALLTOKENS_SELECTED("Android-Market-AllTokens-Selected"),
@@ -167,6 +168,7 @@ data class AnalyticsEvent internal constructor(
         BLOCKCHAIN_MARKETS_SELECTOR_CLICKED("Android-Market-BlockchainSelector-Clicked"),
         BLOCKCHAIN_EARN_SELECTOR_CLICKED("Android-Earn-BlockchainSelector-Clicked"),
         BLOCKCHAIN_BROWSER_SELECTOR_CLICKED("Android-DAPP-BlockchainSelector-Clicked"),
+        BROWSER_MAINSCREEN_SHOWN("Android-Browser-MainScreen-Shown"),
 
         BLOCKCHAIN_MAIN_CHANGED("Android-Main-Blockchain-Changed-$BLOCKCHAIN"),
         BLOCKCHAIN_SWAP_CHANGED("Android-Swap-Blockchain-Changed-$BLOCKCHAIN"),

@@ -5,12 +5,12 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.myetherwallet.mewwalletbl.core.persist.database.dao.LocalTransactionsDao
-import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.addHexPrefix
-import com.myetherwallet.mewwalletkit.core.extension.encode
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
+import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
+import com.myetherwallet.mewwalletkit.eip.eip1559.Eip1559Transaction
 import java.math.BigInteger
 
 @Entity(tableName = LocalTransactionsDao.TABLE_NAME, indices = [Index(value = ["hash"], unique = true)])
@@ -26,6 +26,10 @@ class EntityLocalTransaction(
     val gas: BigInteger,
     @ColumnInfo(name = "gas_price")
     val gasPrice: BigInteger,
+    @ColumnInfo(name = "max_fee_per_gas", defaultValue = "")
+    val maxFeePerGas: BigInteger,
+    @ColumnInfo(name = "max_priority_fee_per_gas", defaultValue = "")
+    val maxPriorityFeePerGas: BigInteger,
     @ColumnInfo(name = "signed_tx")
     val signedTx: String?,
     @ColumnInfo(name = "was_resend")
@@ -42,8 +46,10 @@ class EntityLocalTransaction(
         transaction.value,
         transaction.data.toHexString(),
         transaction.gasLimit,
-        transaction.gasPrice,
-        transaction.encode()?.toHexString()?.addHexPrefix(),
+        if (transaction is LegacyTransaction) transaction.gasPrice else BigInteger.ZERO,
+        if (transaction is Eip1559Transaction) transaction.maxFeePerGas else BigInteger.ZERO,
+        if (transaction is Eip1559Transaction) transaction.maxPriorityFeePerGas else BigInteger.ZERO,
+        transaction.serialize()?.toHexString()?.addHexPrefix(),
         0
     )
 }

@@ -16,6 +16,7 @@ import com.myetherwallet.mewwalletbl.core.json.JsonParser
 import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
+import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import okhttp3.Response
 import java.util.*
@@ -251,7 +252,8 @@ class MewConnectService : Service() {
                     webRtc?.send(message)
                 }
                 WebRtcMessage.Type.SIGN_TX -> {
-                    val transaction = JsonParser.fromJson(webRtcMessage.data.asString as String, Transaction::class.java)
+                    val transaction = JsonParser.fromJson(webRtcMessage.data.asString as String, LegacyTransaction::class.java)
+                    transaction.eipType = Transaction.EIPTransactionType.LEGACY
                     transactionConfirmListener?.invoke(walletAddress.address, transaction)
                 }
                 WebRtcMessage.Type.SIGN_MESSAGE -> {
@@ -266,6 +268,8 @@ class MewConnectService : Service() {
                 WebRtcMessage.Type.SIGN_TYPED_DATA_V3, WebRtcMessage.Type.SIGN_TYPED_DATA_V4 -> {
                     signTypedDataV3V4Listener?.invoke(webRtcMessage.type, webRtcMessage.data.asString as String)
                 }
+                WebRtcMessage.Type.REJECT -> {}
+                null -> {}
             }
         } catch (e: Exception) {
             e.printStackTrace()

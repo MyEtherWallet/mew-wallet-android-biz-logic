@@ -28,7 +28,7 @@ open class KeystoreHelper(
     private val context: Context,
     private val keyType: KeyType,
     private val encryptStorage: EncryptStorage,
-    private val alias: String = "MewWallet" + keyType.name.toLowerCase(Locale.ENGLISH).capitalize() + "Key"
+    private val alias: String = "MewWallet" + keyType.name.lowercase(Locale.ENGLISH).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() } + "Key"
 ) {
 
     private var keyStore: KeyStore = KeyStore.getInstance(PROVIDER_ANDROID_KEYSTORE)

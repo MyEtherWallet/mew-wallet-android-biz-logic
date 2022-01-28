@@ -3,14 +3,12 @@ package com.myetherwallet.mewwalletbl.core.api
 import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.preference.Preferences
-import okhttp3.Dispatcher
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Response
+import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
@@ -33,7 +31,7 @@ abstract class BaseClient : Client {
     private fun createClient() = setupClient().build()
 
     open fun setupClient(): OkHttpClient.Builder {
-        val okHttpClientBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
+        val okHttpClientBuilder = OkHttpClient.Builder()
         if (MewLog.shouldDisplayLogs()) {
             val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
             okHttpClientBuilder.addInterceptor(loggingInterceptor)
@@ -55,6 +53,8 @@ abstract class BaseClient : Client {
         okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.readTimeout(TIMEOUT, TimeUnit.SECONDS)
         okHttpClientBuilder.writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+////        SocketTimeoutException: https://stackoverflow.com/a/62031983/1393280
+//        okHttpClientBuilder.protocols(listOf(Protocol.HTTP_1_1))
         okHttpClientBuilder.addInterceptor(AnalyticsInterceptor(::saveAnalytics))
         okHttpClientBuilder.dispatcher(createDispatcher())
         return okHttpClientBuilder

@@ -51,7 +51,7 @@ class ServiceNotificationHelper {
         val activityClass = findActivityClass(context)
         val intent = Intent(context, activityClass)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        return PendingIntent.getActivity(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private fun findActivityClass(context: Context): Class<*>? {
@@ -62,6 +62,6 @@ class ServiceNotificationHelper {
 
     private fun getServicePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, NotificationActionReceiver::class.java)
-        return PendingIntent.getBroadcast(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getBroadcast(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }

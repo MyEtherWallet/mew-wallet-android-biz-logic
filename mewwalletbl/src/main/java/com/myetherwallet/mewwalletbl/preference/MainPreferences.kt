@@ -44,6 +44,7 @@ private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
 private const val NO_CRASH_SESSION_COUNT = "no_crash_session_count"
 private const val DEBUG_WALLET_BALANCE = "debug_wallet_balance"
 private const val DEBUG_DISABLE_STAKED_TRANSACTION = "debug_disable_staked_transaction"
+private const val DEBUG_STAKED_PROVISION_EMULATING = "debug_staked_provision_emulating"
 private const val DAPP_RADAR_UPDATE_TIME = "dapp_radar_update_time"
 private const val FIRST_ACCOUNT_NACL_PUBLIC_KEY = "first_account_nacl_public_key"
 private const val INTERCOM_HASH = "intercom_hash"
@@ -148,27 +149,27 @@ class MainPreferences internal constructor(context: Context) {
 
     internal fun getAccessKeyBackup(index: Int) = readBytes(ACCESS_KEY_BACKUP + index)
 
-    internal fun setAccessKey(key: ByteArray, keyType: KeyType) = saveBytes(ACCESS_KEY + keyType.name.toLowerCase(Locale.US), key)
+    internal fun setAccessKey(key: ByteArray, keyType: KeyType) = saveBytes(ACCESS_KEY + keyType.name.lowercase(Locale.US), key)
 
-    internal fun getAccessKey(keyType: KeyType): ByteArray = readBytes(ACCESS_KEY + keyType.name.toLowerCase(Locale.US))!!
+    internal fun getAccessKey(keyType: KeyType): ByteArray = readBytes(ACCESS_KEY + keyType.name.lowercase(Locale.US))!!
 
-    internal fun isAccessKeyExists(keyType: KeyType) = preferences.contains(ACCESS_KEY + keyType.name.toLowerCase(Locale.US))
+    internal fun isAccessKeyExists(keyType: KeyType) = preferences.contains(ACCESS_KEY + keyType.name.lowercase(Locale.US))
 
-    internal fun removeAccessKey(keyType: KeyType) = remove(ACCESS_KEY + keyType.name.toLowerCase(Locale.US))
+    internal fun removeAccessKey(keyType: KeyType) = remove(ACCESS_KEY + keyType.name.lowercase(Locale.US))
 
-    internal fun setMasterKey(key: ByteArray, keyType: KeyType) = saveBytes(MASTER_KEY + keyType.name.toLowerCase(Locale.US), key)
+    internal fun setMasterKey(key: ByteArray, keyType: KeyType) = saveBytes(MASTER_KEY + keyType.name.lowercase(Locale.US), key)
 
-    internal fun getMasterKey(keyType: KeyType): ByteArray = readBytes(MASTER_KEY + keyType.name.toLowerCase(Locale.US))!!
+    internal fun getMasterKey(keyType: KeyType): ByteArray = readBytes(MASTER_KEY + keyType.name.lowercase(Locale.US))!!
 
-    internal fun removeMasterKey(keyType: KeyType) = remove(MASTER_KEY + keyType.name.toLowerCase(Locale.US))
+    internal fun removeMasterKey(keyType: KeyType) = remove(MASTER_KEY + keyType.name.lowercase(Locale.US))
 
-    internal fun setSignature(key: ByteArray, keyType: KeyType) = saveBytes(SIGNATURE + keyType.name.toLowerCase(Locale.US), key)
+    internal fun setSignature(key: ByteArray, keyType: KeyType) = saveBytes(SIGNATURE + keyType.name.lowercase(Locale.US), key)
 
-    internal fun getSignature(keyType: KeyType): ByteArray? = readBytes(SIGNATURE + keyType.name.toLowerCase(Locale.US))
+    internal fun getSignature(keyType: KeyType): ByteArray? = readBytes(SIGNATURE + keyType.name.lowercase(Locale.US))
 
-    internal fun setKeystoreIv(keyType: KeyType, iv: ByteArray) = saveBytes(KEYSTORE_IV + keyType.name.toLowerCase(Locale.US), iv)
+    internal fun setKeystoreIv(keyType: KeyType, iv: ByteArray) = saveBytes(KEYSTORE_IV + keyType.name.lowercase(Locale.US), iv)
 
-    internal fun getKeystoreIv(keyType: KeyType): ByteArray = readBytes(KEYSTORE_IV + keyType.name.toLowerCase(Locale.US))!!
+    internal fun getKeystoreIv(keyType: KeyType): ByteArray = readBytes(KEYSTORE_IV + keyType.name.lowercase(Locale.US))!!
 
     internal fun getKeystoreIvBackup(index: Int): ByteArray = readBytes(KEYSTORE_IV_BACKUP + index)!!
 
@@ -233,6 +234,10 @@ class MainPreferences internal constructor(context: Context) {
     fun isStakedTransactionDisabled() = preferences.getBoolean(DEBUG_DISABLE_STAKED_TRANSACTION, false)
 
     fun setStakedTransactionDisabled(isDisabled: Boolean) = preferences.edit().putBoolean(DEBUG_DISABLE_STAKED_TRANSACTION, isDisabled).apply()
+
+    fun isStakedProvisionEmulating() = preferences.getBoolean(DEBUG_STAKED_PROVISION_EMULATING, false)
+
+    fun setStakedProvisionEmulating(isEnabled: Boolean) = preferences.edit().putBoolean(DEBUG_STAKED_PROVISION_EMULATING, isEnabled).apply()
 
     fun setIntercomHash(hash: String) = preferences.edit().putString(INTERCOM_HASH, hash).commit()
 

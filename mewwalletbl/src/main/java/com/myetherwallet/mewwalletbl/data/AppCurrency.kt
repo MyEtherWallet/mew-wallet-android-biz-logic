@@ -49,6 +49,14 @@ enum class AppCurrency {
         return decimalFormat
     }
 
+    fun addSymbol(amount: String?) = (amount ?: "0").let {
+        if (isStartsWithSymbol) {
+            if (symbol.length > 1) "$symbol $it" else "$symbol$it"
+        } else {
+            "$it $symbol"
+        }
+    }
+
     companion object {
 
         fun format(amount: BigDecimal, currency: String, decimals: Int = 2, suffix: Suffix? = null) =

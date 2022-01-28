@@ -3,8 +3,8 @@ package com.myetherwallet.mewwalletbl.data
 import android.os.Parcelable
 import com.myetherwallet.mewwalletbl.data.database.Recent
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class Contact constructor(
@@ -37,7 +37,7 @@ class Contact constructor(
             return Contact(address, ens, name)
         }
 
-        private fun checkEns(ens: String) = false // "^[0-9a-z][0-9a-z.-]+[0-9a-z]\\.eth$".toRegex() matches ens
+        private fun checkEns(@Suppress("UNUSED_PARAMETER") ens: String) = false // "^[0-9a-z][0-9a-z.-]+[0-9a-z]\\.eth$".toRegex() matches ens
 
         fun fromRecent(recent: List<Recent>): List<Contact> = recent.map { create(it.address.address, it.name)!! }
     }

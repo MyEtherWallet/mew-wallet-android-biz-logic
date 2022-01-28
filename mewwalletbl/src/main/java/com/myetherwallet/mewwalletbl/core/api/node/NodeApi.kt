@@ -37,4 +37,10 @@ interface NodeApi {
 
     @POST("{networkId}")
     suspend fun getBlockByNumberWithTransactions(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Any>): JsonRpcResponse<BlockResponseWithTransactions>
+
+    @POST("{networkId}")
+    suspend fun getBlockByNumber(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Any>): JsonRpcResponse<BlockResponse>
+
+    @POST("{networkId}")
+    suspend fun getMaxPriorityFeePerGas(@Path("networkId") networkId: String, @HeaderMap headers: Map<String, String>, @Body jsonRpc: JsonRpcRequest<Unit>): JsonRpcResponse<String>
 }

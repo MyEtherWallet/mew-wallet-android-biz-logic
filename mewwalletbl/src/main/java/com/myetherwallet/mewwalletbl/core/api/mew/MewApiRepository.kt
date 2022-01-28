@@ -8,10 +8,7 @@ import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.MarketPriceVolumeHistory
 import com.myetherwallet.mewwalletbl.data.PriceHistoryItem
 import com.myetherwallet.mewwalletbl.data.VolumeHistoryItem
-import com.myetherwallet.mewwalletbl.data.api.RequestByContracts
-import com.myetherwallet.mewwalletbl.data.api.RequestEstimateByPrice
-import com.myetherwallet.mewwalletbl.data.api.SendFcmTokenRequest
-import com.myetherwallet.mewwalletbl.data.api.TokenBalance
+import com.myetherwallet.mewwalletbl.data.api.*
 import com.myetherwallet.mewwalletbl.data.api.lido.LidoInfo
 import com.myetherwallet.mewwalletbl.data.api.lido.LidoTransactionResult
 import com.myetherwallet.mewwalletbl.data.staked.StakedSubmitTransactionRequest
@@ -32,12 +29,6 @@ import javax.crypto.spec.SecretKeySpec
 private const val TAG = "MewApiRepository"
 
 class MewApiRepository(private val service: MewApi) : BaseRepository() {
-
-    suspend fun getTokens(request: RequestByContracts) = requestSuspend({ service.getTokens(request) }, { it })
-
-    suspend fun getMetaTokens() = requestSuspend({ service.getMetaTokens() }, { it })
-
-    suspend fun getPrices(request: RequestByContracts) = requestSuspend({ service.getPrices(request) }, { it })
 
     suspend fun getBalances(blockchain: Blockchain, address: Address) = requestSuspend({ service.getBalances(blockchain.symbol, address.address) }, { it })
 
@@ -125,8 +116,6 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
 
     suspend fun getYearnInfo() = requestSuspend({ service.getYearnInfo() }, { it })
 
-    suspend fun getYearnHistory(address: Address) = requestSuspend({ service.getYearnHistory(address) }, { it })
-
     suspend fun getLidoInfo(): Either<Failure, LidoInfo> {
         return when (NetworkHandler.isNetworkConnected()) {
             true -> requestSuspend({ service.getLidoInfo() }, { it })
@@ -168,8 +157,6 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
 
     suspend fun getBinanceActive(address: String) = requestSuspend({ service.getBinanceActive(address) }, { it })
 
-    suspend fun getBinanceQuota(iso: String, address: String) = requestSuspend({ service.getBinanceQuota(iso, address) }, { it })
-
     suspend fun getStakedInfo() = requestSuspend({ service.getStakedInfo() }, { it })
 
     suspend fun getStakedTransactions(eth2Address: String, amount: Int) = requestSuspend({ service.getStakedTransactions(eth2Address, amount) }, { it })
@@ -193,4 +180,6 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
     suspend fun getTransactionType(address: Address) = requestSuspend({ service.getAddressTypeInfo(address) }, { it })
 
     suspend fun getExchangeRates() = requestSuspend({ service.getExchangeRates() }, { it })
+
+    suspend fun getMarketTokens(contracts: MarketTokensRequest) = requestSuspend({ service.getMarketTokens(contracts) }, { it })
 }

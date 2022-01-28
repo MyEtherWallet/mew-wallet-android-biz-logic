@@ -57,6 +57,7 @@ class JsonRpcRequest<T>(
         SEND_RAW_TRANSACTION("eth_sendRawTransaction"),
         APPROVAL_HANDLER("eth_call"),
         ESTIMATE_GAS("eth_estimateGas"),
+        MAX_PRIORITY_FEE_PER_GAS("eth_maxPriorityFeePerGas"),
         GET_TRANSACTION_BY_HASH("eth_getTransactionByHash"),
         GET_TRANSACTION_RECEIPT("eth_getTransactionReceipt"),
         GET_BLOCK_BY_NUMBER("eth_getBlockByNumber");

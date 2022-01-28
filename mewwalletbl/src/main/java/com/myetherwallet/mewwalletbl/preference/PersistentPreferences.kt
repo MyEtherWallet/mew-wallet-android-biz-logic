@@ -3,8 +3,8 @@ package com.myetherwallet.mewwalletbl.preference
 import android.content.Context
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
-import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.AppTheme
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.util.ApplicationUtils
 import java.util.*
 
@@ -115,7 +115,7 @@ class PersistentPreferences internal constructor(context: Context) {
 
     fun setLidoBadgeShown() = preferences.edit().putBoolean(WAS_LIDO_BADGE_SHOWN, true).apply()
 
-    fun setRaterData(json: String) =preferences.edit().putString(RATER_DATA, json).apply()
+    fun setRaterData(json: String) = preferences.edit().putString(RATER_DATA, json).apply()
 
-    fun getRaterData() =preferences.getString(RATER_DATA, "{}")!!
+    fun getRaterData() = preferences.getString(RATER_DATA, "{}")!!
 }
