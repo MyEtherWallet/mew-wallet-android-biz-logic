@@ -1,20 +1,32 @@
 package com.myetherwallet.mewwalletbl.core.api
 
+import com.myetherwallet.mewwalletbl.extension.getMessage
+import retrofit2.HttpException
+
 /**
  * Created by BArtWell on 13.09.2019.
  */
 
 sealed class Failure(val throwable: Throwable?) {
     class NetworkConnection : Failure(null)
-    class ServerError(throwable: Throwable) : Failure(throwable)
-    class WrongArguments : Failure(null)
-    class CommonError(errorCode: Int, errorMessage: String) : Failure(CommonErrorThrowable(errorCode, errorMessage))
-    class UnknownError(throwable: Throwable) : Failure(throwable)
-    class WebSocketError(val code: Int, val error: String?) : Failure(CommonErrorThrowable(code, error ?: ""))
 
-    class CommonErrorThrowable(val errorCode: Int, val errorMessage: String) : Throwable()
+    class ApiError(throwable: Throwable) : Failure(throwable)
+    class DbError(message: String) : Failure(IllegalStateException(message))
+    class AlgorithmError(message: String) : Failure(IllegalStateException(message))
+    class CodeMessageError(code: Int, message: String) : Failure(CodeMessageThrowable(code, message))
 
-    abstract class FeatureFailure(throwable: Throwable) : Failure(throwable)
+    override fun toString() = throwable?.getMessage() ?: super.toString()
+
+    fun toHttpException(): HttpException? {
+        if (throwable is HttpException) {
+            return throwable
+        }
+        return null
+    }
+
+    class WebSocketError(val code: Int, val error: String?) : Failure(CodeMessageThrowable(code, error ?: ""))
+
+    class CodeMessageThrowable(val errorCode: Int, val errorMessage: String) : Throwable("Error $errorCode ($errorMessage)")
 
     companion object {
 

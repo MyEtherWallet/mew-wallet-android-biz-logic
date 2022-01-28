@@ -4,8 +4,8 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
-import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
-import kotlinx.android.parcel.Parcelize
+import com.myetherwallet.mewwalletkit.eip.eip1559.Eip1559Transaction
+import kotlinx.parcelize.Parcelize
 import java.math.BigInteger
 
 /**
@@ -26,14 +26,16 @@ data class StakedTransaction(
     val gas: BigInteger
 ) : Parcelable {
 
-    fun toTransaction(nonce: BigInteger, gasPrice: BigInteger, chainId: BigInteger, contractAddress: Address? = null) = Transaction(
+    fun toTransaction(nonce: BigInteger, chainId: BigInteger, maxFeePerGas: BigInteger, maxPriorityFeePerGas: BigInteger, contractAddress: Address? = null) = Eip1559Transaction(
         nonce,
-        gasPrice,
+        maxPriorityFeePerGas,
+        maxFeePerGas,
         gas,
         contractAddress ?: to,
         value,
         data.hexToByteArray(),
         from,
+        null,
         null,
         chainId
     )

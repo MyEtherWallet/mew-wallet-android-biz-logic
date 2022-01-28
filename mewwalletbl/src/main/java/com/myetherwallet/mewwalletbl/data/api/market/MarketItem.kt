@@ -4,30 +4,30 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 import java.util.*
 
 @Parcelize
 data class MarketItem(
-    @SerializedName("contract_address")
-    val contractAddress: Address,
-    @SerializedName("name")
-    val name: String = "",
-    @SerializedName("symbol")
-    val symbol: String = "",
-    @SerializedName("decimals")
-    val decimals: Int = 18,
-    @SerializedName("icon_png")
-    val icon: String = "",
-    @SerializedName("price")
-    val price: BigDecimal?,
-    @SerializedName("timestamp")
-    val timestamp: Date?,
-    @SerializedName("sparkline")
-    val sparkline: List<String>?
-    ) : Parcelable {
+        @SerializedName("contract_address")
+        val contractAddress: Address,
+        @SerializedName("name")
+        val name: String = "",
+        @SerializedName("symbol")
+        val symbol: String = "",
+        @SerializedName("decimals")
+        val decimals: Int = 18,
+        @SerializedName("icon_png")
+        val icon: String = "",
+        @SerializedName("price")
+        val price: BigDecimal?,
+        @SerializedName("timestamp")
+        val timestamp: Date?,
+        @SerializedName("sparkline")
+        val sparkline: List<String>?
+) : Parcelable {
 
     @IgnoredOnParcel
     @SerializedName("entry_title")
@@ -36,6 +36,10 @@ data class MarketItem(
     @IgnoredOnParcel
     @SerializedName("description")
     var description: Localization? = null
+
+    @IgnoredOnParcel
+    @SerializedName("website")
+    var webSite: String? = null
 
     @IgnoredOnParcel
     @SerializedName("type")

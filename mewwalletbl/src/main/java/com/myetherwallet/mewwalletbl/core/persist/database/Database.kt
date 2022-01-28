@@ -3,6 +3,7 @@ package com.myetherwallet.mewwalletbl.core.persist.database
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.annotation.VisibleForTesting
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
@@ -19,21 +20,24 @@ object Database {
     var isDatabaseRemovingInProgress = false
     lateinit var instance: MewDatabase
 
-    private val MIGRATION_1_2 = object : Migration(1, 2) {
+    @VisibleForTesting
+    internal val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + AccountsDao.TABLE_NAME + " ADD COLUMN anonymous_id TEXT NOT NULL DEFAULT ''")
             database.execSQL("UPDATE " + AccountsDao.TABLE_NAME + " SET anonymous_id=CAST(RANDOM() AS TEXT)")
         }
     }
 
-    private val MIGRATION_2_3 = object : Migration(2, 3) {
+    @VisibleForTesting
+    internal val MIGRATION_2_3 = object : Migration(2, 3) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("CREATE TABLE " + RecentDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, address TEXT NOT NULL)")
             database.execSQL("CREATE UNIQUE INDEX index_recent_address ON " + RecentDao.TABLE_NAME + " (address)")
         }
     }
 
-    private val MIGRATION_3_4 = object : Migration(3, 4) {
+    @VisibleForTesting
+    internal val MIGRATION_3_4 = object : Migration(3, 4) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("CREATE TABLE dex_tokens (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, tokenDescriptionId INTEGER NOT NULL)")
             database.execSQL("CREATE UNIQUE INDEX index_dex_tokens_tokenDescriptionId ON dex_tokens (tokenDescriptionId)")
@@ -52,7 +56,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_4_5 = object : Migration(4, 5) {
+    @VisibleForTesting
+    internal val MIGRATION_4_5 = object : Migration(4, 5) {
         override fun migrate(database: SupportSQLiteDatabase) {
             dropAndCreateTransactionsDao(database)
 
@@ -62,7 +67,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_5_6 = object : Migration(5, 6) {
+    @VisibleForTesting
+    internal val MIGRATION_5_6 = object : Migration(5, 6) {
         override fun migrate(database: SupportSQLiteDatabase) {
             dropAndCreateTransactionsDao(database)
 
@@ -76,7 +82,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_6_7 = object : Migration(6, 7) {
+    @VisibleForTesting
+    internal val MIGRATION_6_7 = object : Migration(6, 7) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("DROP TABLE IF EXISTS market")
             database.execSQL("CREATE TABLE " + PriceHistoryDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, contract TEXT NOT NULL, interval TEXT NOT NULL, price DOUBLE NOT NULL, volume DOUBLE NOT NULL, timestamp INTEGER NOT NULL)")
@@ -88,13 +95,15 @@ object Database {
         }
     }
 
-    private val MIGRATION_7_8 = object : Migration(7, 8) {
+    @VisibleForTesting
+    internal val MIGRATION_7_8 = object : Migration(7, 8) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + TokensDao.TABLE_NAME + " ADD COLUMN isHidden INTEGER NOT NULL DEFAULT 0")
         }
     }
 
-    private val MIGRATION_8_9 = object : Migration(8, 9) {
+    @VisibleForTesting
+    internal val MIGRATION_8_9 = object : Migration(8, 9) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + AccountsDao.TABLE_NAME + " ADD COLUMN eth2_address TEXT NOT NULL DEFAULT ''")
             database.execSQL("CREATE TABLE " + StakedHistoryDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, address TEXT NOT NULL, request_uuid TEXT NOT NULL, price DOUBLE NOT NULL, status TEXT NOT NULL, amount DOUBLE NOT NULL, balance DOUBLE NOT NULL, earned DOUBLE, eth2_address TEXT, tx_hash TEXT NOT NULL, apr DOUBLE, current_apr DOUBLE, average_apr DOUBLE, timestamp INTEGER NOT NULL)")
@@ -102,7 +111,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_9_10 = object : Migration(9, 10) {
+    @VisibleForTesting
+    internal val MIGRATION_9_10 = object : Migration(9, 10) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN estimated_timestamp INTEGER")
             database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN queue_position INTEGER")
@@ -110,7 +120,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_10_11 = object : Migration(10, 11) {
+    @VisibleForTesting
+    internal val MIGRATION_10_11 = object : Migration(10, 11) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE dex_tokens ADD COLUMN volume_24h DOUBLE NOT NULL DEFAULT 0")
 
@@ -125,7 +136,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_11_12 = object : Migration(11, 12) {
+    @VisibleForTesting
+    internal val MIGRATION_11_12 = object : Migration(11, 12) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("CREATE TABLE " + DappRadarDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, radar_id TEXT NOT NULL DEFAULT '', name TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', icon TEXT, category TEXT NOT NULL DEFAULT '')")
             database.execSQL("CREATE UNIQUE INDEX index_" + DappRadarDao.TABLE_NAME + "_radar_id ON " + DappRadarDao.TABLE_NAME + " (radar_id)")
@@ -136,21 +148,24 @@ object Database {
         }
     }
 
-    private val MIGRATION_12_13 = object : Migration(12, 13) {
+    @VisibleForTesting
+    internal val MIGRATION_12_13 = object : Migration(12, 13) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN eth_two_exited DOUBLE NOT NULL DEFAULT 0")
             database.execSQL("ALTER TABLE " + StakedHistoryDao.TABLE_NAME + " ADD COLUMN eth_two_addresses_exited TEXT")
         }
     }
 
-    private val MIGRATION_13_14 = object : Migration(13, 14) {
+    @VisibleForTesting
+    internal val MIGRATION_13_14 = object : Migration(13, 14) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("CREATE TABLE " + CurrencyDao.TABLE_NAME + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, fiat TEXT NOT NULL DEFAULT '', exchange_rate DOUBLE NOT NULL DEFAULT 0)")
             database.execSQL("CREATE UNIQUE INDEX index_" + CurrencyDao.TABLE_NAME + "_fiat ON " + CurrencyDao.TABLE_NAME + " (fiat)")
         }
     }
 
-    private val MIGRATION_14_15 = object : Migration(14, 15) {
+    @VisibleForTesting
+    internal val MIGRATION_14_15 = object : Migration(14, 15) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("DROP TABLE IF EXISTS " + BinanceHistoryDao.TABLE_NAME)
             database.execSQL(
@@ -190,13 +205,15 @@ object Database {
         }
     }
 
-    private val MIGRATION_15_16 = object : Migration(15, 16) {
+    @VisibleForTesting
+    internal val MIGRATION_15_16 = object : Migration(15, 16) {
         override fun migrate(database: SupportSQLiteDatabase) {
             dropAndCreateLocalTransactionsDao(database)
         }
     }
 
-    private val MIGRATION_16_17 = object : Migration(16, 17) {
+    @VisibleForTesting
+    internal val MIGRATION_16_17 = object : Migration(16, 17) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + ExchangeDao.TABLE_NAME + " ADD COLUMN blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'")
 
@@ -205,7 +222,7 @@ object Database {
             database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + TransactionsDao.TABLE_NAME + "_account_id_from_recipient_id_nonce_blockchain ON " + TransactionsDao.TABLE_NAME + " (account_id, from_recipient_id, nonce, blockchain)")
 
             database.execSQL("ALTER TABLE " + TokenDescriptionDao.TABLE_NAME + " ADD COLUMN blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'")
-            database.execSQL("DROP INDEX index_" + TokenDescriptionDao.TABLE_NAME + "_address")
+            database.execSQL("DROP INDEX IF EXISTS index_" + TokenDescriptionDao.TABLE_NAME + "_address")
             database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_" + TokenDescriptionDao.TABLE_NAME + "_address_blockchain ON " + TokenDescriptionDao.TABLE_NAME + " (address,blockchain)")
 
             database.execSQL("DROP TABLE IF EXISTS " + BinanceHistoryDao.TABLE_NAME)
@@ -281,7 +298,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_17_18 = object : Migration(17, 18) {
+    @VisibleForTesting
+    internal val MIGRATION_17_18 = object : Migration(17, 18) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("DROP TABLE IF EXISTS dex_tokens")
             database.execSQL(
@@ -317,14 +335,16 @@ object Database {
         }
     }
 
-    private val MIGRATION_18_19 = object : Migration(18, 19) {
+    @VisibleForTesting
+    internal val MIGRATION_18_19 = object : Migration(18, 19) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN signed_tx TEXT DEFAULT NULL")
             database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN was_resend INTEGER NOT NULL DEFAULT 0")
         }
     }
 
-    private val MIGRATION_19_20 = object : Migration(19, 20) {
+    @VisibleForTesting
+    internal val MIGRATION_19_20 = object : Migration(19, 20) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL(
                 "CREATE TABLE " + YearnHistoryDao.TABLE_NAME + " (" +
@@ -356,7 +376,8 @@ object Database {
         }
     }
 
-    private val MIGRATION_20_21 = object : Migration(20, 21) {
+    @VisibleForTesting
+    internal val MIGRATION_20_21 = object : Migration(20, 21) {
         override fun migrate(database: SupportSQLiteDatabase) {
             database.execSQL(
                 "CREATE TABLE " + LidoHistoryDao.TABLE_NAME + " (" +
@@ -366,6 +387,13 @@ object Database {
             database.execSQL("CREATE UNIQUE INDEX index_" + LidoHistoryDao.TABLE_NAME + "_tx_hash ON " + LidoHistoryDao.TABLE_NAME + " (tx_hash)")
         }
     }
+
+//    private val MIGRATION_21_22 = object : Migration(21, 22) {
+//        override fun migrate(database: SupportSQLiteDatabase) {
+//            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN max_fee_per_gas TEXT NOT NULL DEFAULT ''")
+//            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN max_priority_fee_per_gas TEXT NOT NULL DEFAULT ''")
+//        }
+//    }
 
     private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
@@ -402,6 +430,7 @@ object Database {
             .addMigrations(MIGRATION_18_19)
             .addMigrations(MIGRATION_19_20)
             .addMigrations(MIGRATION_20_21)
+//            .addMigrations(MIGRATION_21_22)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

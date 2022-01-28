@@ -14,6 +14,6 @@ class MoveStatusSerializer : JsonDeserializer<MoveStatus> {
         typeOfT: Type,
         context: JsonDeserializationContext
     ): MoveStatus {
-        return MoveStatus.valueOf(json.asString.toUpperCase(Locale.ENGLISH))
+        return MoveStatus.valueOf(json.asString.uppercase(Locale.ENGLISH))
     }
 }

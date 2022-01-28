@@ -11,4 +11,7 @@ open class JsonRpcResponse<T>(
     var result: T?,
     @SerializedName("error")
     var error: JsonRpcResponseError?
-)
+) {
+
+    fun getOrThrow(): T = result ?: throw IllegalStateException("[" + error?.error + "] " + error?.message)
+}

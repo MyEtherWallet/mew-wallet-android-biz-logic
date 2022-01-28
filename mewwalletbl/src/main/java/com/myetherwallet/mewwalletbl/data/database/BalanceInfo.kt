@@ -6,7 +6,7 @@ import androidx.room.Ignore
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toTokenValue
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*

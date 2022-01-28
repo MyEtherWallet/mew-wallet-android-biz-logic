@@ -8,6 +8,7 @@ import android.content.res.TypedArray
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.myetherwallet.mewwalletbl.AppActivityImpl
 import com.myetherwallet.mewwalletbl.R
@@ -163,15 +164,6 @@ object ApplicationUtils {
         if (activity is AppActivityImpl) {
             activity.sendMessageToSentry(report)
         }
-    }
-
-    fun shareAddress(fragment: Fragment, address: Address, title: String) {
-        val intent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, address.address)
-            type = "text/plain"
-        }
-        fragment.startActivityForResult(Intent.createChooser(intent, title), 0)
     }
 
     fun fetchAccentColor(context: Context): Int {

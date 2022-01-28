@@ -11,13 +11,13 @@ import com.myetherwallet.mewwalletkit.core.extension.toHexStringWithoutStartZero
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.util.concurrent.atomic.AtomicInteger
 
-private val API_METHOD_ETH = "eth"
+private const val API_METHOD_ETH = "eth"
 
 class EstimatedGasApiRepository(private val service: EstimatedGasApi) : BaseRepository() {
 
     suspend fun getMultipleEstimateGas(transaction: Transaction, approvalTransaction: Transaction?) =
         requestSuspend({ service.getMultipleEstimateGas(API_METHOD_ETH, JsonRpcRequest.createMultipleEstimateGasRequest(transaction, approvalTransaction)) }) {
-            it.result!!.map { item -> item.hexToBigInteger() }
+            it.getOrThrow().map { item -> item.hexToBigInteger() }
         }
 
     class JsonRpcRequest<T>(

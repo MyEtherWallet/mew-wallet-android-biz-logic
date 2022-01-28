@@ -35,7 +35,6 @@ class WebRtc(private val logsCollector: LogsCollector) {
     private var peerConnection: PeerConnection? = null
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var dataChannel: DataChannel? = null
-    private val mediaConstraints = MediaConstraints()
     private var isDataChannelOpened = false
     private var isAnswerGenerated = false
     private var gatheringTimer: Timer? = null
@@ -73,9 +72,8 @@ class WebRtc(private val logsCollector: LogsCollector) {
             peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(PeerConnectionFactory.Options())
                 .createPeerConnectionFactory()
-            val rtcConfig = PeerConnection.RTCConfiguration(iceServersList)
 
-            peerConnection = peerConnectionFactory?.createPeerConnection(rtcConfig, mediaConstraints, PeerConnectionObserver(::handleIceConnectionChange, ::handleIceGatheringChange))
+            peerConnection = peerConnectionFactory?.createPeerConnection(iceServersList, PeerConnectionObserver(::handleIceConnectionChange, ::handleIceGatheringChange))
         } catch (e: Exception) {
             connectErrorListener?.invoke()
             logsCollector.add(TAG, "Native fail in connect", e)
@@ -87,7 +85,7 @@ class WebRtc(private val logsCollector: LogsCollector) {
             if (peerConnection == null) {
                 connectErrorListener?.invoke()
             } else {
-                peerConnection?.setRemoteDescription(WebRtcSdpObserver("setRemoteDescription", ::createAnswer, {}), sessionDescription)
+                peerConnection?.setRemoteDescription(WebRtcSdpObserver("setRemoteDescription", ::createAnswer) {}, sessionDescription)
             }
         } catch (e: Throwable) {
             connectErrorListener?.invoke()
@@ -178,7 +176,7 @@ class WebRtc(private val logsCollector: LogsCollector) {
     }
 
     private fun createAnswer() {
-        peerConnection?.createAnswer(WebRtcSdpObserver("createAnswer", ::setLocalDescription) { connectErrorListener?.invoke() }, mediaConstraints)
+        peerConnection?.createAnswer(WebRtcSdpObserver("createAnswer", ::setLocalDescription) { connectErrorListener?.invoke() }, MediaConstraints())
     }
 
     private fun setLocalDescription(sessionDescription: SessionDescription?) {

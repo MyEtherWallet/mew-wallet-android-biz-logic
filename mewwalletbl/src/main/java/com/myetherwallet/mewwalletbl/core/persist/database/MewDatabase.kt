@@ -1,5 +1,6 @@
 package com.myetherwallet.mewwalletbl.core.persist.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -12,6 +13,7 @@ import com.myetherwallet.mewwalletbl.data.database.*
  */
 
 @Database(
+    exportSchema = true,
     entities = [
         EntityAccount::class,
         EntityBalance::class,
@@ -38,7 +40,13 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntitySwapToken::class,
         EntityYearnHistory::class,
         EntityYearnBalance::class,
-        EntityLidoHistory::class
+        EntityLidoHistory::class,
+        EntityDappBlackList::class,
+        EntityMarketFavorite::class
+    ],
+    autoMigrations = [
+        AutoMigration(from = 21, to = 22),
+        AutoMigration(from = 22, to = 23)
     ], version = MewDatabase.DB_VERSION
 )
 @TypeConverters(
@@ -106,8 +114,12 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getLidoHistoryDao(): LidoHistoryDao
 
+    abstract fun getDappBlackListDao(): DappBlackListDao
+
+    abstract fun getMarketFavoriteDao(): MarketFavoriteDao
+
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 21
+        const val DB_VERSION = 23
     }
 }

@@ -3,14 +3,14 @@ package com.myetherwallet.mewwalletbl.data.api.market
 import android.content.Context
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 @Parcelize
 data class Localization(
 
     @SerializedName("localization_key")
-    val localizationKey: String,
+    val localizationKey: String? = null,
 
     @SerializedName("title")
     val title: String? = null,

@@ -7,6 +7,7 @@ import com.myetherwallet.mewwalletbl.core.api.Failure
 import com.myetherwallet.mewwalletbl.core.api.JsonRpcResponseConverter
 import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletbl.preference.Preferences
+import com.myetherwallet.mewwalletbl.util.NetworkHandler
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.math.BigInteger
@@ -25,12 +26,22 @@ class NodeApiRepository(private val service: NodeApi) : BaseRepository() {
 
     suspend fun getBlockByNumberWithTransactions(block: String, blockchain: Blockchain? = null): Either<Failure, BlockResponseWithTransactions> {
         val jsonRpc = JsonRpcRequest<Any>(JsonRpcRequest.Method.GET_BLOCK_BY_NUMBER.methodName, listOf(block, true))
-        return requestSuspend({ service.getBlockByNumberWithTransactions(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { it.result!! }
+        return requestSuspend({ service.getBlockByNumberWithTransactions(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { it.getOrThrow() }
     }
 
     suspend fun getGasPrice(blockchain: Blockchain? = null): Either<Failure, BigInteger> {
         val jsonRpc = JsonRpcRequest<Unit>(JsonRpcRequest.Method.GAS_PRICE.methodName, emptyList())
         return requestSuspend({ service.getGasPrice(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { JsonRpcResponseConverter(it).toWalletBalance() }
+    }
+
+    suspend fun getBlockByNumber(block: String, blockchain: Blockchain? = null): Either<Failure, BlockResponse> {
+        val jsonRpc = JsonRpcRequest<Any>(JsonRpcRequest.Method.GET_BLOCK_BY_NUMBER.methodName, listOf(block, false))
+        return requestSuspend({ service.getBlockByNumber(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { it.result!! }
+    }
+
+    suspend fun getMaxPriorityFeePerGas(blockchain: Blockchain? = null): Either<Failure, BigInteger> {
+        val jsonRpc = JsonRpcRequest<Unit>(JsonRpcRequest.Method.MAX_PRIORITY_FEE_PER_GAS.methodName, emptyList())
+        return requestSuspend({ service.getMaxPriorityFeePerGas(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { JsonRpcResponseConverter(it).toBigInteger() }
     }
 
     suspend fun getTransactionCount(address: Address, period: String, blockchain: Blockchain? = null): Either<Failure, BigInteger> {
@@ -40,17 +51,17 @@ class NodeApiRepository(private val service: NodeApi) : BaseRepository() {
 
     suspend fun sendRawTransaction(hash: String, blockchain: Blockchain? = null): Either<Failure, String> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.SEND_RAW_TRANSACTION.methodName, listOf(hash))
-        return requestSuspend({ service.sendRawTransaction(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { it.result!! }
+        return requestSuspend({ service.sendRawTransaction(getNodeUrlPrefix(blockchain), createHeaders(blockchain), jsonRpc) }) { it.getOrThrow() }
     }
 
     suspend fun getTransactionByHash(hash: String, blockchain: Blockchain? = null): Either<Failure, TransactionResponse> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_BY_HASH.methodName, listOf(hash))
-        return requestSuspend({ service.getTransactionByHash(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc) }) { it.result!! }
+        return requestSuspend({ service.getTransactionByHash(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc) }) { it.getOrThrow() }
     }
 
     suspend fun getTransactionReceipt(hash: String, blockchain: Blockchain? = null): Either<Failure, TransactionReceiptResponse> {
         val jsonRpc = JsonRpcRequest(JsonRpcRequest.Method.GET_TRANSACTION_RECEIPT.methodName, listOf(hash))
-        return requestSuspend({ service.getTransactionReceipt(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc) }) { it.result!! }
+        return requestSuspend({ service.getTransactionReceipt(getNodeUrlPrefix(blockchain), createHeaders(), jsonRpc) }) { it.getOrThrow() }
     }
 
     suspend fun getEstimateGas(transaction: Transaction): Either<Failure, BigInteger> {
@@ -65,10 +76,10 @@ class NodeApiRepository(private val service: NodeApi) : BaseRepository() {
                 JsonRpcRequest.createApprovalHandlerRequest(from, data, Address.create(BuildConfig.DEX_PROXY))
             )
         }
-        ) { it.result!! }
+        ) { it.getOrThrow() }
     }
 
-    private fun getNodeUrlPrefix(blockchain: Blockchain? = null): String {
+    fun getNodeUrlPrefix(blockchain: Blockchain? = null): String {
         val activeBlockchain = blockchain ?: Preferences.persistent.getBlockchain()
         return activeBlockchain.nodePrefix
     }

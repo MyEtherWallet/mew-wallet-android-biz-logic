@@ -2,7 +2,7 @@ package com.myetherwallet.mewwalletbl.data.database
 
 import android.os.Parcelable
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TokenDescription(

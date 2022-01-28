@@ -3,6 +3,7 @@ package com.myetherwallet.mewwalletbl.core.persist.database.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.myetherwallet.mewwalletbl.core.persist.database.Database
+import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.database.DappInfo
 import com.myetherwallet.mewwalletbl.data.database.EntityBrowserRecent
 
@@ -23,9 +24,11 @@ abstract class BrowserRecentDao : BaseDao<EntityBrowserRecent> {
                 "${DappDao.TABLE_NAME}.category," +
                 "$TABLE_NAME.timestamp," +
                 "${DappDao.TABLE_NAME}.id AS dappId " +
-                "FROM $TABLE_NAME LEFT JOIN ${DappDao.TABLE_NAME} ON $TABLE_NAME.url = ${DappDao.TABLE_NAME}.url ORDER BY $TABLE_NAME.timestamp DESC LIMIT 15"
+                "FROM $TABLE_NAME LEFT JOIN ${DappDao.TABLE_NAME} ON $TABLE_NAME.url = ${DappDao.TABLE_NAME}.url " +
+                "WHERE $TABLE_NAME.blockchain=:blockchain " +
+                "ORDER BY $TABLE_NAME.timestamp DESC LIMIT 15"
     )
-    abstract suspend fun getAll(): List<DappInfo>
+    abstract suspend fun getAll(blockchain: Blockchain): List<DappInfo>
 
     @Query("SELECT * FROM $TABLE_NAME WHERE url=:url")
     abstract suspend fun get(url: String): EntityBrowserRecent?
@@ -33,8 +36,8 @@ abstract class BrowserRecentDao : BaseDao<EntityBrowserRecent> {
     @Query("DELETE FROM $TABLE_NAME WHERE id=:id")
     abstract suspend fun delete(id: Long)
 
-    @Query("DELETE FROM $TABLE_NAME")
-    abstract suspend fun clear()
+    @Query("DELETE FROM $TABLE_NAME WHERE $TABLE_NAME.blockchain=:blockchain")
+    abstract suspend fun clear(blockchain: Blockchain)
 
     companion object {
         const val TABLE_NAME: String = "browser_recent"

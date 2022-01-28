@@ -6,7 +6,7 @@ import androidx.room.Ignore
 import com.google.gson.annotations.SerializedName
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 import java.util.*
 

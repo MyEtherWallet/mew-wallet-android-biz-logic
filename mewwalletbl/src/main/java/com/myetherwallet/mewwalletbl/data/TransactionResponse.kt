@@ -3,7 +3,7 @@ package com.myetherwallet.mewwalletbl.data
 import android.os.Parcelable
 import androidx.room.Ignore
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 
 /**
@@ -21,6 +21,10 @@ data class TransactionResponse(
     val gas: String,
     @SerializedName("gasPrice")
     val gasPrice: String,
+    @SerializedName("maxFeePerGas")
+    val maxFeePerGas: String?,
+    @SerializedName("maxPriorityFeePerGas")
+    val maxPriorityFeePerGas: String?,
     @SerializedName("hash")
     val hash: String,
     @SerializedName("input")

@@ -2,7 +2,8 @@ package com.myetherwallet.mewwalletbl.data.api.market
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class MarketCollectionItem(
@@ -37,6 +38,10 @@ data class MarketCollectionItem(
     val filters: List<CollectionFilter>
 
 ) : Parcelable {
+
+    @IgnoredOnParcel
+    @SerializedName("rank")
+    var rank: Int? = null
 
     @Parcelize
     data class Banner(

@@ -46,7 +46,7 @@ class MessageCrypt(private val privateKey: String) {
         val connectPublicKey = publicKeyFromPrivateWithControl(privateKey)
         val initVector = SecureRandom().generateSeed(16)
 
-        val ephemPrivateKey = SecureRandom().generateSeed(32).toHexString().toLowerCase()
+        val ephemPrivateKey = SecureRandom().generateSeed(32).toHexString().lowercase(Locale.getDefault())
         val ephemPublicKey = publicKeyFromPrivateWithControl(ephemPrivateKey)
 
         val multipliedKeys = multiplyKeys(ephemPrivateKey, connectPublicKey)

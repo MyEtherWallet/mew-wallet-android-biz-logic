@@ -12,14 +12,14 @@ import java.math.BigInteger
 
 class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<String>) {
 
-    private val endOfDataIndex = jsonRpcResponse.result!!.lastIndexOf("01")
+    private val endOfDataIndex = jsonRpcResponse.getOrThrow().lastIndexOf("01")
     private var offset = endOfDataIndex
 
-    fun toBigInteger() = jsonRpcResponse.result!!.hexToBigInteger()
+    fun toBigInteger() = jsonRpcResponse.getOrThrow().hexToBigInteger()
 
-    fun toInt() = jsonRpcResponse.result!!.hexToBigInteger().toInt()
+    fun toInt() = jsonRpcResponse.getOrThrow().hexToBigInteger().toInt()
 
-    fun toWalletBalance(): BigInteger = jsonRpcResponse.result!!.hexToBigInteger()
+    fun toWalletBalance(): BigInteger = jsonRpcResponse.getOrThrow().hexToBigInteger()
 
     fun toBalancesList(): List<Balance> {
         val balances = mutableListOf<Balance>()
@@ -30,7 +30,7 @@ class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<Stri
         for (i in 0 until tokensCount) {
             // balance
             val balanceOffset = offset - sizeHex(16 + 20 + 1 + 32)
-            val balanceStr = jsonRpcResponse.result!!.substring(balanceOffset, balanceOffset + sizeHex(32))
+            val balanceStr = jsonRpcResponse.getOrThrow().substring(balanceOffset, balanceOffset + sizeHex(32))
             val balance = getBigInteger(balanceStr)
             if (balance <= BigInteger.ZERO) {
                 offset -= sizeHex(16 + 20 + 1 + 32)
@@ -48,17 +48,17 @@ class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<Stri
 
             // symbol
             offset -= sizeHex(16)
-            val symbolStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(16))
+            val symbolStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(16))
             val symbol = getString(symbolStr)
 
             //addr
             offset -= sizeHex(20)
-            val addrStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(20))
+            val addrStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(20))
             val address = "0x$addrStr"
 
             //decimal
             offset -= sizeHex(1)
-            val decimalStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(1))
+            val decimalStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(1))
             val decimals = getInt(decimalStr)
 
             //balance
@@ -67,21 +67,21 @@ class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<Stri
             var name: String? = null
             if (hasName) {
                 offset -= sizeHex(16)
-                val nameStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(16))
+                val nameStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(16))
                 name = getString(nameStr)
             }
 
             var website: String? = null
             if (hasWebsite) {
                 offset -= sizeHex(32)
-                val webSiteStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(32))
+                val webSiteStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(32))
                 website = getString(webSiteStr)
             }
 
             var email: String? = null
             if (hasEmail) {
                 offset -= sizeHex(32)
-                val emailStr = jsonRpcResponse.result!!.substring(offset, offset + sizeHex(32))
+                val emailStr = jsonRpcResponse.getOrThrow().substring(offset, offset + sizeHex(32))
                 email = getString(emailStr)
             }
 
@@ -98,7 +98,7 @@ class JsonRpcResponseConverter(private val jsonRpcResponse: JsonRpcResponse<Stri
         val end = offset
         offset -= sizeHex(bytesCount)
         val start = offset
-        return jsonRpcResponse.result!!.substring(start, end)
+        return jsonRpcResponse.getOrThrow().substring(start, end)
     }
 
     private fun getBoolean(string: String) = (trimInt(string) == "1")

@@ -2,8 +2,11 @@ package com.myetherwallet.mewwalletbl.data
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import com.myetherwallet.mewwalletkit.core.extension.*
-import kotlinx.android.parcel.Parcelize
+import com.myetherwallet.mewwalletkit.core.extension.hashPersonalMessage
+import com.myetherwallet.mewwalletkit.core.extension.hexToByteArray
+import com.myetherwallet.mewwalletkit.core.extension.isHex
+import com.myetherwallet.mewwalletkit.core.extension.removeHexPrefix
+import kotlinx.parcelize.Parcelize
 
 /**
  * Created by BArtWell on 24.07.2019.

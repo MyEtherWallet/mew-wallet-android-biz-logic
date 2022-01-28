@@ -23,7 +23,7 @@ class ServiceAlarmReceiver : BroadcastReceiver() {
         fun schedule(context: Context) {
             val time = calculateNextStartTime()
             val intent = Intent(context, ServiceAlarmReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
             MewLog.d(TAG, "Scheduled on " + DateFormat.format("dd/MM/yyyy HH:mm:ss", time))
@@ -32,7 +32,7 @@ class ServiceAlarmReceiver : BroadcastReceiver() {
         fun cancel(context: Context) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, ServiceAlarmReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             alarmManager.cancel(pendingIntent)
         }
 

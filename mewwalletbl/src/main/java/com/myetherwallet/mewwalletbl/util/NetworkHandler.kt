@@ -17,19 +17,22 @@ object NetworkHandler {
         connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 
-//    fun isNetworkConnected(): Boolean {
-//        // if connectivityManager is not initialized, the test is running
-//        connectivityManager?.let { connectivityManager ->
-//            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)?.let { networkCapabilities ->
-//                return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-//                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-//            }
-//            return false
-//        } ?: return true
-//    }
-
     fun isNetworkConnected(): Boolean {
         // if connectivityManager is not initialized, the test is running
-        return connectivityManager?.activeNetworkInfo?.isConnectedOrConnecting ?: return true
+        return connectivityManager?.let { connectivityManager ->
+            val network = connectivityManager.activeNetwork ?: return false
+            val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+            when {
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } ?: true
     }
+
+//    fun isNetworkConnected(): Boolean {
+////         if connectivityManager is not initialized, the test is running
+//        return connectivityManager?.activeNetworkInfo?.isConnectedOrConnecting ?: return true
+//    }
 }
