@@ -39,6 +39,7 @@ private const val WAS_APP_CRASHED = "was_app_crashed"
 private const val APP_CRASH_EXCEPTION = "app_crash_exception"
 private const val RATE_STARTS_COUNT = "rate_starts_count"
 private const val RATER_APP_VERSION = "rater_app_version"
+private const val RATER_DISABLE_ID = "rater_disable_id"
 private const val IS_TOKENS_ICONS_CACHED = "is_tokens_icons_cached"
 private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
 private const val NO_CRASH_SESSION_COUNT = "no_crash_session_count"
@@ -288,4 +289,8 @@ class MainPreferences internal constructor(context: Context) {
     fun wasYearnDisclaimerShown() = preferences.getBoolean(WAS_YEARN_DISCLAIMER_SHOWN, false)
 
     fun setYearnDisclaimerShown() = preferences.edit().putBoolean(WAS_YEARN_DISCLAIMER_SHOWN, true).apply()
+
+    fun setRaterDisableId(id: Int) = preferences.edit().putInt(RATER_DISABLE_ID, id).apply()
+
+    fun getRaterDisableId() = preferences.getInt(RATER_DISABLE_ID, 0)
 }

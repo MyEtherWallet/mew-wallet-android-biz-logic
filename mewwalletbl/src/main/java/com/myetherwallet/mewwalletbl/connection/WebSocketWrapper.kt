@@ -29,60 +29,64 @@ class WebSocketWrapper {
 
     fun connect(url: String) {
         MewLog.d(TAG, "Connect: $url")
-        val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .pingInterval(PING_PERIOD, TimeUnit.SECONDS)
-            .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-            .build()
+        try {
+            val loggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+            val client = OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .pingInterval(PING_PERIOD, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build()
 
-        val request = Request.Builder()
-            .url(url)
-            .build()
+            val request = Request.Builder()
+                .url(url)
+                .build()
 
-        client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                if (response.isSuccessful || response.code == 101) {
-                    MewLog.e(TAG, "Opened (" + response.code + ": " + response.message + ")")
-                    // Wait a second while server ready after connecting
-                    Timer().schedule(object : TimerTask() {
-                        override fun run() {
-                            isConnected = true
-                            flushSuspended()
-                        }
-                    }, SERVER_READY_DELAY)
-                } else {
-                    MewLog.e(TAG, "Open error [" + response.code + "]: " + response.message)
+            client.newWebSocket(request, object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    if (response.isSuccessful || response.code == 101) {
+                        MewLog.e(TAG, "Opened (" + response.code + ": " + response.message + ")")
+                        // Wait a second while server ready after connecting
+                        Timer().schedule(object : TimerTask() {
+                            override fun run() {
+                                isConnected = true
+                                flushSuspended()
+                            }
+                        }, SERVER_READY_DELAY)
+                    } else {
+                        MewLog.e(TAG, "Open error [" + response.code + "]: " + response.message)
+                    }
+                    this@WebSocketWrapper.webSocket = webSocket
+                    onConnectedListener?.invoke()
                 }
-                this@WebSocketWrapper.webSocket = webSocket
-                onConnectedListener?.invoke()
-            }
-
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                MewLog.d(TAG, "String received: $text")
-                onMessageListener?.invoke(text)
-            }
-
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                MewLog.d(TAG, "Bytes received")
-            }
-
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                MewLog.d(TAG, "Close connection: $code $reason")
-            }
-
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                MewLog.d(TAG, "Close connection: $code $reason")
-                onDisconnectedListener?.invoke()
-            }
-
-            override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
-                MewLog.d(TAG, "Error", throwable)
-                onErrorListener?.invoke(throwable, response)
-            }
-        })
-        client.dispatcher.executorService.shutdown()
+    
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    MewLog.d(TAG, "String received: $text")
+                    onMessageListener?.invoke(text)
+                }
+    
+                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                    MewLog.d(TAG, "Bytes received")
+                }
+    
+                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    MewLog.d(TAG, "Close connection: $code $reason")
+                }
+    
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    MewLog.d(TAG, "Close connection: $code $reason")
+                    onDisconnectedListener?.invoke()
+                }
+    
+                override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
+                    MewLog.d(TAG, "Error", throwable)
+                    onErrorListener?.invoke(throwable, response)
+                }
+            })
+            client.dispatcher.executorService.shutdown()
+        } catch (e: Exception) {
+            MewLog.d(TAG, "Socket error", e)
+        }
     }
 
     private fun flushSuspended() {

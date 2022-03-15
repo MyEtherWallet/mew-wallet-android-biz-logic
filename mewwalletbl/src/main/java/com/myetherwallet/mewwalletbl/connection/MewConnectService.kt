@@ -18,6 +18,7 @@ import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
+import com.myetherwallet.mewwalletkit.eip.eip1559.Eip1559Transaction
 import okhttp3.Response
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -95,7 +96,7 @@ class MewConnectService : Service() {
     }
 
     fun connect(privateKey: String, connectionId: String, walletAddress: String) {
-        logsCollector.add(TAG, "Connect (id=$connectionId, address=$walletAddress)")
+        logsCollector.add(TAG, "Connect (id=$connectionId)")
         MewLog.d(TAG, "PrivateKey $privateKey")
         if (isConnected) {
             logsCollector.add(TAG, "Already connected, ignore")
@@ -117,10 +118,10 @@ class MewConnectService : Service() {
             messageCrypt = MessageCrypt(this.privateKey)
             val url = "${BuildConfig.MEW_CONNECT_SOCKET_END_POINT}?role=receiver&connId=$connectionId&signed=" + messageCrypt.signMessage(privateKey)
             socket = WebSocketWrapper().apply {
-                onConnectedListener = ::onConnected
-                onErrorListener = ::onError
-                onDisconnectedListener = ::onDisconnected
-                onMessageListener = ::onMessage
+                onConnectedListener = ::onSocketConnected
+                onErrorListener = ::onSocketError
+                onDisconnectedListener = ::onSocketDisconnected
+                onMessageListener = ::onSocketMessage
                 connect(url)
             }
             startTimeoutTimer()
@@ -128,11 +129,11 @@ class MewConnectService : Service() {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onConnected() {
-        logsCollector.add(TAG, "onConnected")
+    private fun onSocketConnected() {
+        logsCollector.add(TAG, "onSocketConnected")
     }
 
-    private fun onMessage(text: String) {
+    private fun onSocketMessage(text: String) {
         MewLog.showDebugToast(this, "onMessage $text")
         logsCollector.add(TAG, "onMessage")
         MewLog.d(TAG, "onMessage: $text")
@@ -172,13 +173,14 @@ class MewConnectService : Service() {
     }
 
     private fun connectWebRtc(turnServers: List<TurnServer>?) {
+        logsCollector.add(TAG, "Turn servers count: " + turnServers?.size)
         webRtc = WebRtc(logsCollector).apply {
             disconnect()
             answerListener = ::onAnswerCreated
             connectSuccessListener = ::onWebRtcConnected
             messageListener = { handleWebRtcMessages(it) }
             connectErrorListener = ::onWebRtcConnectError
-            disconnectListener = ::onRtcDisconnected
+            disconnectListener = ::onWebRtcDisconnected
             connect(this@MewConnectService, turnServers)
         }
     }
@@ -197,13 +199,13 @@ class MewConnectService : Service() {
         startTimeoutTimer()
     }
 
-    private fun onWebRtcConnectError() {
-        logsCollector.add(TAG, "onWebRtcConnectError")
+    private fun onWebRtcConnectError(throwable: Throwable) {
+        logsCollector.add(TAG, "WebRTC connection error", throwable)
         waitForTurnOrQuit("WebRTC connect error")
     }
 
-    private fun onRtcDisconnected() {
-        logsCollector.add(TAG, "onRtcDisconnected")
+    private fun onWebRtcDisconnected() {
+        logsCollector.add(TAG, "WebRTC disconnected")
         disconnect()
         disconnectListener?.invoke()
         stopService()
@@ -222,6 +224,7 @@ class MewConnectService : Service() {
         } else {
             wasTurnUsed = true
             if (turnServers == null) {
+                disconnect(false)
                 startTimeoutTimer()
                 logsCollector.add(TAG, "Waiting for turn servers")
             } else {
@@ -252,8 +255,12 @@ class MewConnectService : Service() {
                     webRtc?.send(message)
                 }
                 WebRtcMessage.Type.SIGN_TX -> {
-                    val transaction = JsonParser.fromJson(webRtcMessage.data.asString as String, LegacyTransaction::class.java)
-                    transaction.eipType = Transaction.EIPTransactionType.LEGACY
+                    val jsonString = webRtcMessage.data.asString
+                    val transaction = when {
+                        jsonString.contains("maxFeePerGas") && jsonString.contains("maxPriorityFeePerGas") ->
+                            JsonParser.fromJson(jsonString, Eip1559Transaction::class.java).apply { eipType = Transaction.EIPTransactionType.EIP1559 }
+                        else -> JsonParser.fromJson(jsonString, LegacyTransaction::class.java).apply { eipType = Transaction.EIPTransactionType.LEGACY }
+                    }
                     transactionConfirmListener?.invoke(walletAddress.address, transaction)
                 }
                 WebRtcMessage.Type.SIGN_MESSAGE -> {
@@ -343,8 +350,8 @@ class MewConnectService : Service() {
         }
     }
 
-    private fun onError(throwable: Throwable?, response: Response?) {
-        MewLog.e(TAG, "onError: " + response?.code, throwable)
+    private fun onSocketError(throwable: Throwable?, response: Response?) {
+        logsCollector.add(TAG, "onSocketError", throwable)
         if (response?.code == WEB_SOCKET_QR_EXPIRED_CODE) {
             logsCollector.add(TAG, "QR expired")
             disconnect()
@@ -363,8 +370,8 @@ class MewConnectService : Service() {
         stopService()
     }
 
-    private fun onDisconnected() {
-        logsCollector.add(TAG, "onDisconnected")
+    private fun onSocketDisconnected() {
+        logsCollector.add(TAG, "WebSocket disconnected")
         if (!isDisconnectSignalReceived) {
             disconnectListener?.invoke()
             stopService()
@@ -392,6 +399,7 @@ class MewConnectService : Service() {
     }
 
     private fun stopService() {
+        logsCollector.add(TAG, "Stop service")
         stopForeground(true)
         stopSelf()
     }

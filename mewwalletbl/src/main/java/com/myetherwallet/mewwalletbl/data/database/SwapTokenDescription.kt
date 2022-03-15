@@ -23,7 +23,8 @@ data class SwapTokenDescription(
     val timestamp: Date,
     val price: BigDecimal,
     @ColumnInfo(name = "volume_24h")
-    val volume24h: BigDecimal
+    val volume24h: BigDecimal,
+    val category: SwapTokenCategory
 ) : Parcelable {
     @Ignore
     var currency: AppCurrency = AppCurrency.USD

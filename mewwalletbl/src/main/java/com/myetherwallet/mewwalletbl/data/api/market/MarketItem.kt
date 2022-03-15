@@ -11,22 +11,24 @@ import java.util.*
 
 @Parcelize
 data class MarketItem(
-        @SerializedName("contract_address")
-        val contractAddress: Address,
-        @SerializedName("name")
-        val name: String = "",
-        @SerializedName("symbol")
-        val symbol: String = "",
-        @SerializedName("decimals")
-        val decimals: Int = 18,
-        @SerializedName("icon_png")
-        val icon: String = "",
-        @SerializedName("price")
-        val price: BigDecimal?,
-        @SerializedName("timestamp")
-        val timestamp: Date?,
-        @SerializedName("sparkline")
-        val sparkline: List<String>?
+    @SerializedName("contract_address")
+    val contractAddress: Address,
+    @SerializedName("name")
+    val name: String = "",
+    @SerializedName("symbol")
+    val symbol: String = "",
+    @SerializedName("decimals")
+    val decimals: Int = 18,
+    @SerializedName("icon")
+    val icon: String?,
+    @SerializedName("icon_png")
+    val iconPng: String?,
+    @SerializedName("price")
+    val price: BigDecimal?,
+    @SerializedName("timestamp")
+    val timestamp: Date?,
+    @SerializedName("sparkline")
+    val sparkline: List<String>?
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -89,4 +91,6 @@ data class MarketItem(
         currency = value.first
         exchangeRate = value.second
     }
+
+    fun getPngIcon() = (iconPng ?: icon)?.takeIf { it.startsWith("https") && it.endsWith(".png") } ?: ""
 }

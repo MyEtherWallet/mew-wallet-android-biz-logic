@@ -11,16 +11,16 @@ import org.webrtc.SessionDescription
 class WebRtcSdpObserver(private val tag: String) : SdpObserver {
 
     private var onSetSuccessListener: (() -> Unit)? = null
-    private var onSetErrorListener: (() -> Unit)? = null
+    private var onSetErrorListener: ((String) -> Unit)? = null
     private var onCreateSuccessListener: ((sessionDescription: SessionDescription?) -> Unit)? = null
-    private var onCreateErrorListener: (() -> Unit)? = null
+    private var onCreateErrorListener: ((String) -> Unit)? = null
 
-    constructor(tag: String, successListener: () -> Unit, errorListener: () -> Unit) : this(tag) {
+    constructor(tag: String, successListener: () -> Unit, errorListener: (String) -> Unit) : this(tag) {
         onSetSuccessListener = successListener
         onSetErrorListener = errorListener
     }
 
-    constructor(tag: String, successListener: (sessionDescription: SessionDescription?) -> Unit, errorListener: () -> Unit) : this(tag) {
+    constructor(tag: String, successListener: (sessionDescription: SessionDescription?) -> Unit, errorListener: (String) -> Unit) : this(tag) {
         onCreateSuccessListener = successListener
         onCreateErrorListener = errorListener
     }
@@ -32,7 +32,7 @@ class WebRtcSdpObserver(private val tag: String) : SdpObserver {
 
     override fun onSetFailure(reason: String) {
         MewLog.d(tag, "SdpObserver.onSetFailure $reason")
-        onSetErrorListener?.invoke()
+        onSetErrorListener?.invoke(reason)
     }
 
     override fun onCreateSuccess(sessionDescription: SessionDescription?) {
@@ -42,5 +42,6 @@ class WebRtcSdpObserver(private val tag: String) : SdpObserver {
 
     override fun onCreateFailure(reason: String) {
         MewLog.d(tag, "SdpObserver.onCreateFailure")
+        onCreateErrorListener?.invoke(reason)
     }
 }

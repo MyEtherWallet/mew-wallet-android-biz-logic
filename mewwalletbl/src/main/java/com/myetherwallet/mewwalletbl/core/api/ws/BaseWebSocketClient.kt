@@ -1,36 +1,31 @@
 package com.myetherwallet.mewwalletbl.core.api.ws
 
 import android.util.SparseArray
-import com.myetherwallet.mewwalletbl.BuildConfig
 import com.myetherwallet.mewwalletbl.connection.WebSocketWrapper
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.api.Either
 import com.myetherwallet.mewwalletbl.core.api.Failure
+import com.myetherwallet.mewwalletbl.core.api.ws.data.BaseRequest
 import com.myetherwallet.mewwalletbl.core.api.ws.data.Chain
-import com.myetherwallet.mewwalletbl.core.api.ws.data.Method
-import com.myetherwallet.mewwalletbl.core.api.ws.data.Request
-import com.myetherwallet.mewwalletbl.core.api.ws.data.RequestData
 import com.myetherwallet.mewwalletbl.core.json.JsonParser
 import org.json.JSONObject
 
 /**
- * Created by BArtWell on 02.09.2021.
+ * Created by BArtWell on 15.02.2022.
  */
 
-private const val TAG = "WebSocketClient"
-private const val URL = BuildConfig.MEW_MAINNET_SOCKET_END_POINT
+private const val TAG = "BaseWebSocketClient"
 
-class WebSocketClient {
+abstract class BaseWebSocketClient(private val url: String, private val parser: Parser) {
 
     @Volatile
-    private var id = 0
+    private var id = 1
     private val webSocketWrapper = WebSocketWrapper()
 
-    private val requestCallbacks = SparseArray<Chain<*, *>>()
-    private val eventCallback: (() -> Unit)? = null
+    private val requestCallbacks = SparseArray<Chain<*>>()
 
     fun connect() {
-        webSocketWrapper.connect(URL)
+        webSocketWrapper.connect(url)
         webSocketWrapper.onMessageListener = ::onMessageReceived
     }
 
@@ -39,7 +34,7 @@ class WebSocketClient {
         if (responseId != null && requestCallbacks[responseId] != null) {
             requestCallbacks[responseId].setResult(data)
         } else {
-            eventCallback?.invoke()
+            handleEvent(data)
         }
     }
 
@@ -55,9 +50,10 @@ class WebSocketClient {
         return null
     }
 
-    fun <IN, OUT : Any> send(method: Method, path: String, data: IN, clazz: Class<OUT>, callback: (Either<Failure.WebSocketError, OUT>) -> Unit) {
-        val id = this.id++
-        val chain = Chain(Request(RequestData(id, method.getMethod(), path, data)), clazz, callback)
+    protected fun getNextId() = id++
+
+    protected fun <OUT : Any> sendForResponse(id: Int, request: BaseRequest, clazz: Class<OUT>, callback: (Either<Failure.WebSocketError, OUT>) -> Unit) {
+        val chain = Chain(request, parser, clazz, callback)
         requestCallbacks.put(id, chain)
         send(chain.request)
     }
@@ -67,26 +63,11 @@ class WebSocketClient {
         webSocketWrapper.send(json)
     }
 
-//    fun <T> listen(event: Event, callback: (T) -> Unit) {
-//        appViewModel.observe(owner, KEY_LISTEN + event.name, callback)
-//    }
+    protected open fun handleEvent(data: String) {}
 
     fun disconnect() {
         webSocketWrapper.disconnect()
-    }
-
-    companion object {
-
-        var client: WebSocketClient? = null
-
-        fun connect() {
-            client = WebSocketClient()
-            client?.connect()
-        }
-
-        fun disconnect() {
-            client?.disconnect()
-            client = null
-        }
+        requestCallbacks.clear()
+        id = 0
     }
 }

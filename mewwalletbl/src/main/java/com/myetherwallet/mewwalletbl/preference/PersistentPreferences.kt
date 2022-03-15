@@ -26,9 +26,10 @@ private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
 private const val BLOCKCHAIN = "blockchain"
 private const val IS_SURVEY_FINISHED = "is_survey_finished"
 private const val SURVEY_DATE = "survey_date"
-private const val WAS_YEARN_BADGE_SHOWN = "was_yearn_badge_shown"
-private const val WAS_LIDO_BADGE_SHOWN = "was_lido_badge_shown"
+private const val WAS_SWAP_BADGE_SHOWN = "was_swap_badge_shown"
 private const val RATER_DATA = "rater_data"
+private const val SWAP_CLOSE_QUESTION_TIME = "swap_close_question_time"
+private const val SWAP_SUCCESS_QUESTION_TIME = "swap_success_question_time"
 
 class PersistentPreferences internal constructor(context: Context) {
 
@@ -107,15 +108,20 @@ class PersistentPreferences internal constructor(context: Context) {
 
     private fun getDayOfYear() = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
 
-    fun wasYearnBadgeShown() = preferences.getBoolean(WAS_YEARN_BADGE_SHOWN, false)
+    fun wasSwapBadgeShown() = preferences.getBoolean(WAS_SWAP_BADGE_SHOWN, false)
 
-    fun setYearnBadgeShown() = preferences.edit().putBoolean(WAS_YEARN_BADGE_SHOWN, true).apply()
-
-    fun wasLidoBadgeShown() = preferences.getBoolean(WAS_LIDO_BADGE_SHOWN, false)
-
-    fun setLidoBadgeShown() = preferences.edit().putBoolean(WAS_LIDO_BADGE_SHOWN, true).apply()
+    fun setSwapBadgeShown() = preferences.edit().putBoolean(WAS_SWAP_BADGE_SHOWN, true).apply()
 
     fun setRaterData(json: String) = preferences.edit().putString(RATER_DATA, json).apply()
 
     fun getRaterData() = preferences.getString(RATER_DATA, "{}")!!
+
+    fun getSwapCloseQuestionTime() = preferences.getLong(SWAP_CLOSE_QUESTION_TIME, 0)
+
+    fun saveSwapCloseQuestionTime(time: Long = System.currentTimeMillis()) = preferences.edit().putLong(SWAP_CLOSE_QUESTION_TIME, time).apply()
+
+    fun getSwapSuccessQuestionTime() = preferences.getLong(SWAP_SUCCESS_QUESTION_TIME, 0)
+
+    fun saveSwapSuccessQuestionTime(time: Long = System.currentTimeMillis()) = preferences.edit().putLong(SWAP_SUCCESS_QUESTION_TIME, time).apply()
+
 }
