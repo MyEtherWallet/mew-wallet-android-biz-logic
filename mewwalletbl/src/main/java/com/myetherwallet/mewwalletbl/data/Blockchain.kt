@@ -28,7 +28,7 @@ enum class Blockchain(
         "eth",
         1,
         "ETH",
-        "https://etherscan.io/tx/",
+        "https://etherscan.io/",
         "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/ETH-0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png"
     ),
     BSC(
@@ -39,7 +39,7 @@ enum class Blockchain(
         "bsc",
         56,
         "BNB",
-        "https://bscscan.com/tx/",
+        "https://bscscan.com/",
         "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52-eth.png"
     ),
     MATIC(
@@ -50,7 +50,7 @@ enum class Blockchain(
         "matic",
         137,
         "MATIC",
-        "https://polygonscan.com/tx/",
+        "https://polygonscan.com/",
         "https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/icons/MATIC-0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0-eth.png"
     );
 
@@ -59,6 +59,7 @@ enum class Blockchain(
         fun getBlockchain(symbol: String) = values().firstOrNull { symbol == it.symbol } ?: Preferences.persistent.getBlockchain()
 
         fun getBlockchainOrNull(chainId: Int) = values().firstOrNull { chainId == it.chainId }
+
     }
 }
 

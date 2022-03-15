@@ -34,6 +34,7 @@ android {
         manifestPlaceholders = [samsungBlockchainAppId: secretsProperties['samsungBlockchainAppId']]
 
         buildConfigField "String", "NODE_API_END_POINT", "\"" + secretsProperties['nodeApiEndPoint'] + "\""
+        buildConfigField "String", "NODE_SOCKET_END_POINT", "\"" + secretsProperties['nodeSocketEndPoint'] + "\""
         buildConfigField "String", "MEW_MAINNET_API_END_POINT", "\"" + secretsProperties['mewMainnetApiEndPoint'] + "\""
         buildConfigField "String", "MEW_MAINNET_SOCKET_END_POINT", "\"" + secretsProperties['mewMainnetSocketEndPoint'] + "\""
         buildConfigField "String", "MEW_DEVELOPMENT_API_END_POINT", "\"" + secretsProperties['mewDevelopmentApiEndPoint'] + "\""

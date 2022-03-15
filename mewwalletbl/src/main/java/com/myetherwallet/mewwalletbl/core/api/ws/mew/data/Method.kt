@@ -1,4 +1,4 @@
-package com.myetherwallet.mewwalletbl.core.api.ws.data
+package com.myetherwallet.mewwalletbl.core.api.ws.mew.data
 
 import java.util.*
 

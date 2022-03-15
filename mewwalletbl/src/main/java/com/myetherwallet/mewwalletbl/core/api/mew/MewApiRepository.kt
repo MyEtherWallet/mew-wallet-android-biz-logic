@@ -104,6 +104,16 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
     suspend fun getSwapTrade(blockchain: Blockchain, address: String, dex: String, exchange: String, fromContract: String, toContract: String, amount: String) =
         requestSuspend({ service.getSwapTrade(blockchain.symbol, address, dex, exchange, fromContract, toContract, amount, "android") }, { it })
 
+    suspend fun getSwapLists(blockchain: Blockchain) = requestSuspend({ service.getSwapLists(blockchain.symbol) }, { it })
+
+    suspend fun getSwapRate(blockchain: Blockchain, fromContract: String, toContract: String) =
+        requestSuspend({ service.getSwapRate(blockchain.symbol, fromContract, toContract) }, { it })
+
+    suspend fun getSwapTrades(blockchain: Blockchain, address: String, fromContract: String, toContract: String, amount: String) =
+        requestSuspend({ service.getSwapTrades(blockchain.symbol, fromContract, toContract, amount, address, "android") }, { it })
+
+    suspend fun sendSwapFeedback(request: SwapFeedbackRequest) = requestSuspend({ service.sendSwapFeedback(request) }, { it })
+
     suspend fun getBinanceList(iso: String) = requestSuspend({ service.getBinanceList(iso) }, { it })
 
     suspend fun getBinanceNetworks(iso: String, symbol: String) = requestSuspend({ service.getBinanceNetworks(iso, symbol) }, { it })
@@ -182,4 +192,6 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
     suspend fun getExchangeRates() = requestSuspend({ service.getExchangeRates() }, { it })
 
     suspend fun getMarketTokens(contracts: MarketTokensRequest) = requestSuspend({ service.getMarketTokens(contracts) }, { it })
+
+    suspend fun checkDomainForMalware(domain: String) = requestSuspend({ service.checkDomainForMalware(domain) }, { it })
 }

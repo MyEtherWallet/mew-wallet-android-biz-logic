@@ -6,6 +6,8 @@ import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.api.TransactionStatus
 import com.myetherwallet.mewwalletbl.data.database.EntitySwap
 import com.myetherwallet.mewwalletbl.data.database.Swap
+import com.myetherwallet.mewwalletbl.data.database.SwapAccountContract
+import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import java.util.*
 
 @Dao
@@ -66,6 +68,17 @@ abstract class ExchangeDao : BaseDao<EntitySwap> {
                 "LIMIT 1"
     )
     abstract suspend fun getSwap(hash: String): Swap?
+
+    @Query(
+        "SELECT " +
+                "$TABLE_NAME.accountId," +
+                "${TokenDescriptionDao.TABLE_NAME}.address AS toContract " +
+                "FROM $TABLE_NAME INNER JOIN ${TokenDescriptionDao.TABLE_NAME} " +
+                "ON $TABLE_NAME.toDescriptionId=${TokenDescriptionDao.TABLE_NAME}.id " +
+                "WHERE $TABLE_NAME.blockchain=:blockchain " +
+                "ORDER BY $TABLE_NAME.createTime DESC"
+    )
+    abstract suspend fun getSwapped(blockchain: Blockchain): List<SwapAccountContract>
 
     @Query("UPDATE $TABLE_NAME SET txHash=:hash WHERE id=:id")
     abstract suspend fun updateTxHashById(id: Long, hash: String)

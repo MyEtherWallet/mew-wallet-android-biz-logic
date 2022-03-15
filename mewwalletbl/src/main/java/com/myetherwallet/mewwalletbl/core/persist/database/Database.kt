@@ -388,12 +388,36 @@ object Database {
         }
     }
 
-//    private val MIGRATION_21_22 = object : Migration(21, 22) {
-//        override fun migrate(database: SupportSQLiteDatabase) {
-//            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN max_fee_per_gas TEXT NOT NULL DEFAULT ''")
-//            database.execSQL("ALTER TABLE " + LocalTransactionsDao.TABLE_NAME + " ADD COLUMN max_priority_fee_per_gas TEXT NOT NULL DEFAULT ''")
-//        }
-//    }
+    @VisibleForTesting
+    internal val MIGRATION_23_24 = object : Migration(23, 24) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE IF EXISTS " + SwapTokensDao.TABLE_NAME)
+            database.execSQL(
+                "CREATE TABLE " + SwapTokensDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        "blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'," +
+                        "contract_address TEXT NOT NULL DEFAULT ''," +
+                        "name TEXT NOT NULL DEFAULT ''," +
+                        "symbol TEXT NOT NULL DEFAULT ''," +
+                        "icon TEXT NOT NULL DEFAULT ''," +
+                        "decimals INTEGER NOT NULL DEFAULT 18," +
+                        "timestamp INTEGER NOT NULL DEFAULT 0," +
+                        "price DOUBLE NOT NULL DEFAULT 0," +
+                        "volume_24h DOUBLE NOT NULL DEFAULT 0," +
+                        "category TEXT NOT NULL DEFAULT 'TOKENS')"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_swap_tokens_blockchain_contract_address_category ON " + SwapTokensDao.TABLE_NAME + " (blockchain,contract_address,category)")
+
+            database.execSQL(
+                "CREATE TABLE " + SwapSearchHistoryDao.TABLE_NAME + " (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                        "blockchain TEXT NOT NULL DEFAULT 'ETHEREUM'," +
+                        "contract TEXT NOT NULL DEFAULT ''," +
+                        "timestamp INTEGER NOT NULL DEFAULT 0)"
+            )
+            database.execSQL("CREATE UNIQUE INDEX index_" + SwapSearchHistoryDao.TABLE_NAME + "_blockchain_contract ON " + SwapSearchHistoryDao.TABLE_NAME + " (blockchain,contract)")
+        }
+    }
 
     private fun dropAndCreateLocalTransactionsDao(database: SupportSQLiteDatabase) {
         database.execSQL("DROP TABLE IF EXISTS " + LocalTransactionsDao.TABLE_NAME)
@@ -430,7 +454,7 @@ object Database {
             .addMigrations(MIGRATION_18_19)
             .addMigrations(MIGRATION_19_20)
             .addMigrations(MIGRATION_20_21)
-//            .addMigrations(MIGRATION_21_22)
+            .addMigrations(MIGRATION_23_24)
             .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .build()
     }

@@ -51,6 +51,6 @@ data class TransactionInfo(
         blockchain: Blockchain
     ) : this(hash, address, fromRecipient, toRecipient, amount, status, timestamp, tokenName, symbol, logo, contract, price, nonce, blockchain, AppCurrency.USD, BigDecimal.ONE)
 
-    fun getUrl() = blockchain.chainExplorer + hash
+    fun getUrl() = "${blockchain.chainExplorer}tx/$hash"
 
 }

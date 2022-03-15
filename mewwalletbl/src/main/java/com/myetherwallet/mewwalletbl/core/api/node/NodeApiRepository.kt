@@ -7,7 +7,6 @@ import com.myetherwallet.mewwalletbl.core.api.Failure
 import com.myetherwallet.mewwalletbl.core.api.JsonRpcResponseConverter
 import com.myetherwallet.mewwalletbl.data.*
 import com.myetherwallet.mewwalletbl.preference.Preferences
-import com.myetherwallet.mewwalletbl.util.NetworkHandler
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.eip.eip155.Transaction
 import java.math.BigInteger
@@ -79,7 +78,7 @@ class NodeApiRepository(private val service: NodeApi) : BaseRepository() {
         ) { it.getOrThrow() }
     }
 
-    fun getNodeUrlPrefix(blockchain: Blockchain? = null): String {
+    private fun getNodeUrlPrefix(blockchain: Blockchain? = null): String {
         val activeBlockchain = blockchain ?: Preferences.persistent.getBlockchain()
         return activeBlockchain.nodePrefix
     }

@@ -10,11 +10,13 @@ import com.myetherwallet.mewwalletbl.data.api.lido.LidoInfo
 import com.myetherwallet.mewwalletbl.data.api.lido.LidoTransactionResult
 import com.myetherwallet.mewwalletbl.data.api.market.MarketCollectionItem
 import com.myetherwallet.mewwalletbl.data.api.market.MarketItem
+import com.myetherwallet.mewwalletbl.data.api.swap.SwapListResult
+import com.myetherwallet.mewwalletbl.data.api.swap.SwapRate
+import com.myetherwallet.mewwalletbl.data.api.swap.SwapTrade
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnBalance
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnDepositResult
 import com.myetherwallet.mewwalletbl.data.api.yearn.YearnInfo
-import com.myetherwallet.mewwalletbl.data.dex.DexPriceResult
-import com.myetherwallet.mewwalletbl.data.dex.DexTradeResult
+import com.myetherwallet.mewwalletbl.data.dex.*
 import com.myetherwallet.mewwalletbl.data.staked.*
 import com.myetherwallet.mewwalletbl.data.ws.GetIntercomHashResponse
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
@@ -100,6 +102,33 @@ interface MewApi {
         @Query("amount") amount: String,
         @Query("platform") platform: String
     ): DexTradeResult
+
+    @GET("v4/swap/list")
+    @Headers("content-type: application/json")
+    suspend fun getSwapLists(@Query("chain") blockchain: String): SwapListResult
+
+    @GET("v4/swap/rate")
+    @Headers("content-type: application/json")
+    suspend fun getSwapRate(
+        @Query("chain") blockchain: String,
+        @Query("fromContractAddress") from: String,
+        @Query("toContractAddress") to: String
+    ): List<SwapRate>
+
+    @GET("v4/swap/trade")
+    @Headers("content-type: application/json")
+    suspend fun getSwapTrades(
+        @Query("chain") blockchain: String,
+        @Query("fromContractAddress") from: String,
+        @Query("toContractAddress") to: String,
+        @Query("amount") amount: String,
+        @Query("address") address: String,
+        @Query("platform") platform: String
+    ): List<SwapTrade>
+
+    @POST("feedback/swap")
+    @Headers("content-type: application/json")
+    suspend fun sendSwapFeedback(@Body request: SwapFeedbackRequest): Any
 
     @GET("v2/swap/binance/list")
     @Headers("content-type: application/json")
@@ -230,4 +259,7 @@ interface MewApi {
     @POST("/prices/market")
     @Headers("content-type: application/json")
     suspend fun getMarketTokens(@Body contracts: MarketTokensRequest): List<MarketItem>
+
+    @GET("/security/phishfort")
+    suspend fun checkDomainForMalware(@Query("domain") domain: String): DomainCheckoutResult
 }

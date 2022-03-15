@@ -26,7 +26,7 @@ private val GATHERING_TIMEOUT = TimeUnit.SECONDS.toMillis(1)
 class WebRtc(private val logsCollector: LogsCollector) {
 
     var connectSuccessListener: (() -> Unit)? = null
-    var connectErrorListener: (() -> Unit)? = null
+    var connectErrorListener: ((e: Throwable) -> Unit)? = null
     var answerListener: ((Offer) -> Unit)? = null
     var dataListener: (() -> Unit)? = null
     var messageListener: ((String) -> Unit)? = null
@@ -39,6 +39,10 @@ class WebRtc(private val logsCollector: LogsCollector) {
     private var isAnswerGenerated = false
     private var gatheringTimer: Timer? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    init {
+        logsCollector.add(TAG, "WebRTC created")
+    }
 
     fun connect(context: Context, turnServers: List<TurnServer>? = null) {
         try {
@@ -75,7 +79,7 @@ class WebRtc(private val logsCollector: LogsCollector) {
 
             peerConnection = peerConnectionFactory?.createPeerConnection(iceServersList, PeerConnectionObserver(::handleIceConnectionChange, ::handleIceGatheringChange))
         } catch (e: Exception) {
-            connectErrorListener?.invoke()
+            connectErrorListener?.invoke(e)
             logsCollector.add(TAG, "Native fail in connect", e)
         }
     }
@@ -83,12 +87,15 @@ class WebRtc(private val logsCollector: LogsCollector) {
     fun setOffer(sessionDescription: SessionDescription) {
         try {
             if (peerConnection == null) {
-                connectErrorListener?.invoke()
+                connectErrorListener?.invoke(IllegalStateException("No peerConnection"))
             } else {
-                peerConnection?.setRemoteDescription(WebRtcSdpObserver("setRemoteDescription", ::createAnswer) {}, sessionDescription)
+                peerConnection?.setRemoteDescription(
+                    WebRtcSdpObserver("setRemoteDescription", ::createAnswer) { logsCollector.add(TAG, "setRemoteDescription error: $it") },
+                    sessionDescription
+                )
             }
         } catch (e: Throwable) {
-            connectErrorListener?.invoke()
+            connectErrorListener?.invoke(e)
             logsCollector.add(TAG, "Native fail in setOffer", e)
         }
     }
@@ -97,7 +104,7 @@ class WebRtc(private val logsCollector: LogsCollector) {
         logsCollector.add(TAG, "handleIceConnectionChange $connectionState")
         when (connectionState) {
             PeerConnection.IceConnectionState.FAILED -> {
-                connectErrorListener?.invoke()
+                connectErrorListener?.invoke(IllegalStateException("IceConnectionState failed"))
             }
             PeerConnection.IceConnectionState.CONNECTED -> {
                 connectSuccessListener?.invoke()
@@ -162,6 +169,7 @@ class WebRtc(private val logsCollector: LogsCollector) {
     }
 
     private fun onDataMessage(buffer: DataChannel.Buffer) {
+        logsCollector.add(TAG, "onDataMessage")
         val data = buffer.data
         val bytes = ByteArray(data.capacity())
         data.get(bytes)
@@ -176,14 +184,20 @@ class WebRtc(private val logsCollector: LogsCollector) {
     }
 
     private fun createAnswer() {
-        peerConnection?.createAnswer(WebRtcSdpObserver("createAnswer", ::setLocalDescription) { connectErrorListener?.invoke() }, MediaConstraints())
+        peerConnection?.createAnswer(
+            WebRtcSdpObserver("createAnswer", ::setLocalDescription) { connectErrorListener?.invoke(IllegalStateException("createAnswer failed: $it")) },
+            MediaConstraints()
+        )
     }
 
     private fun setLocalDescription(sessionDescription: SessionDescription?) {
         if (sessionDescription == null) {
-            connectErrorListener?.invoke()
+            connectErrorListener?.invoke(IllegalStateException("Empty sessionDescription"))
         } else {
-            peerConnection?.setLocalDescription(WebRtcSdpObserver("setLocalDescription", { _ -> }, { connectErrorListener?.invoke() }), sessionDescription)
+            peerConnection?.setLocalDescription(
+                WebRtcSdpObserver("setLocalDescription", { _ -> }, { connectErrorListener?.invoke(IllegalStateException("setLocalDescription failed: $it")) }),
+                sessionDescription
+            )
         }
     }
 

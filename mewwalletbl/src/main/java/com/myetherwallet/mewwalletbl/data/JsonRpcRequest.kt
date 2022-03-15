@@ -4,6 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
+import com.myetherwallet.mewwalletbl.core.api.ws.data.BaseRequest
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.addHexPrefix
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
@@ -20,12 +21,12 @@ class JsonRpcRequest<T>(
     private val method: String,
     @SerializedName("params")
     private val params: List<T>
-) {
+) : BaseRequest {
 
     companion object {
         private val nextId = AtomicInteger(0)
 
-        fun createEstimateGasRequest(transaction: Transaction) : JsonRpcRequest<JsonElement> {
+        fun createEstimateGasRequest(transaction: Transaction): JsonRpcRequest<JsonElement> {
             val jsonObject = JsonObject()
             transaction.from?.let { jsonObject.addProperty("from", it.address) }
             jsonObject.addProperty("to", transaction.to!!.address)
@@ -35,7 +36,7 @@ class JsonRpcRequest<T>(
             return JsonRpcRequest(Method.ESTIMATE_GAS.methodName, params)
         }
 
-        fun createApprovalHandlerRequest(from: Address, data: String, to: Address) : JsonRpcRequest<JsonElement> {
+        fun createApprovalHandlerRequest(from: Address, data: String, to: Address): JsonRpcRequest<JsonElement> {
             val jsonObject = JsonObject()
             jsonObject.addProperty("from", from.address)
             jsonObject.addProperty("data", data)
@@ -47,8 +48,9 @@ class JsonRpcRequest<T>(
 
     @SerializedName("jsonrpc")
     val version: String = "2.0"
+
     @SerializedName("id")
-    val id = nextId.getAndIncrement()
+    var id = nextId.getAndIncrement()
 
     enum class Method(val methodName: String) {
         GET_BALANCE("eth_getBalance"),
@@ -60,7 +62,9 @@ class JsonRpcRequest<T>(
         MAX_PRIORITY_FEE_PER_GAS("eth_maxPriorityFeePerGas"),
         GET_TRANSACTION_BY_HASH("eth_getTransactionByHash"),
         GET_TRANSACTION_RECEIPT("eth_getTransactionReceipt"),
-        GET_BLOCK_BY_NUMBER("eth_getBlockByNumber");
+        GET_BLOCK_BY_NUMBER("eth_getBlockByNumber"),
+        SUBSCRIBE("eth_subscribe"),
+        UNSUBSCRIBE("eth_unsubscribe");
 
         override fun toString() = methodName
     }

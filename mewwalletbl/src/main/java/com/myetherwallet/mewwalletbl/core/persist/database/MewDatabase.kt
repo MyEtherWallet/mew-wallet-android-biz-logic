@@ -42,7 +42,8 @@ import com.myetherwallet.mewwalletbl.data.database.*
         EntityYearnBalance::class,
         EntityLidoHistory::class,
         EntityDappBlackList::class,
-        EntityMarketFavorite::class
+        EntityMarketFavorite::class,
+        EntitySwapSearchHistory::class
     ],
     autoMigrations = [
         AutoMigration(from = 21, to = 22),
@@ -58,7 +59,8 @@ import com.myetherwallet.mewwalletbl.data.database.*
     PurchaseStateTypeConverter::class,
     StakedStatusConverter::class,
     MoveStatusConverter::class,
-    YearnTypeConverter::class
+    YearnTypeConverter::class,
+    SwapTokenCategoryConverter::class
 )
 abstract class MewDatabase : RoomDatabase() {
 
@@ -118,8 +120,10 @@ abstract class MewDatabase : RoomDatabase() {
 
     abstract fun getMarketFavoriteDao(): MarketFavoriteDao
 
+    abstract fun getSwapSearchHistoryDao(): SwapSearchHistoryDao
+
     companion object {
         const val DB_NAME = "db_mew"
-        const val DB_VERSION = 23
+        const val DB_VERSION = 24
     }
 }
