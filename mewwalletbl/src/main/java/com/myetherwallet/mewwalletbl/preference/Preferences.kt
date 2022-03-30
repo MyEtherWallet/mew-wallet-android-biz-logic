@@ -6,21 +6,18 @@ import android.content.Context
  * Created by BArtWell on 17.07.2019.
  */
 
-class Preferences private constructor(context: Context) {
+object Preferences {
 
-    private val main = MainPreferences(context)
-    private val wallet = WalletPreferences(context)
-    private val persistent = PersistentPreferences(context)
+    lateinit var main: MainPreferences
+        private set
+    lateinit var wallet: WalletPreferences
+        private set
+    lateinit var persistent: PersistentPreferences
+        private set
 
-    companion object {
-
-        private lateinit var instance: Preferences
-        val main: MainPreferences by lazy { instance.main }
-        val wallet: WalletPreferences by lazy { instance.wallet }
-        val persistent: PersistentPreferences by lazy { instance.persistent }
-
-        fun init(context: Context) {
-            instance = Preferences(context)
-        }
+    fun init(context: Context) {
+        main = MainPreferences(context)
+        wallet = WalletPreferences(context)
+        persistent = PersistentPreferences(context)
     }
 }

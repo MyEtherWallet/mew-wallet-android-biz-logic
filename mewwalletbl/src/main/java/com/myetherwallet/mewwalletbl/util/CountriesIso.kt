@@ -35,6 +35,8 @@ enum class CountriesIso(val iso: String, private val usingFor: String) {
 
     companion object {
 
+        fun isUSA(context: Context) = USA.iso.equals(ApplicationUtils.getCountryIso(context), true)
+
         fun isTurkeyOrNeighbors(context: Context) =
             values()
                 .find {

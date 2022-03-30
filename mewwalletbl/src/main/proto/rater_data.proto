@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.myetherwallet.mewwalletbl";
+option java_multiple_files = true;
+
+message RaterData {
+  int32 random = 1;
+  int32 gasPrice = 2;
+}

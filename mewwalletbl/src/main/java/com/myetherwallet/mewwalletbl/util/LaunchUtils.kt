@@ -5,8 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
-import android.text.Html
 import android.text.TextUtils
 import com.myetherwallet.mewwalletbl.R
 
@@ -89,6 +89,25 @@ object LaunchUtils {
                 }
             }
             openWebSite(context, PLAY_MARKET_URL + context.packageName)
+        }
+    }
+
+    fun shareText(context: Context?, title: String?, text: String?) {
+        context?.let  {
+            val intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text)
+                type = "text/plain"
+            }
+            val chooser = Intent.createChooser(intent, title)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val excludedComponents = arrayOf(
+                    ComponentName("com.facebook.katana", "com.facebook.composer.shareintent.ImplicitShareIntentHandlerDefaultAlias"),
+                    ComponentName("com.facebook.katana", "com.facebook.composer.shareintent.ShareToGroupsAlias")
+                )
+                chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, excludedComponents)
+            }
+            context.startActivity(chooser)
         }
     }
 

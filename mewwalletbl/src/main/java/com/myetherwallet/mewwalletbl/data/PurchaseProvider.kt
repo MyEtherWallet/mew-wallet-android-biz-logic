@@ -17,6 +17,8 @@ data class PurchaseProvider(
     val fiatCurrencies: List<String>,
     @SerializedName("crypto_currencies")
     val cryptoCurrencies: List<String>,
+    @SerializedName("ach")
+    val ach: Boolean,
     @SerializedName("prices")
     val prices: List<PurchasePrices>,
     @SerializedName("limits")
@@ -26,41 +28,18 @@ data class PurchaseProvider(
 ) : Parcelable {
 
     fun getLimit(currency: String) = limits.find {
-        it.fiatCurrency == currency && it.type == "WEB"
-    }!!.limit
+        (it.fiatCurrency == currency || it.cryptoCurrency == currency) && it.type == "WEB"
+    }?.limit ?: PurchaseLimitValues(BigDecimal.ZERO, BigDecimal.ZERO)
 
     fun getPrice(blockchain: Blockchain, currency: String) = prices.find { it.cryptoCurrency == blockchain.token && it.fiatCurrency == currency }?.price
 
-    fun getRate(currency: String) = rates.find { it.fiatCurrency == currency }?.exchangeRate
+    fun getPrice(currency: String) = prices.find { it.fiatCurrency == currency }?.price ?: BigDecimal.ZERO
 
-    companion object {
+    fun getRate(currency: String) = rates.find { it.fiatCurrency == currency }?.exchangeRate ?: BigDecimal.ONE
 
-        fun getProvider(response: List<PurchaseProvider>, blockchain: Blockchain): PurchaseProvider? {
-            hasNonZeroLimits(response, Name.SIMPLEX, blockchain)?.let {
-                return it
-            }
-            return null
-        }
-
-        private fun hasNonZeroLimits(response: List<PurchaseProvider>, search: Name, blockchain: Blockchain): PurchaseProvider? {
-            val provider = response.find { it.name == search }
-            val isProviderSupportToken = provider?.cryptoCurrencies?.find { it == blockchain.token } != null
-            if (isProviderSupportToken) {
-                provider?.limits?.forEach {
-                    if (it.type == "WEB" && it.limit.max > BigDecimal.ZERO) {
-                        return provider
-                    }
-                }
-            }
-            return null
-        }
-
-        fun isProviderPresent(data: List<PurchaseProvider>?, name: Name): Boolean {
-            return data?.find { it.name == name } != null
-        }
-    }
+    fun getCryptoCurrency() = cryptoCurrencies.firstOrNull() ?: ""
 
     enum class Name {
-        SIMPLEX
+        SIMPLEX, MOONPAY
     }
 }

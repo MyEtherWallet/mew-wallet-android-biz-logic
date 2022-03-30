@@ -9,11 +9,13 @@ import androidx.core.content.ContextCompat
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import com.myetherwallet.mewwalletbl.BuildConfig
+import com.myetherwallet.mewwalletbl.R
 import com.myetherwallet.mewwalletbl.connection.webrtc.WebRtc
 import com.myetherwallet.mewwalletbl.core.LogsCollector
 import com.myetherwallet.mewwalletbl.core.MewLog
 import com.myetherwallet.mewwalletbl.core.json.JsonParser
 import com.myetherwallet.mewwalletbl.data.*
+import com.myetherwallet.mewwalletbl.util.NotificationBuilder
 import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import com.myetherwallet.mewwalletkit.core.extension.toHexString
 import com.myetherwallet.mewwalletkit.eip.eip155.LegacyTransaction
@@ -74,8 +76,19 @@ class MewConnectService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val notificationHelper = ServiceNotificationHelper()
-        startForeground(1, notificationHelper.create(this))
+        val notificationId = hashCode()
+        val notification = NotificationBuilder()
+            .setNotificationId(notificationId)
+            .setChannelId("com.myetherwallet.mewwalletbl.connection.socket_service")
+            .setChannelName(this, R.string.service_notification_channel_name)
+            .setChannelDescription(this, R.string.service_notification_channel_description)
+            .setTitle(this, R.string.service_notification_title)
+            .setText(this, R.string.service_notification_text)
+            .setColor(this, R.color.service_notification_icon_background)
+            .setSmallIcon(R.drawable.service_notification)
+            .setContentIntentToLauncherActivity(this)
+            .build(this)
+        startForeground(notificationId, notification)
     }
 
     override fun onBind(intent: Intent) = binder
