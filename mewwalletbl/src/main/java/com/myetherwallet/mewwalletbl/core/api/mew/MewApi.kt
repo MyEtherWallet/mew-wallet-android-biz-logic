@@ -48,6 +48,10 @@ interface MewApi {
     @Headers("content-type: application/json")
     suspend fun getPurchaseProviders(@Query(value = "cryptoCurrency") cryptoCurrency: String, @Query("iso") iso: String): List<PurchaseProvider>
 
+    @GET("v3/sell/providers/android")
+    @Headers("content-type: application/json")
+    suspend fun getSellProviders(@Query(value = "cryptoCurrency") cryptoCurrency: String, @Query("iso") iso: String): List<PurchaseProvider>
+
     @GET("prices/market")
     @Headers("content-type: application/json")
     suspend fun getMarketInfo(@Query(value = "chain") blockchain: String, @Query("contractAddress") address: String): MarketItem

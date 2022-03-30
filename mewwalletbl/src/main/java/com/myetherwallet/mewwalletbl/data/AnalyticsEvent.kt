@@ -46,6 +46,19 @@ data class AnalyticsEvent internal constructor(
         RATER_RATE_CLICKED("Android-Rater-Rate-clicked"),
         RATER_DONT_SHOW_CLICKED("Android-Rater-DontShow-clicked"),
         RATER_CLOSED("Android-Rater-closed"),
+        SAY_THANKS_TELL_US_CLICKED("Android-say-thanks-tell-us-clicked"),
+        SAY_THANKS_DONATE_CLICKED("Android-say-thanks-donate-clicked"),
+        SAY_THANKS_RECOMMEND_CLICKED("Android-say-thanks-recommend-clicked"),
+        SAY_THANKS_REVIEW_CLICKED("Android-say-thanks-review-clicked"),
+        SAY_THANKS_SHOWN("Android-say-thanks-shown"),
+        LOVE_MEW_SHARE_SNACKBAR_SHOWN("Android-Love-Mew_Share-Snackbar-Shown"),
+        LOVE_MEW_SHARE_SNACKBAR_CLOSE_CLICKED("Android-LoveMewShare-Close-Clicked"),
+        LOVE_MEW_SHARE_SNACKBAR_SHARE_CLICKED("Android-LoveMewShare-Share-Clicked"),
+        LOVE_MEW_SHARE_SNACKBAR_SHARE_DISSMISED("Android-LoveMewShare-Dissmissed"),
+        LOVE_MEW_SUPPORT_SNACKBAR_SHOWN("Android-Love-Mew_Support-Snackbar- Shown"),
+        LOVE_MEW_SUPPORT_SNACKBAR_CLOSE_CLICKED("Android-LoveMewSupport-Close-Clicked"),
+        LOVE_MEW_SUPPORT_SNACKBAR_SUPPORT_CLICKED("Android-LoveMewSupport-Support-Clicked"),
+        LOVE_MEW_SHARE_SNACKBAR_SUPPORT_DISSMISED("Android-LoveMewSupport-Dissmissed"),
         CAMERA_VALID_MEWCONNECT_QR("Android-camera-valid-mewconnect-QRcode-scanned"),
         CAMERA_VALID_ADDRESS_QR("Android-camera-valid-eth-address-QRcode-scanned"),
         CAMERA_INVALID_QR("Android-camera-invalid-QRcode-scanned"),
@@ -56,7 +69,6 @@ data class AnalyticsEvent internal constructor(
         EXCHANGE_TOKEN_INFO_SWAP_CLICKED("Android-ExchangeScreen-TokenPopupSwap-clicked"),
 
         EXCHANGE_SWAP_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Swap-clicked"),
-        EXCHANGE_BUY_ETH_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Buy-clicked"),
         WALLET_MAINSCREEN_SHOWN("Android-Wallet-MainScreen-Shown"),
         SWAP_SHOWN("Android-$BLOCKCHAIN-Swap-MainScreen-shown"),
         SWAP_LOW_LIQUIDITY("Android-$BLOCKCHAIN-Swap-MainScreen-LowLiquidity-shown"),
@@ -107,9 +119,16 @@ data class AnalyticsEvent internal constructor(
         SWAP2_INITIATED_SHOWN("Android-$BLOCKCHAIN-Swap2-SwapInitiatedPopup-Shown"),
         SWAP2_SUCCESS_EXECUTED("Android-$BLOCKCHAIN-Swap2-successfully-Executed"),
 
-        BUY_AMOUNTS_LIST_SHOWN("Android-$BLOCKCHAIN-Buy-AmountsList-Shown"),
-        BUY_CUSTOM_AMOUNT_SHOWN("Android-$BLOCKCHAIN-Buy-CustomAmount-Shown"),
-        BUY_SIMPLEX_PAGE_SHOWN("Android-$BLOCKCHAIN-Buy-SimplexPage-Shown"),
+        MAIN_BANK_TRANSFER_SHOWN("Android-$BLOCKCHAIN-Main-BuyWithBank-banner-Shown"),
+        MAIN_BANK_TRANSFER_CLICKED("Android-$BLOCKCHAIN-Main-BuyWithBank-banner-Clicked"),
+        EXCHANGE_BUY_ETH_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Buy-Clicked"),
+        EXCHANGE_SELL_SHOWN("Android-$BLOCKCHAIN-ExchangeScreen-Sell-Shown"),
+        EXCHANGE_SELL_CLICKED("Android-$BLOCKCHAIN-ExchangeScreen-Sell-Clicked"),
+        BUY_AMOUNTS_LIST_SHOWN("Android-$BLOCKCHAIN-Buy-AmountsScreen-Shown"),
+        BUY_CUSTOM_AMOUNT_SHOWN("Android-$BLOCKCHAIN-Buy-CustomAmountScreen-Shown"),
+        BUY_SELECT_PROVIDER_SHOWN("Android-$BLOCKCHAIN-Buy-SelectProviderScreen-Shown"),
+        BUY_SELECT_PROVIDER_FEE_CLICKED("Android-$BLOCKCHAIN-Buy-SelectProviderScreen-Fee-Clicked"),
+        BUY_SELECT_PROVIDER_MAX_CLICKED("Android-$BLOCKCHAIN-Buy-CustomAmountScreen-Max-Clicked"),
 
         PUSH_NOTIFICATION_RECEIVED("Android-broadcast-push-notification-received"),
         COMIC_MAIN_CLICKED("Android-Main-Comic-banner-clicked"),
@@ -281,6 +300,10 @@ data class AnalyticsEvent internal constructor(
         fun createBnbAmountSelectedEvent(amount: BigDecimal) = AnalyticsEvent("Android-Binance-GotBnbScreen-${amount.toPlainString()}BNB-Selected", Date())
 
         fun createClickYearnDeposit(symbol: String) = AnalyticsEvent("Android-Yearn-BalanceScreen-Deposit-${symbol.format()}-Clicked", Date())
+
+        fun createBuyProviderSelectedEvent(blockchain: Blockchain, provider: String) = AnalyticsEvent("Android-${blockchain.symbol}-Buy-SelectProviderScreen-${provider}-Selected", Date())
+
+        fun createBuyCurrencySelectedEvent(blockchain: Blockchain, currency: String) = AnalyticsEvent("Android-${blockchain.symbol}-Buy-ChangeCurrency-${currency}-Selected", Date())
 
         fun String?.format() = this?.uppercase(Locale.US)?.replace(" ", "_")
     }

@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import com.myetherwallet.mewwalletbl.core.persist.database.Database
 import com.myetherwallet.mewwalletbl.preference.Preferences
+import com.myetherwallet.mewwalletbl.proto.ProtoDataStoreManager
 import com.myetherwallet.mewwalletbl.util.NetworkHandler
 
 /**
@@ -17,6 +18,7 @@ internal class MewWalletBlProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         Database.init(context!!)
         Preferences.init(context!!)
+        ProtoDataStoreManager.init(context!!)
         NetworkHandler.init(context!!)
         return true
     }

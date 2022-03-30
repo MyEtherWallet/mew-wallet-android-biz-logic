@@ -9,7 +9,9 @@ data class PurchaseLimit(
         @SerializedName("type")
         val type: String,
         @SerializedName("fiat_currency")
-        val fiatCurrency: String,
+        val fiatCurrency: String?,
+        @SerializedName("crypto_currency")
+        val cryptoCurrency: String?,
         @SerializedName("limit")
         val limit: PurchaseLimitValues
 ) : Parcelable

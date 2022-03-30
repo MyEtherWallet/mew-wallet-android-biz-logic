@@ -8,6 +8,7 @@ import com.myetherwallet.mewwalletbl.data.Blockchain
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
 import com.myetherwallet.mewwalletbl.key.KeyType
 import com.myetherwallet.mewwalletbl.key.util.Utils
+import com.myetherwallet.mewwalletbl.util.CountriesIso
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -29,17 +30,21 @@ private const val SIGNATURE = "signature_"
 private const val KEYSTORE_IV = "keystore_iv_"
 private const val BIOMETRY_SALT = "biometry_salt"
 private const val GUIDE_ENABLE = "guide_enable"
+private const val BUY_BANK_ENABLE = "buy_bank_enable"
 private const val IS_SECURE_MODE_ENABLED = "is_secure_mode_enabled"
 private const val FCM_TOKEN = "fcm_token"
 private const val STORAGE_TYPE = "storage_type"
 private const val SAMSUNG_BLOCKCHAIN_HASH = "samsung_blockchain_hash"
 private const val DEBUG_ENVIRONMENT_TYPE = "debug_environment_type"
+private const val DEBUG_COUNTRY = "debug_country"
 private const val FORCE_BACKUP_DIALOG_DATE = "force_backup_dialog_date"
 private const val WAS_APP_CRASHED = "was_app_crashed"
 private const val APP_CRASH_EXCEPTION = "app_crash_exception"
 private const val RATE_STARTS_COUNT = "rate_starts_count"
 private const val RATER_APP_VERSION = "rater_app_version"
 private const val RATER_DISABLE_ID = "rater_disable_id"
+private const val LOVE_MEW_SHARE_SNACKBAR_SHOW_TIME = "love_mew_snackbar_share_clicked"
+private const val LOVE_MEW_SUPPORT_SNACKBAR_SHOW_TIME = "love_mew_snackbar_Support_clicked"
 private const val IS_TOKENS_ICONS_CACHED = "is_tokens_icons_cached"
 private const val PRIVATE_KEY_TEST_DATE = "private_key_test_date"
 private const val NO_CRASH_SESSION_COUNT = "no_crash_session_count"
@@ -90,6 +95,10 @@ class MainPreferences internal constructor(context: Context) {
 
     fun isGuideEnabled() = preferences.getBoolean(GUIDE_ENABLE, true)
 
+    fun setBuyBankBannerEnabled(isEnable: Boolean) = preferences.edit().putBoolean(BUY_BANK_ENABLE, isEnable).apply()
+
+    fun isBuyBankBannerEnabled() = preferences.getBoolean(BUY_BANK_ENABLE, true)
+
     fun setSecureModeEnabled(isEnable: Boolean) = preferences.edit().putBoolean(IS_SECURE_MODE_ENABLED, isEnable).apply()
 
     fun isSecureModeEnabled() = preferences.getBoolean(IS_SECURE_MODE_ENABLED, true)
@@ -110,6 +119,10 @@ class MainPreferences internal constructor(context: Context) {
 
     fun getDebugEnvironmentType() = MewEnvironment.Type.valueOf(preferences.getString(DEBUG_ENVIRONMENT_TYPE, MewEnvironment.Type.PRODUCTION.name)!!)
 
+    fun setDebugCountry(iso: String) = preferences.edit().putString(DEBUG_COUNTRY, iso).apply()
+
+    fun getDebugCountry() = preferences.getString(DEBUG_COUNTRY, "") ?: ""
+
     fun setAppCrashed(wasCrashed: Boolean) = preferences.edit().putBoolean(WAS_APP_CRASHED, wasCrashed).apply()
 
     fun wasAppCrashed() = preferences.getBoolean(WAS_APP_CRASHED, false)
@@ -125,6 +138,14 @@ class MainPreferences internal constructor(context: Context) {
     fun setRaterAppVersion(version: Int) = preferences.edit().putInt(RATER_APP_VERSION, version).apply()
 
     fun getRaterAppVersion() = preferences.getInt(RATER_APP_VERSION, 0)
+
+    fun getLoveMewShareSnackbarShowTime() = preferences.getLong(LOVE_MEW_SHARE_SNACKBAR_SHOW_TIME, 0)
+
+    fun setLoveMewShareSnackbarShowTime(time: Long) = preferences.edit().putLong(LOVE_MEW_SHARE_SNACKBAR_SHOW_TIME, time).apply()
+
+    fun getLoveMewSupportSnackbarShowTime() = preferences.getLong(LOVE_MEW_SUPPORT_SNACKBAR_SHOW_TIME, 0)
+
+    fun setLoveMewSupportSnackbarShowTime(time: Long) = preferences.edit().putLong(LOVE_MEW_SUPPORT_SNACKBAR_SHOW_TIME, time).apply()
 
     fun isTokensIconsCached() = preferences.getBoolean(IS_TOKENS_ICONS_CACHED, false)
 

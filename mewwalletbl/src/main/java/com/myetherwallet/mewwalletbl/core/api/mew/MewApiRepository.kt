@@ -69,6 +69,8 @@ class MewApiRepository(private val service: MewApi) : BaseRepository() {
 
     suspend fun getPurchaseProvider(cryptoCurrency: String, iso: String) = requestSuspend({ service.getPurchaseProviders(cryptoCurrency, iso) }, { it })
 
+    suspend fun getSellProviders(cryptoCurrency: String, iso: String) = requestSuspend({ service.getSellProviders(cryptoCurrency, iso) }, { it })
+
     suspend fun getMarketOverview(period: String?) = requestSuspend({ service.getMarketOverview(period) }, { it })
 
     suspend fun getMarketMovers() = requestSuspend({ service.getMarketMovers() }, { it })

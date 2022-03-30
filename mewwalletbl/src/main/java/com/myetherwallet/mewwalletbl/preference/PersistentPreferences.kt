@@ -26,8 +26,8 @@ private const val IS_MANUAL_GAS_PRICE_ENABLED = "is_manual_gas_price_enabled"
 private const val BLOCKCHAIN = "blockchain"
 private const val IS_SURVEY_FINISHED = "is_survey_finished"
 private const val SURVEY_DATE = "survey_date"
-private const val WAS_SWAP_BADGE_SHOWN = "was_swap_badge_shown"
-private const val RATER_DATA = "rater_data"
+private const val WAS_BUY_BADGE_SHOWN = "was_buy_badge_shown"
+private const val WAS_SELL_BADGE_SHOWN = "was_sell_badge_shown"
 private const val SWAP_CLOSE_QUESTION_TIME = "swap_close_question_time"
 private const val SWAP_SUCCESS_QUESTION_TIME = "swap_success_question_time"
 
@@ -108,13 +108,13 @@ class PersistentPreferences internal constructor(context: Context) {
 
     private fun getDayOfYear() = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
 
-    fun wasSwapBadgeShown() = preferences.getBoolean(WAS_SWAP_BADGE_SHOWN, false)
+    fun wasSellBadgeShown() = preferences.getBoolean(WAS_SELL_BADGE_SHOWN, false)
 
-    fun setSwapBadgeShown() = preferences.edit().putBoolean(WAS_SWAP_BADGE_SHOWN, true).apply()
+    fun setSellBadgeShown() = preferences.edit().putBoolean(WAS_SELL_BADGE_SHOWN, true).apply()
 
-    fun setRaterData(json: String) = preferences.edit().putString(RATER_DATA, json).apply()
+    fun wasBuyBadgeShown() = preferences.getBoolean(WAS_BUY_BADGE_SHOWN, false)
 
-    fun getRaterData() = preferences.getString(RATER_DATA, "{}")!!
+    fun setBuyBadgeShown() = preferences.edit().putBoolean(WAS_BUY_BADGE_SHOWN, true).apply()
 
     fun getSwapCloseQuestionTime() = preferences.getLong(SWAP_CLOSE_QUESTION_TIME, 0)
 

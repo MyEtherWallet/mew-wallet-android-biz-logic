@@ -1,7 +1,11 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-parcelize'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id "com.google.protobuf" version "0.8.17"
+}
+
 apply from: "${rootProject.projectDir}/flavors.gradle"
 
 def secretsPropertiesFile = rootProject.file("../MEWwalletBL/secrets.properties")
@@ -26,7 +30,7 @@ android {
             debug.assets.srcDirs += files("$projectDir/schemas".toString())
         }
         testOptions {
-            unitTests{
+            unitTests {
                 includeAndroidResources = true
             }
         }
@@ -71,7 +75,7 @@ dependencies {
     implementation project(path: ':mewwalletkit')
     implementation project(path: ':secp256k1')
 
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
     implementation 'com.samsung.android.sdk.coldwallet:KeystoreSDK_v1.5.1@aar'
 
@@ -83,11 +87,16 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
+    implementation 'androidx.datastore:datastore-core:1.0.0'
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation "com.google.protobuf:protobuf-javalite:3.14.0"
+    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.1"
 //    api 'androidx.room:room-runtime:2.3.0'
 //    kapt 'androidx.room:room-compiler:2.3.0'
 //    implementation 'androidx.room:room-ktx:2.3.0'
 
-    def roomVersion = '2.4.1'
+    def roomVersion = '2.4.2'
     api("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
@@ -106,7 +115,25 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation 'androidx.preference:preference-ktx:1.1.1'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.4"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
 }
 
 repositories {

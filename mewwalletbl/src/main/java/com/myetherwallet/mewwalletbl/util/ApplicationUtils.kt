@@ -8,8 +8,6 @@ import android.content.res.TypedArray
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
 import com.myetherwallet.mewwalletbl.AppActivityImpl
 import com.myetherwallet.mewwalletbl.R
 import com.myetherwallet.mewwalletbl.core.MewLog
@@ -18,8 +16,8 @@ import com.myetherwallet.mewwalletbl.core.persist.database.Database
 import com.myetherwallet.mewwalletbl.data.AppCurrency
 import com.myetherwallet.mewwalletbl.data.AppLanguage
 import com.myetherwallet.mewwalletbl.data.KeysStorageType
+import com.myetherwallet.mewwalletbl.data.ScreenOrientation
 import com.myetherwallet.mewwalletbl.preference.Preferences
-import com.myetherwallet.mewwalletkit.bip.bip44.Address
 import org.json.JSONObject
 import retrofit2.HttpException
 import java.math.BigDecimal
@@ -62,13 +60,11 @@ object ApplicationUtils {
         ""
     }
 
-    fun getCountryIso(context: Context): String {
+    fun getCountryIso(context: Context) = Preferences.main.getDebugCountry().ifEmpty {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val networkCountryIso = telephonyManager.networkCountryIso
-        return if (networkCountryIso.isEmpty()) {
+        networkCountryIso.ifEmpty {
             getSystemLocale().country
-        } else {
-            networkCountryIso
         }
     }
 
@@ -171,5 +167,9 @@ object ApplicationUtils {
         val color = typedArray.getColor(0, 0)
         typedArray.recycle()
         return color
+    }
+
+    fun setScreenOrientation(activity: Activity?, orientation: ScreenOrientation) {
+        activity?.requestedOrientation = orientation.value
     }
 }
